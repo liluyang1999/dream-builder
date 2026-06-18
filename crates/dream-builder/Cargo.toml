@@ -1,9 +1,12 @@
 [package]
 name = "dream-builder"
-version = "0.1.0"
 description = "Interactive procedural 3D fantasy tree desktop app"
-authors = ["Dream Builder"]
-edition = "2021"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

@@ -132,7 +132,11 @@ pub fn build_tree_scene(seed: u64) -> TreeScene {
     let mut crystals = Vec::new();
     let mut details = Vec::new();
 
-    let mut last = Vec3 { x: 0.0, y: 0.0, z: 0.0 };
+    let mut last = Vec3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
     for index in 0..10 {
         let t = index as f32 / 9.0;
         let next = Vec3 {
@@ -195,7 +199,8 @@ pub fn build_tree_scene(seed: u64) -> TreeScene {
                 id: leaf_id,
                 kind: DetailKind::Leaf,
                 title: format!("星雾叶簇 {}", tier * 4 + arm + 1),
-                description: "叶片在鼠标掠过时会产生青绿色微光，并带动周围粒子轻微旋转。".to_string(),
+                description: "叶片在鼠标掠过时会产生青绿色微光，并带动周围粒子轻微旋转。"
+                    .to_string(),
                 energy: clamp(rng.range(0.48, 0.74), 0.0, 1.0),
             });
         }
@@ -298,7 +303,11 @@ pub fn compute_magic_field(seed: u64, tick: u32) -> MagicField {
                 y: 0.88 + index as f32 * 0.58 + (phase + index as f32).sin() * 0.12,
                 z: angle.sin() * orbit,
             },
-            radius: clamp(0.42 + rng.range(0.0, 0.36) + phase.sin().abs() * 0.18, 0.05, 3.0),
+            radius: clamp(
+                0.42 + rng.range(0.0, 0.36) + phase.sin().abs() * 0.18,
+                0.05,
+                3.0,
+            ),
             strength: clamp(0.42 + (phase * 0.7 + index as f32).cos() * 0.25, 0.0, 1.0),
         });
     }

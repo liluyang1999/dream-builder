@@ -1,13 +1,13 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "$schema": "../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Dream Builder Fantasy Tree",
   "version": "0.1.0",
   "identifier": "com.dreambuilder.fantasytree",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "pnpm -C ../.. dev",
     "devUrl": "http://127.0.0.1:1420",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../frontend/dist"
+    "beforeBuildCommand": "pnpm -C ../.. build",
+    "frontendDist": "../../apps/desktop/dist"
   },
   "app": {
     "windows": [
