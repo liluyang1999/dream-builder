@@ -5,3 +5,7 @@ packages:
 allowBuilds:
   '@biomejs/biome': true
   esbuild: true
+
+# Keep pnpm's content-addressable store inside the project (pnpm otherwise
+# defaults to <drive>:\.pnpm-store at the drive root on Windows).
+storeDir: .pnpm-store
