@@ -9,10 +9,15 @@ export type SelectionAction =
   | { type: 'click'; id: string }
   | { type: 'selection-clear' };
 
-export function reduceSelectionState(state: SelectionState, action: SelectionAction): SelectionState {
+export function reduceSelectionState(
+  state: SelectionState,
+  action: SelectionAction,
+): SelectionState {
   switch (action.type) {
     case 'hover':
-      return normalizedId(action.id) ? { ...state, hoveredId: action.id.trim() } : { ...state, hoveredId: null };
+      return normalizedId(action.id)
+        ? { ...state, hoveredId: action.id.trim() }
+        : { ...state, hoveredId: null };
     case 'hover-clear':
       return { ...state, hoveredId: null };
     case 'click': {

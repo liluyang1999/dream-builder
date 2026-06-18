@@ -23,7 +23,10 @@ export class KeyboardShortcuts {
     if (event.defaultPrevented || event.repeat) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target as HTMLElement | null;
-    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+    if (
+      target &&
+      (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)
+    ) {
       return;
     }
     switch (event.key) {

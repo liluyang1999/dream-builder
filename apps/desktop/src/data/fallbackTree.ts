@@ -3,7 +3,7 @@ import type { TreeScene } from '../types/tree';
 const GLYPHS = ['A', 'E', 'I', 'O', 'U', 'R', 'S', 'T'];
 
 export function createFallbackTreeScene(seed: number): TreeScene {
-  const rng = mulberry32((seed >>> 0) || 1);
+  const rng = mulberry32(seed >>> 0 || 1);
   const jitter = (mid: number, span: number) => mid + (rng() - 0.5) * span;
 
   const leafSlots = [

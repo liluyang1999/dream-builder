@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { reduceSelectionState, type SelectionState } from './selectionState';
+import { type SelectionState, reduceSelectionState } from './selectionState';
 
 export interface InteractionCallbacks {
   onHoverChange: (id: string | null) => void;
@@ -129,7 +129,10 @@ function setEmissiveBoost(object: THREE.Object3D, multiplier: number): void {
     const materials = materialList(maybeMesh.material);
     for (const material of materials) {
       if ('emissiveIntensity' in material && typeof material.emissiveIntensity === 'number') {
-        const base = typeof material.userData.baseEmissive === 'number' ? material.userData.baseEmissive : material.emissiveIntensity;
+        const base =
+          typeof material.userData.baseEmissive === 'number'
+            ? material.userData.baseEmissive
+            : material.emissiveIntensity;
         material.userData.baseEmissive = base;
         material.emissiveIntensity = base * multiplier;
       }

@@ -110,7 +110,7 @@ export class MagicParticles {
     this.points.geometry.dispose();
     const material = this.points.material;
     if (Array.isArray(material)) {
-      material.forEach((item) => item.dispose());
+      for (const item of material) item.dispose();
     } else {
       material.dispose();
     }
@@ -119,7 +119,7 @@ export class MagicParticles {
 }
 
 function createSeedRng(seed: number): () => number {
-  let state = (seed >>> 0) || 1;
+  let state = seed >>> 0 || 1;
   return () => {
     state = Math.imul(1664525, state) + 1013904223;
     return (state >>> 0) / 4294967296;

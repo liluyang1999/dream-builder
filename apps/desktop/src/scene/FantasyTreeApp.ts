@@ -1,14 +1,14 @@
-import * as THREE from 'three';
+import type * as THREE from 'three';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { InteractionController } from '../interaction/InteractionController';
 import { KeyboardShortcuts } from '../interaction/keyboardShortcuts';
 import { loadDetailInfo, loadMagicField, loadTreeScene } from '../tauri/treeApi';
+import type { TreeScene } from '../types/tree';
 import { DetailsPanel } from '../ui/DetailsPanel';
 import { OnboardingHint } from '../ui/OnboardingHint';
-import type { TreeScene } from '../types/tree';
 import { MagicParticles } from './Particles';
 import { Renderer } from './Renderer';
-import { createTreeObjects, type TreeObjects } from './TreeFactory';
+import { type TreeObjects, createTreeObjects } from './TreeFactory';
 
 const DEFAULT_SEED = 424242;
 const SEED_STORAGE_KEY = 'dream-builder.seed';
@@ -35,8 +35,8 @@ export class FantasyTreeApp {
   constructor(root: HTMLDivElement) {
     this.root = root;
     this.currentSeed = readStoredSeed() ?? DEFAULT_SEED;
-    this.prefersReducedMotion = typeof matchMedia === 'function'
-      && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.prefersReducedMotion =
+      typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   async start(): Promise<void> {
@@ -102,7 +102,9 @@ export class FantasyTreeApp {
 
     const load = await loadTreeScene(seed);
     this.sceneData = load.scene;
-    panel.setStatus(load.source === 'rust' ? 'Rust 后端已连接，场景数据已加载。' : '使用本地回退数据运行。');
+    panel.setStatus(
+      load.source === 'rust' ? 'Rust 后端已连接，场景数据已加载。' : '使用本地回退数据运行。',
+    );
     panel.setError(load.warning);
     panel.setSeed(load.scene.seed);
 
@@ -112,11 +114,16 @@ export class FantasyTreeApp {
     this.particles = new MagicParticles(renderer.scene, load.scene);
 
     const tree = this.tree;
-    this.interaction = new InteractionController(renderer.domElement, renderer.camera, tree.interactive, {
-      onHoverChange: (id) => panel.setHover(id ? tree.labels.get(id) ?? id : null),
-      onSelect: (id) => void this.selectDetail(id),
-      onSelectionClear: () => panel.setSelected(null),
-    });
+    this.interaction = new InteractionController(
+      renderer.domElement,
+      renderer.camera,
+      tree.interactive,
+      {
+        onHoverChange: (id) => panel.setHover(id ? (tree.labels.get(id) ?? id) : null),
+        onSelect: (id) => void this.selectDetail(id),
+        onSelectionClear: () => panel.setSelected(null),
+      },
+    );
   }
 
   private disposeContent(): void {

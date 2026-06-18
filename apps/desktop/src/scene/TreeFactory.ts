@@ -1,5 +1,12 @@
 import * as THREE from 'three';
-import type { BranchSegment, CrystalCluster, LeafCluster, RuneMark, TreeScene, Vec3 } from '../types/tree';
+import type {
+  BranchSegment,
+  CrystalCluster,
+  LeafCluster,
+  RuneMark,
+  TreeScene,
+  Vec3,
+} from '../types/tree';
 
 export interface TreeObjects {
   group: THREE.Group;
@@ -57,7 +64,14 @@ function createBranchMesh(branch: BranchSegment, material: THREE.Material): THRE
   const end = toVector3(branch.end);
   const direction = new THREE.Vector3().subVectors(end, start);
   const height = Math.max(direction.length(), 0.001);
-  const geometry = new THREE.CylinderGeometry(branch.radiusEnd, branch.radiusStart, height, 10, 4, false);
+  const geometry = new THREE.CylinderGeometry(
+    branch.radiusEnd,
+    branch.radiusStart,
+    height,
+    10,
+    4,
+    false,
+  );
   const mesh = new THREE.Mesh(geometry, material);
 
   mesh.position.copy(start).add(end).multiplyScalar(0.5);

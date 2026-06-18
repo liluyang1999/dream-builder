@@ -1,8 +1,7 @@
 :root {
   color: #f4efe2;
   background: #070914;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -38,8 +37,7 @@ button {
   height: 100%;
   min-width: 320px;
   min-height: 420px;
-  background:
-    radial-gradient(circle at 50% 35%, rgba(58, 91, 76, 0.28), transparent 42%),
+  background: radial-gradient(circle at 50% 35%, rgba(58, 91, 76, 0.28), transparent 42%),
     linear-gradient(180deg, #070914 0%, #10231d 100%);
 }
 
@@ -196,9 +194,7 @@ button {
   color: #07110e;
   background: #f7c76b;
   cursor: pointer;
-  transition:
-    transform 160ms ease,
-    background 160ms ease;
+  transition: transform 160ms ease, background 160ms ease;
 }
 
 .hud__button:hover {
@@ -329,9 +325,7 @@ kbd {
   color: #07110e;
   background: #f7c76b;
   cursor: pointer;
-  transition:
-    transform 160ms ease,
-    background 160ms ease;
+  transition: transform 160ms ease, background 160ms ease;
 }
 
 .onboarding button:hover {
