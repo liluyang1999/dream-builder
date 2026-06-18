@@ -10,6 +10,7 @@ export class MagicParticles {
 
   private readonly positions: Float32Array;
   private readonly phases: Float32Array;
+  private readonly positionAttribute: THREE.BufferAttribute;
   private readonly wind = new THREE.Vector3();
   private pulses: MagicPulse[] = [];
 
@@ -29,7 +30,8 @@ export class MagicParticles {
     }
 
     const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+    this.positionAttribute = new THREE.BufferAttribute(this.positions, 3);
+    geometry.setAttribute('position', this.positionAttribute);
 
     const material = new THREE.PointsMaterial({
       color: new THREE.Color(tree.palette.glow),
@@ -59,15 +61,16 @@ export class MagicParticles {
 
     for (let index = 0; index < this.phases.length; index += 1) {
       const offset = index * 3;
-      const phase = this.phases[index] + elapsed * (0.35 + (index % 7) * 0.018);
+      const phase = (this.phases[index] ?? 0) + elapsed * (0.35 + (index % 7) * 0.018);
       let dx = Math.sin(phase) * baseAttraction + windX;
       let dy = Math.cos(phase * 0.7) * 0.004 + windY;
       let dz = Math.cos(phase) * baseAttraction + windZ;
 
+      const x = this.positions[offset] ?? 0;
+      const y = this.positions[offset + 1] ?? 0;
+      const z = this.positions[offset + 2] ?? 0;
+
       if (hasPulses) {
-        const x = this.positions[offset];
-        const y = this.positions[offset + 1];
-        const z = this.positions[offset + 2];
         for (const pulse of this.pulses) {
           const pdx = pulse.center.x - x;
           const pdy = pulse.center.y - y;
@@ -85,20 +88,21 @@ export class MagicParticles {
         }
       }
 
-      this.positions[offset] += dx;
-      this.positions[offset + 1] += dy;
-      this.positions[offset + 2] += dz;
+      let nx = x + dx;
+      const ny = y + dy;
+      let nz = z + dz;
 
-      const planar = Math.hypot(this.positions[offset], this.positions[offset + 2]);
+      const planar = Math.hypot(nx, nz);
       if (planar > 3.4) {
-        this.positions[offset] *= 0.92;
-        this.positions[offset + 2] *= 0.92;
+        nx *= 0.92;
+        nz *= 0.92;
       }
-      if (this.positions[offset + 1] > 4.6) {
-        this.positions[offset + 1] = 0.28;
-      }
+
+      this.positions[offset] = nx;
+      this.positions[offset + 1] = ny > 4.6 ? 0.28 : ny;
+      this.positions[offset + 2] = nz;
     }
-    this.points.geometry.attributes.position.needsUpdate = true;
+    this.positionAttribute.needsUpdate = true;
     this.points.rotation.y = elapsed * 0.025;
   }
 

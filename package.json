@@ -12,7 +12,7 @@
     "preview": "pnpm --filter @dream-builder/desktop preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --pretty",
+    "typecheck": "pnpm -r --if-present typecheck",
     "lint": "biome check .",
     "fmt": "biome format --write .",
     "tauri": "cd crates/dream-builder && tauri",

@@ -11,7 +11,9 @@ describe('validateTreeScene', () => {
 
   test('rejects malformed branch coordinates', () => {
     const scene = createFallbackTreeScene(7);
-    scene.branches[0].start.x = Number.NaN;
+    const firstBranch = scene.branches[0];
+    if (!firstBranch) throw new Error('expected at least one branch');
+    firstBranch.start.x = Number.NaN;
 
     const result = validateTreeScene(scene);
 
@@ -23,7 +25,10 @@ describe('validateTreeScene', () => {
 
   test('rejects duplicate interactive ids', () => {
     const scene = createFallbackTreeScene(7);
-    scene.runes[0].id = scene.crystals[0].id;
+    const firstRune = scene.runes[0];
+    const firstCrystal = scene.crystals[0];
+    if (!firstRune || !firstCrystal) throw new Error('expected a rune and a crystal');
+    firstRune.id = firstCrystal.id;
 
     const result = validateTreeScene(scene);
 

@@ -23,8 +23,7 @@ export function validateTreeScene(value: unknown): ValidationResult {
     }
   }
 
-  for (let index = 0; index < scene.branches.length; index += 1) {
-    const branch = scene.branches[index];
+  for (const [index, branch] of scene.branches.entries()) {
     const path = `branches[${index}]`;
     if (!isNonEmptyString(branch.id)) return fail(`${path}.id must be non-empty`);
     if (!isFiniteVec3(branch.start)) return fail(`${path}.start.${badVec3Field(branch.start)} must be finite`);
@@ -40,8 +39,7 @@ export function validateTreeScene(value: unknown): ValidationResult {
     ['runes', scene.runes],
     ['crystals', scene.crystals],
   ] as const) {
-    for (let index = 0; index < collection.length; index += 1) {
-      const item = collection[index];
+    for (const [index, item] of collection.entries()) {
       if (!isNonEmptyString(item.id)) return fail(`${collectionName}[${index}].id must be non-empty`);
       if (interactiveIds.has(item.id)) return fail(`duplicate interactive id: ${item.id}`);
       interactiveIds.add(item.id);
@@ -49,8 +47,7 @@ export function validateTreeScene(value: unknown): ValidationResult {
     }
   }
 
-  for (let index = 0; index < scene.details.length; index += 1) {
-    const detail = scene.details[index];
+  for (const [index, detail] of scene.details.entries()) {
     if (!interactiveIds.has(detail.id)) return fail(`details[${index}].id does not match an interactive object`);
     if (!isNonEmptyString(detail.title)) return fail(`details[${index}].title must be non-empty`);
     if (!Number.isFinite(detail.energy) || detail.energy < 0 || detail.energy > 1) {

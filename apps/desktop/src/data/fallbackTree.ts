@@ -27,7 +27,7 @@ export function createFallbackTreeScene(seed: number): TreeScene {
       id: `rune-${index}`,
       position: { x: Math.cos(angle) * 0.34, y: jitter(1.4, 0.7), z: Math.sin(angle) * 0.34 },
       normal: { x: Math.cos(angle), y: 0, z: Math.sin(angle) },
-      glyph: GLYPHS[Math.floor(rng() * GLYPHS.length)],
+      glyph: GLYPHS[Math.floor(rng() * GLYPHS.length)] ?? 'A',
       intensity: clamp(jitter(0.82, 0.2), 0.4, 1),
     };
   });

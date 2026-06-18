@@ -13,10 +13,11 @@ describe('treeApi browser fallback', () => {
 
   test('returns local detail info and rejects unknown ids outside Tauri', async () => {
     const result = await loadTreeScene(19);
-    const knownId = result.scene.runes[0].id;
-    const detail = await loadDetailInfo(knownId, result.scene);
+    const knownRune = result.scene.runes[0];
+    if (!knownRune) throw new Error('expected at least one rune in fallback scene');
+    const detail = await loadDetailInfo(knownRune.id, result.scene);
 
     await expect(loadDetailInfo('missing-id', result.scene)).rejects.toThrow('未知细节');
-    expect(detail.id).toBe(knownId);
+    expect(detail.id).toBe(knownRune.id);
   });
 });
