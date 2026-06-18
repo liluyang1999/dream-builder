@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.dreambuilder.fantasytree",
   "build": {
-    "beforeDevCommand": "pnpm -C ../.. dev",
+    "beforeDevCommand": "pnpm -C .. dev",
     "devUrl": "http://127.0.0.1:1420",
-    "beforeBuildCommand": "pnpm -C ../.. build",
+    "beforeBuildCommand": "pnpm -C .. build",
     "frontendDist": "../../apps/desktop/dist"
   },
   "app": {
@@ -32,6 +32,20 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "icon": ["icons/icon.ico"]
+    "icon": ["icons/icon.ico"],
+    "publisher": "Dream Builder",
+    "copyright": "© 2026 Dream Builder",
+    "category": "Education",
+    "shortDescription": "智慧树 · 程序化 3D 互动桌面程序",
+    "longDescription": "Dream Builder 智慧树是一个由 Tauri 2 + Rust + React + Three.js 打造的本地原生 3D 互动程序，用于教学演示全栈桌面应用开发。",
+    "licenseFile": "installer/LICENSE.txt",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["SimpChinese", "English"],
+        "displayLanguageSelector": true,
+        "installerIcon": "icons/icon.ico"
+      }
+    }
   }
 }

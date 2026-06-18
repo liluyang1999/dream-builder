@@ -1,54 +1,46 @@
 # agent-standards
 
-A portable, tool-agnostic set of engineering standards for coding agents (Claude Code,
-Codex, Cursor, …), organized in three tiers and provided in two parallel language sets
-(`en/`, `zh/`).
+A portable, tool-agnostic engineering standard for coding agents (Claude Code, Codex, Cursor,
+…), in two parallel language sets (`en/`, `zh/`). It has **two layers**:
 
-## The three tiers
+| Layer | File(s) | When loaded | Holds |
+|-------|---------|-------------|-------|
+| **Global** (universal) | `AGENTS.md` | **Always** — on every agent start | Conduct (how the agent behaves) + Craft (the engineering lifecycle, design → deliver) + the on-demand loading protocol |
+| **Language** (specific) | `languages/{python, typescript-javascript, rust, jvm}.md` | **On demand** — only when a task touches that language | Per-language toolchain, idioms, build/packaging, pitfalls |
 
-| Tier | File | Scope | Answers |
-|------|------|-------|---------|
-| 1 — Law | `AGENTS.md` | Behavior & judgment, tool- and language-agnostic | *How should the agent conduct itself?* |
-| 2 — Craft | `engineering-baseline.md` | Concrete but language-neutral practice | *What does "good engineering" mean in any repo?* |
-| 3 — Idiom | `languages/{python,typescript-javascript,rust,jvm}.md` | Per-language modern defaults | *How is it done well in this language?* |
-
-Each tier narrows the previous one (general → specific). Precedence runs the other way: a
-user's explicit instruction and a repo's own closer-scoped rules override anything here
-(see Tier 1 §0).
-
-That is the **vertical** axis. **Horizontally**, Tier 2 and every language guide trace the
-full lifecycle — understand & design → implement → verify → integrate → release → operate —
-with security, dependencies, performance, and documentation as cross-cutting concerns. So a
-change is covered from first thought to shipped artifact.
+The split is deliberate. The universal layer is small and always needed, so it is always loaded.
+The language layer is bulkier and situational, so the global `AGENTS.md` tells the agent to
+**detect the tech stack and pull in only the guide(s) the current task needs** — never all of
+them. Context is a finite budget; load the smallest set of guidance that fully covers the work.
 
 ## Deploying
 
-These are plain Markdown — drop them where your agent reads instructions.
+Put `AGENTS.md` where your agent auto-loads global instructions, and keep the `languages/`
+directory **beside it** so the on-demand reads resolve by relative path.
 
-| Target | Suggested placement |
-|--------|---------------------|
-| Claude Code (global) | `en/AGENTS.md` → `~/.claude/CLAUDE.md` |
-| Codex (global) | `zh/AGENTS.md` → `~/.codex/AGENTS.md` |
-| Any agent (cross-tool) | `AGENTS.md` at the user or repo root |
-| A specific repo | paste/adapt the relevant tier(s) into the repo's own `AGENTS.md` |
+| Target | Place the global file at | Languages directory |
+|--------|--------------------------|---------------------|
+| Claude Code (global) | `~/.claude/CLAUDE.md` *or* `~/.claude/AGENTS.md` | `~/.claude/languages/` |
+| Codex (global) | `~/.codex/AGENTS.md` | `~/.codex/languages/` |
+| Other agents | `~/.agents/AGENTS.md` (or a repo root) | `…/languages/` |
 
-Tier 1 references Tiers 2–3 by relative path and degrades gracefully: an `AGENTS.md`
-deployed on its own is still complete. For the full stack, copy the tier files alongside it.
+Pick the `en/` or the `zh/` set per preference (e.g. `zh/` → `~/.codex/`). The global `AGENTS.md`
+references `languages/<guide>.md` by relative path, so co-locating the two is all that's required.
+A repo's own `AGENTS.md` and closer-scoped rules always override this set.
 
 ## Extending
 
-Add a language by creating `languages/<lang>.md` in both `en/` and `zh/`, following the
-existing shape (toolchain → layout → types/safety → idioms → errors → concurrency →
-testing → dependencies → pitfalls). Keep it opinionated and short; this set optimizes for
-signal, not coverage.
+Add a language by creating `languages/<lang>.md` in both `en/` and `zh/` — same shape (toolchain →
+layout → types/safety → idioms → errors → concurrency → testing → build & packaging →
+dependencies → pitfalls) — then add a row to the dispatch table in each `AGENTS.md` (*How to use
+this standard*). Keep it opinionated and short; this set optimizes for signal, not coverage.
 
 ## 中文说明
 
-本目录提供面向编码智能体（Claude Code、Codex、Cursor 等）的、工具无关的工程规范，分三层、
-中英双份（`en/` 与 `zh/`）：第 1 层 `AGENTS.md` 是与语言无关的「行为准则」，第 2 层
-`engineering-baseline.md` 是语言无关的「工程通则」，第 3 层 `languages/*.md` 是各语言的
-「现代化实践」。纵向上三层由「通用」走向「具体」；优先级方向相反——用户的明确指令与仓库
-自身的就近规则，高于本目录的任何内容。横向上，第 2 层与各语言指引都贯穿完整生命周期——
-理解与设计 → 实现 → 验证 → 集成 → 发布 → 运维，并以安全、依赖、性能、文档为横切关注点，
-覆盖一次改动从最初构思到交付产物的全过程。部署时把对应文件放到智能体读取指令的位置（例如
-`zh/AGENTS.md` → `~/.codex/AGENTS.md`）。
+本目录是面向编码智能体（Claude Code、Codex、Cursor 等）的、工具无关的工程规范，中英双份（`en/`
+与 `zh/`），分**两层**：**全局层** `AGENTS.md` 始终加载，包含「行为准则 + 工程生命周期（设计→
+交付）+ 按需加载协议」；**语言层** `languages/*.md` 仅当任务涉及该语言时按需加载。如此划分是有意
+为之——通用内容小而常用，故始终加载；语言内容更厚且因任务而异，故由全局文件指示智能体「先识别
+技术栈，再只拉取当前任务所需的语言指引」，而非一次性全部载入，因为上下文是有限预算。部署时把
+`AGENTS.md` 放到智能体自动加载全局指令之处，并把 `languages/` 目录**放在其旁边**，使按需加载的
+相对路径可解析（例如 `zh/AGENTS.md` → `~/.codex/AGENTS.md`，`languages/` → `~/.codex/languages/`）。

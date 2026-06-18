@@ -1,7 +1,7 @@
-# Python (Tier 3)
+# Python — Language Layer (load on demand)
 
-Modern, typed, tooling-first Python. Apply on top of Tier 1 (conduct) and Tier 2 (craft);
-a repo's own rules win.
+Modern, typed, tooling-first Python. Read this only when the task touches Python. It applies on
+top of the global `AGENTS.md` (universal conduct + lifecycle craft); a repo's own rules win.
 
 ## Toolchain & version
 

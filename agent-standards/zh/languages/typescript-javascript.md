@@ -1,6 +1,7 @@
-# TypeScript 与 JavaScript（第 3 层）
+# TypeScript 与 JavaScript — 语言层（按需加载）
 
-默认使用严格模式的 TypeScript；把纯 JavaScript 视为约束，而非选择。在第 1 层与第 2 层之上应用；仓库自身规则优先。
+默认使用严格模式的 TypeScript；把纯 JavaScript 视为约束，而非选择。仅当任务涉及 TS/JS 时才读取本文件。
+它在全局 `AGENTS.md`（通用行为与生命周期素养）之上应用；仓库自身规则优先。
 
 ## 工具链与运行时
 

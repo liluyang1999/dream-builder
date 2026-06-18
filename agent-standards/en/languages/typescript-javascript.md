@@ -1,7 +1,8 @@
-# TypeScript & JavaScript (Tier 3)
+# TypeScript & JavaScript — Language Layer (load on demand)
 
-Default to TypeScript in strict mode; treat plain JavaScript as a constraint, not a choice.
-Apply on top of Tier 1 and Tier 2; a repo's own rules win.
+Default to TypeScript in strict mode; treat plain JavaScript as a constraint, not a choice. Read
+this only when the task touches TS/JS. It applies on top of the global `AGENTS.md` (universal
+conduct + lifecycle craft); a repo's own rules win.
 
 ## Toolchain & runtime
 

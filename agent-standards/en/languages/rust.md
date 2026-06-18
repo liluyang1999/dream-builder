@@ -1,6 +1,7 @@
-# Rust (Tier 3)
+# Rust — Language Layer (load on demand)
 
-Idiomatic, safe, warning-free Rust. Apply on top of Tier 1 and Tier 2; a repo's own rules win.
+Idiomatic, safe, warning-free Rust. Read this only when the task touches Rust. It applies on top
+of the global `AGENTS.md` (universal conduct + lifecycle craft); a repo's own rules win.
 
 ## Toolchain
 

@@ -1,7 +1,8 @@
-# JVM — Java & Scala (Tier 3)
+# JVM — Java & Scala — Language Layer (load on demand)
 
-Modern JVM engineering. Apply on top of Tier 1 and Tier 2; a repo's own rules win. The
-shared section applies to both languages; language-specific guidance follows.
+Modern JVM engineering. Read this only when the task touches Java or Scala. It applies on top of
+the global `AGENTS.md` (universal conduct + lifecycle craft); a repo's own rules win. The shared
+section applies to both languages; language-specific guidance follows.
 
 ## Shared (Java & Scala)
 
