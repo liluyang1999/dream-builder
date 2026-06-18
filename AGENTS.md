@@ -68,9 +68,9 @@ If `pnpm tauri build` fails to find the MSVC linker, run inside an "x64 Native T
 
 The root `tauri` script does `cd crates/dream-builder && tauri` so Tauri-CLI finds `tauri.conf.json` directly in CWD. Run from project root: `pnpm tauri dev` / `pnpm tauri build`.
 
-**Tauri path-base quirk to remember:**
-- `beforeDevCommand` / `beforeBuildCommand` are spawned from the **parent** of `tauri.conf.json` (i.e., `crates/dream-builder/`). That's why they read `pnpm -C ../.. dev` / `pnpm -C ../.. build` — `../..` resolves back to the repo root where the orchestrator scripts live.
-- `frontendDist` is relative to `tauri.conf.json` itself (i.e., `crates/dream-builder/`), so it's `../../apps/desktop/dist`. Same base, but a different relative target than the `before*Command` working dir — easy to confuse.
+**Tauri path-base quirk to remember (two different bases!):**
+- `beforeDevCommand` / `beforeBuildCommand` are spawned with cwd = the **parent of the directory that contains `tauri.conf.json`**, i.e. `crates/` (not `crates/dream-builder/`). So to reach the repo root they read `pnpm -C .. dev` / `pnpm -C .. build` (`crates/.. = repo root`). Using `../..` overshoots to `D:\Projects` and fails with "No package.json found".
+- `frontendDist` is relative to the `tauri.conf.json` **file** (i.e., `crates/dream-builder/`), so it's `../../apps/desktop/dist`. Different base than the `before*Command` cwd — easy to confuse.
 
 ## Architecture
 
