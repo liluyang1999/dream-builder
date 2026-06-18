@@ -1,0 +1,23 @@
+# Node
+node_modules/
+**/node_modules/
+**/dist/
+.pnpm-store/
+
+# Rust
+target/
+**/target/
+
+# Tauri
+crates/*/gen/
+**/gen/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.vite-dev.*.log
+
+# Env
+.env
+.env.local
