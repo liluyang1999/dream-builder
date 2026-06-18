@@ -16,7 +16,8 @@
     "rules": {
       "recommended": true,
       "suspicious": { "noExplicitAny": "error" },
-      "style": { "useConst": "error", "useImportType": "error" }
+      "style": { "useConst": "error", "useImportType": "error" },
+      "a11y": { "useSemanticElements": "off" }
     }
   },
   "javascript": {

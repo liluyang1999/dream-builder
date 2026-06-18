@@ -1,3 +1,4 @@
+import { parseWith, treeSceneSchema } from '@dream-builder/ipc-contracts';
 import { describe, expect, test } from 'vitest';
 import { createFallbackTreeScene } from '../data/fallbackTree';
 
@@ -10,6 +11,11 @@ describe('createFallbackTreeScene', () => {
     expect(scene.runes.length).toBeGreaterThan(0);
     expect(scene.crystals.length).toBeGreaterThan(0);
     expect(scene.details.length).toBeGreaterThan(0);
+  });
+
+  test('satisfies the shared TreeScene contract', () => {
+    const result = parseWith(treeSceneSchema, createFallbackTreeScene(11));
+    expect(result.ok).toBe(true);
   });
 
   test('creates unique interactive ids', () => {

@@ -1,13 +1,14 @@
-import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+  plugins: [react()],
   clearScreen: false,
-  server: {
-    strictPort: true,
-  },
+  server: { strictPort: true },
   envPrefix: ['VITE_', 'TAURI_'],
   test: {
-    environment: 'node',
-    include: ['src/**/*.test.ts'],
+    environment: 'jsdom',
+    globals: true,
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 });

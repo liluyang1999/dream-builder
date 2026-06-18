@@ -1,4 +1,4 @@
-import type { TreeScene } from '../types/tree';
+import type { TreeScene } from '@dream-builder/ipc-contracts';
 
 const GLYPHS = ['A', 'E', 'I', 'O', 'U', 'R', 'S', 'T'];
 
