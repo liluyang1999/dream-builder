@@ -8,6 +8,7 @@
  * - Own screenshot / glTF / scene-export side effects and keyboard shortcuts.
  */
 import type { MagicField } from '@dream-builder/ipc-contracts';
+import { GlassProvider } from '@dream-builder/liquid-glass';
 import { useCallback, useEffect, useRef } from 'react';
 import { useKeyboardShortcuts } from './interaction/useKeyboardShortcuts';
 import { isTauriRuntime } from './ipc/runtime';
@@ -22,6 +23,7 @@ export function App() {
   const scene = useAppStore((state) => state.scene);
   const reducedMotion = useAppStore((state) => state.reducedMotion);
   const hudHidden = useAppStore((state) => state.hudHidden);
+  const theme = useAppStore((state) => state.theme);
   const selectedId = useAppStore((state) => state.selection.selectedId);
   const applySceneResult = useAppStore((state) => state.applySceneResult);
   const setSelectedDetail = useAppStore((state) => state.setSelectedDetail);
@@ -147,25 +149,27 @@ export function App() {
   });
 
   return (
-    <div className={hudHidden ? 'app-shell hud-hidden' : 'app-shell'}>
-      <div className="scene-host">
-        {scene ? (
-          <SceneCanvas
-            scene={scene}
-            reducedMotion={reducedMotion}
-            fieldRef={fieldRef}
-            apiRef={sceneApiRef}
-          />
-        ) : null}
+    <GlassProvider theme={theme} className="app-root">
+      <div className={hudHidden ? 'app-shell hud-hidden' : 'app-shell'}>
+        <div className="scene-host">
+          {scene ? (
+            <SceneCanvas
+              scene={scene}
+              reducedMotion={reducedMotion}
+              fieldRef={fieldRef}
+              apiRef={sceneApiRef}
+            />
+          ) : null}
+        </div>
+        <Hud
+          onResetCamera={handleResetCamera}
+          onScreenshot={() => void handleScreenshot()}
+          onExport={() => void handleExportGltf()}
+          onExportScene={() => void handleExportScene()}
+        />
+        <OnboardingHint />
       </div>
-      <Hud
-        onResetCamera={handleResetCamera}
-        onScreenshot={() => void handleScreenshot()}
-        onExport={() => void handleExportGltf()}
-        onExportScene={() => void handleExportScene()}
-      />
-      <OnboardingHint />
-    </div>
+    </GlassProvider>
   );
 }
 

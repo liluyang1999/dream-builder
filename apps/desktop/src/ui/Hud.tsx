@@ -1,3 +1,4 @@
+import { GlassBadge, GlassPanel } from '@dream-builder/liquid-glass';
 import { useAppStore } from '../state/store';
 import { DetailsPanel } from './DetailsPanel';
 import { HelpOverlay } from './HelpOverlay';
@@ -12,9 +13,9 @@ interface Props {
 }
 
 const STATUS_TEXT = {
-  rust: 'Rust 后端已连接，场景数据已加载。',
-  fallback: '使用本地回退数据运行。',
-  loading: '正在唤醒古树...',
+  rust: 'Rust 已连接',
+  fallback: '本地回退',
+  loading: '加载中…',
 } as const;
 
 export function Hud({ onResetCamera, onScreenshot, onExport, onExportScene }: Props) {
@@ -34,24 +35,32 @@ export function Hud({ onResetCamera, onScreenshot, onExport, onExportScene }: Pr
 
   return (
     <section className="hud">
-      <h1 className="hud__title">Dream Builder · 智慧树</h1>
-      <div className="hud__status">{STATUS_TEXT[source ?? 'loading']}</div>
-      <div className="hud__line">
-        {hoverLabel ? `当前悬停：${hoverLabel}` : '移动鼠标探索符文、水晶与叶簇。'}
-      </div>
+      <GlassPanel interactive className="hud__panel">
+        <div className="hud__header">
+          <h1 className="hud__title">智慧树</h1>
+          <GlassBadge className={source === 'rust' ? 'hud__badge--ok' : 'hud__badge--warn'}>
+            {STATUS_TEXT[source ?? 'loading']}
+          </GlassBadge>
+        </div>
 
-      <DetailsPanel detail={selectedDetail} />
+        <div className="hud__line">
+          {hoverLabel ? `当前悬停：${hoverLabel}` : '移动鼠标探索符文、水晶与叶簇。'}
+        </div>
 
-      {warning ? <div className="hud__error">{warning}</div> : null}
+        <DetailsPanel detail={selectedDetail} />
 
-      <SeedForm seed={seed} onRegenerate={setSeed} />
-      <Toolbar
-        onResetCamera={onResetCamera}
-        onScreenshot={onScreenshot}
-        onExport={onExport}
-        onExportScene={onExportScene}
-        onToggleHelp={toggleHelp}
-      />
+        {warning ? <div className="hud__error">{warning}</div> : null}
+
+        <SeedForm seed={seed} onRegenerate={setSeed} />
+        <Toolbar
+          onResetCamera={onResetCamera}
+          onScreenshot={onScreenshot}
+          onExport={onExport}
+          onExportScene={onExportScene}
+          onToggleHelp={toggleHelp}
+        />
+      </GlassPanel>
+
       <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
     </section>
   );

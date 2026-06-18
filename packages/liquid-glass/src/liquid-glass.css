@@ -1,0 +1,200 @@
+/*
+ * Liquid Glass — iOS 26-inspired translucent surfaces.
+ *
+ * Layers that create the "liquid glass" read:
+ *   1. backdrop blur + saturation  → frosted refraction of what's behind
+ *   2. translucent tint            → the glass body
+ *   3. top sheen (::before)        → light catching the upper edge
+ *   4. pointer specular (::after)  → a highlight that follows the cursor
+ *   5. inset + drop shadows        → thickness and lift
+ *   6. high-tier caustic shimmer   → subtle moving light, gated by quality
+ *
+ * Theme + quality are driven by data-attributes on `.lg-root` so the whole tree
+ * can be tuned from one place, and effects degrade when the platform can't keep
+ * up (or the user prefers reduced motion).
+ */
+
+.lg-root {
+  --lg-radius: 22px;
+  --lg-radius-sm: 14px;
+  --lg-blur: 18px;
+  --lg-saturate: 160%;
+  --lg-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+  --lg-specular-size: 160px;
+  /* dark defaults; overridden per theme below */
+  --lg-tint: rgba(12, 16, 28, 0.55);
+  --lg-tint-solid: rgba(16, 22, 38, 0.92);
+  --lg-fg: #f4efe2;
+  --lg-border: rgba(255, 255, 255, 0.16);
+  --lg-inner-top: rgba(255, 255, 255, 0.3);
+  --lg-inner-bottom: rgba(255, 255, 255, 0.08);
+  --lg-sheen: rgba(255, 255, 255, 0.16);
+  --lg-specular: rgba(255, 255, 255, 0.22);
+  --lg-accent: #f7c76b;
+  --lg-accent-fg: #07110e;
+}
+
+.lg-root[data-lg-theme="light"] {
+  --lg-tint: rgba(255, 255, 255, 0.5);
+  --lg-tint-solid: rgba(244, 246, 252, 0.94);
+  --lg-fg: #1b2230;
+  --lg-border: rgba(255, 255, 255, 0.65);
+  --lg-inner-top: rgba(255, 255, 255, 0.8);
+  --lg-inner-bottom: rgba(120, 130, 150, 0.12);
+  --lg-sheen: rgba(255, 255, 255, 0.45);
+  --lg-specular: rgba(255, 255, 255, 0.55);
+}
+
+@media (prefers-color-scheme: light) {
+  .lg-root[data-lg-theme="auto"] {
+    --lg-tint: rgba(255, 255, 255, 0.5);
+    --lg-tint-solid: rgba(244, 246, 252, 0.94);
+    --lg-fg: #1b2230;
+    --lg-border: rgba(255, 255, 255, 0.65);
+    --lg-inner-top: rgba(255, 255, 255, 0.8);
+    --lg-inner-bottom: rgba(120, 130, 150, 0.12);
+    --lg-sheen: rgba(255, 255, 255, 0.45);
+    --lg-specular: rgba(255, 255, 255, 0.55);
+  }
+}
+
+.lg-surface {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--lg-radius);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 var(--lg-inner-top), inset 0 -1px 1px
+    var(--lg-inner-bottom);
+  color: var(--lg-fg);
+}
+
+/* Top sheen. */
+.lg-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--lg-sheen), rgba(255, 255, 255, 0) 38%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Pointer-tracked specular highlight (only when interactive). */
+.lg-surface[data-lg-specular="on"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    var(--lg-specular-size) var(--lg-specular-size) at var(--lg-mx, 50%) var(--lg-my, -20%),
+    var(--lg-specular),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lg-surface[data-lg-specular="on"]:hover::after,
+.lg-surface[data-lg-specular="on"]:focus-within::after {
+  opacity: 1;
+}
+
+/* Keep real content above the decorative pseudo-layers. */
+.lg-surface > * {
+  position: relative;
+  z-index: 2;
+}
+
+.lg-surface--sm {
+  border-radius: var(--lg-radius-sm);
+}
+
+/* High quality: a faint caustic shimmer driven by an SVG turbulence filter. */
+.lg-root[data-lg-quality="high"] .lg-surface[data-lg-refraction="on"]::before {
+  background: linear-gradient(180deg, var(--lg-sheen), rgba(255, 255, 255, 0) 38%),
+    radial-gradient(120% 120% at 30% 0%, rgba(255, 255, 255, 0.1), transparent 60%);
+  filter: url(#lg-caustics);
+}
+
+/* Low quality / no backdrop-filter: fall back to an opaque-ish tint. */
+.lg-root[data-lg-quality="low"] .lg-surface {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--lg-tint-solid);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lg-surface {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--lg-tint-solid);
+  }
+}
+
+/* Components ---------------------------------------------------------------- */
+
+.lg-panel {
+  padding: 16px 18px;
+}
+
+.lg-card {
+  padding: 14px 16px;
+}
+
+.lg-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--lg-radius-sm);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.lg-button:hover {
+  transform: translateY(-1px);
+}
+
+.lg-button:active {
+  transform: translateY(0);
+}
+
+.lg-button--primary {
+  color: var(--lg-accent-fg);
+  background: var(--lg-accent);
+  border-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.lg-button--primary:hover {
+  background: color-mix(in srgb, var(--lg-accent) 80%, white);
+}
+
+.lg-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-surface[data-lg-specular="on"]::after,
+  .lg-button {
+    transition: none;
+  }
+  .lg-root[data-lg-quality="high"] .lg-surface[data-lg-refraction="on"]::before {
+    filter: none;
+  }
+}

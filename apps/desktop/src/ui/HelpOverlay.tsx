@@ -1,3 +1,5 @@
+import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
+
 const SHORTCUTS: ReadonlyArray<[string, string]> = [
   ['R', '重置视角'],
   ['H', '隐藏 / 显示面板'],
@@ -11,7 +13,7 @@ const SHORTCUTS: ReadonlyArray<[string, string]> = [
 export function HelpOverlay({ open, onClose }: { open: boolean; onClose(): void }) {
   if (!open) return null;
   return (
-    <div className="hud__help" role="dialog" aria-label="键盘快捷键">
+    <GlassPanel className="hud__help" role="dialog" aria-label="键盘快捷键">
       <strong>键盘快捷键</strong>
       <ul>
         {SHORTCUTS.map(([key, label]) => (
@@ -20,9 +22,7 @@ export function HelpOverlay({ open, onClose }: { open: boolean; onClose(): void 
           </li>
         ))}
       </ul>
-      <button className="hud__button hud__button--ghost" type="button" onClick={onClose}>
-        关闭
-      </button>
-    </div>
+      <GlassButton onClick={onClose}>关闭</GlassButton>
+    </GlassPanel>
   );
 }

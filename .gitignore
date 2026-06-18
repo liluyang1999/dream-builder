@@ -21,3 +21,7 @@ Thumbs.db
 # Env
 .env
 .env.local
+
+# Tooling scratch
+.playwright-mcp/
+**/.playwright-mcp/

@@ -1,3 +1,4 @@
+import { GlassButton } from '@dream-builder/liquid-glass';
 import { type FormEvent, useEffect, useState } from 'react';
 
 interface Props {
@@ -37,9 +38,7 @@ export function SeedForm({ seed, onRegenerate }: Props) {
         value={value}
         onChange={(event) => setValue(event.target.value)}
       />
-      <button className="hud__button hud__button--ghost" type="submit">
-        重新生成
-      </button>
+      <GlassButton type="submit">重新生成</GlassButton>
     </form>
   );
 }

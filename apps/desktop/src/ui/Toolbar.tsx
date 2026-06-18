@@ -1,3 +1,5 @@
+import { GlassButton } from '@dream-builder/liquid-glass';
+
 interface Props {
   onResetCamera(): void;
   onScreenshot(): void;
@@ -15,26 +17,15 @@ export function Toolbar({
 }: Props) {
   return (
     <div className="hud__actions">
-      <button className="hud__button" type="button" onClick={onResetCamera}>
+      <GlassButton variant="primary" onClick={onResetCamera}>
         重置视角
-      </button>
-      <button className="hud__button hud__button--ghost" type="button" onClick={onScreenshot}>
-        截图
-      </button>
-      <button className="hud__button hud__button--ghost" type="button" onClick={onExport}>
-        导出 glTF
-      </button>
-      <button className="hud__button hud__button--ghost" type="button" onClick={onExportScene}>
-        导出场景
-      </button>
-      <button
-        className="hud__button hud__button--ghost hud__button--icon"
-        type="button"
-        aria-label="键盘帮助"
-        onClick={onToggleHelp}
-      >
+      </GlassButton>
+      <GlassButton onClick={onScreenshot}>截图</GlassButton>
+      <GlassButton onClick={onExport}>导出 glTF</GlassButton>
+      <GlassButton onClick={onExportScene}>导出场景</GlassButton>
+      <GlassButton aria-label="键盘帮助" onClick={onToggleHelp}>
         ?
-      </button>
+      </GlassButton>
     </div>
   );
 }
