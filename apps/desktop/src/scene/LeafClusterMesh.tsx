@@ -15,7 +15,7 @@ export function LeafClusterMesh({
   const { hovered, selected, handlers } = useInteractive(cluster.id);
 
   const count = Math.min(Math.max(cluster.density, 6), 64);
-  const color = useMemo(() => new THREE.Color().setHSL(cluster.hue, 0.62, 0.42), [cluster.hue]);
+  const color = useMemo(() => new THREE.Color().setHSL(cluster.hue, 0.56, 0.34), [cluster.hue]);
   const emissive = useMemo(() => new THREE.Color(leafColor), [leafColor]);
 
   const matrices = useMemo(() => {
@@ -69,6 +69,14 @@ export function LeafClusterMesh({
 
   return (
     <group ref={groupRef} {...handlers}>
+      <mesh
+        position={[cluster.position.x, cluster.position.y, cluster.position.z]}
+        scale={[cluster.radius * 0.82, cluster.radius * 0.56, cluster.radius * 0.74]}
+        castShadow
+      >
+        <dodecahedronGeometry args={[1, 0]} />
+        <meshToonMaterial color={color} emissive={emissive} emissiveIntensity={0.04} />
+      </mesh>
       <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
         <icosahedronGeometry args={[0.08, 0]} />
         <meshStandardMaterial

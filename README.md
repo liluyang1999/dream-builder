@@ -1,59 +1,107 @@
 # Dream Builder Fantasy Tree
 
-一个 Tauri 2 + Rust + Vite + TypeScript + Three.js 的桌面 3D 奇幻树项目。前端负责 WebGL 渲染、鼠标交互、粒子和 UI；后端 Rust 负责确定性生成树木结构、交互细节和魔法场数据。
+《智慧树之森》是一款单人离线第三人称卡通森林游戏。玩家作为能听见森林记忆的小小守林人，
+探索中央林地、蘑菇坡、溪流与遗迹，收集三枚光种并完成方向净化，让失色的智慧树和周围生态重新发光。
 
-> 本仓库正在进行「教学级改造」（pnpm + Cargo 双 workspace 单仓、React 19 + react-three-fiber 前端、iOS 26 液态玻璃 UI、安装向导与教学文档）。规格与实现计划见 `docs/superpowers/`。
+当前产品版本为 **1.1**。标题—探索—净化—章节结尾闭环、自动存档与损坏恢复、键鼠与标准手柄、
+音频、画质与无障碍设置、截图/场景导出、单实例及 Windows 安装工程均已实现。目标设备的原生十分钟
+性能报告和当前用户安装—首次启动—卸载闭环已有归档；五名首次接触玩家观察、实体手柄完整听测、
+干净账户覆盖升级和受信任代码签名仍是正式发布前的外部门槛。
 
-## 目录结构
+- [游戏愿景、当前状态与里程碑](docs/game/README.md)
+- [完整中文全栈教学档案](knowledge/index.html)
+- [Windows 交付与恢复手册](docs/game/release-runbook.md)
 
-pnpm workspace（前端）+ Cargo workspace（Rust）单仓：
+## 技术栈
 
-```
+- 桌面：Tauri 2、Rust 2024、Windows WebView2、NSIS
+- 前端：React 19、TypeScript、Vite、Zustand
+- 3D：Three.js、react-three-fiber、drei、postprocessing
+- 边界：Zod IPC 契约、Rust 确定性生成、Web Worker 浏览器回退
+- UI：工作区内可复用的 `@dream-builder/liquid-glass` 组件包
+
+## Windows WebView2
+
+Windows 安装版由 Tauri/Wry 创建 WebView2 原生窗口；React 前端不直接实例化或调用
+CoreWebView2。安装器显式使用 `downloadBootstrapper` 的 **WebView2 Evergreen** 策略，但不固定
+Runtime 版本：系统已有运行时就直接使用，缺失时由 Microsoft 引导安装，之后随 Evergreen 通道保持
+安全更新。不同机器的 WebView2 补丁版本不要求完全相同，受支持行为由真实 Tauri 回归测试保证。
+
+`pnpm dev` 只是浏览器开发模式，使用你打开页面的浏览器和 Web Worker 回退；只有
+`pnpm tauri dev`、Tauri 构建产物及安装版使用 WebView2 和 Rust IPC。
+
+## 仓库结构
+
+```text
 dream-builder/
-├── apps/desktop/        # Vite + TypeScript + Three.js（包名 @dream-builder/desktop）
-├── packages/            # 可复用 TS 包（ipc-contracts、liquid-glass，将在 P2/P3 加入）
-├── crates/dream-builder/# Rust + Tauri 2
-├── docs/                # design / superpowers（规格+计划）/ teaching
-├── package.json         # 根 orchestrator（统一脚本入口）
-├── Cargo.toml           # Cargo workspace
-├── justfile             # 跨语言统一任务入口
-└── AGENTS.md            # 给所有编码代理的项目说明
+├── apps/desktop/          # React + R3F 桌面前端与浏览器回退
+├── packages/
+│   ├── ipc-contracts/     # Rust/前端边界的 Zod 运行时契约
+│   └── liquid-glass/      # 可复用玻璃主题组件
+├── crates/dream-builder/  # Rust 领域、生成、状态、事件与 Tauri 外壳
+├── docs/game/             # 当前产品方向、验收证据与交付手册
+├── knowledge/index.html   # 唯一的综合中文教学档案
+├── scripts/               # 版本、依赖布局、知识档案与发布验证
+└── version.json           # 1.1 → 1.1.0 的唯一版本映射
 ```
 
-## 环境要求
+## 环境与 pnpm 数据位置
 
-Node 24、pnpm 11、Rust 工具链（含 MSVC，用于 Windows 打包）。
+需要 Node 24、pnpm 11 和 Rust 工具链。Windows 原生打包还需要 MSVC Build Tools。
 
-## 安装与开发
+pnpm 是本项目唯一的前端包管理器。内容寻址仓库、元数据缓存和虚拟依赖树分别固定在仓库根目录下：
+
+- `.pnpm-store/`
+- `.pnpm-cache/`
+- `node_modules/.pnpm/`
+
+本项目不会把 pnpm 依赖缓存写到磁盘根目录，也禁用用户级全局虚拟仓库。`pnpm pnpm:verify-layout`
+会解析绝对路径独立校验，并已纳入完整门禁。
 
 ```powershell
-pnpm install            # 安装全部工作区依赖
-pnpm dev                # http://127.0.0.1:1420（浏览器开发，无原生外壳）
-pnpm tauri dev          # 完整 Tauri 原生外壳
+pnpm install
+pnpm dev          # 浏览器回退：http://127.0.0.1:1420
+pnpm tauri dev    # 完整 Rust + Tauri + WebView2 桌面模式
 ```
 
-## 测试、检查与构建
+M2 主持人证据工作台使用 `http://127.0.0.1:1420/?tool=m2-evidence`。它不出现在玩家 HUD，
+只在本机汇总匿名五人观察与原生十分钟性能 JSON；协议见 [M2 无提示观察](docs/game/m2-playtest.md)。
+
+## 版本规则
+
+对玩家、文档、发布目录和交付文件使用两段式版本 `主版本.功能版本`：小功能增加第二段，
+非常大的功能模块增加第一段并把第二段归零。npm、Cargo、Tauri 和 Windows 元数据要求合法
+三段 SemVer，因此内部只做机械映射：产品 **1.1** 对应技术 **1.1.0**。
+
+根 [version.json](version.json) 是唯一真相源，`pnpm version:verify` 会核对所有工作区清单、
+Cargo、Tauri、WebView2 策略和该映射。历史证据 JSON 中记录的旧技术版本保持原样。
+
+## 质量门禁
 
 ```powershell
-pnpm test               # Vitest 全工作区
-pnpm typecheck          # tsc --noEmit 全部 TS 包
-pnpm lint               # biome check
-pnpm build              # tsc 类型检查 + vite build → apps/desktop/dist
-cargo test              # Rust 工作区测试
-cargo clippy -- -D warnings
-pnpm check              # lint + typecheck + test + build 一站式门禁
+pnpm check
+cargo fmt --check
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo check --workspace --all-targets --locked
 ```
 
-安装 [`just`](https://github.com/casey/just) 后可用 `just check` / `just tauri-dev` / `just bundle` 包裹同样的命令。
+`pnpm check` 依次验证版本/WebView2、教学 HTML、本地 pnpm 布局、Biome、TypeScript、Vitest、
+Vite 生产构建和 bundle 预算。GitHub Actions 在 Windows 上执行同一组前端与 Rust 门禁。
 
-## 打包 Windows exe
-
-安装 Rust、Cargo 和 Visual Studio C++ Build Tools 后执行：
+## Windows 构建与发布候选
 
 ```powershell
 pnpm tauri build
+pnpm release:build
+pnpm release:verify
 ```
 
-入口程序为 `target/release/dream-builder.exe`，单一 NSIS 安装包输出到 `target/release/bundle/nsis/`。
+Tauri 原始入口为 `target/release/dream-builder.exe`，NSIS 安装包位于
+`target/release/bundle/nsis/`。发布脚本会把玩家可读的交付文件组装到
+`output/release/1.1/`，并重新验证精确文件集、产品/技术版本、来源提交、源码树 SHA-256、
+文件哈希、许可/手册副本和 Authenticode 状态。
 
-如果普通 PowerShell 找不到 MSVC 链接器，可以在 x64 Native Tools 环境中运行，或临时补齐本机 MSVC/Windows SDK 环境变量后执行 Tauri 构建。
+未签名文件只能称为候选版。生产分发必须从干净提交运行 `pnpm release:build:signed`，使用
+当前用户证书库中的有效受信任代码签名证书和时间戳服务；详细回滚、升级、安装与卸载步骤见
+[交付手册](docs/game/release-runbook.md)。

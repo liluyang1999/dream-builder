@@ -1,6 +1,6 @@
 {
   "name": "@dream-builder/ipc-contracts",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -11,6 +11,6 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "zod": "^3.23.0"
+    "zod": "^3.25.76"
   }
 }

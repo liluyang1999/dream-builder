@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "purpose": "m2-playtest-target-build",
+  "appVersion": "0.1.0",
+  "source": {
+    "gitHead": "a54fc6503ec7d64048a09492c4a7356a0edda752",
+    "worktreeState": "dirty",
+    "worktreeId": "a54fc6503ec7-dirty"
+  },
+  "artifacts": {
+    "executable": {
+      "relativePath": "target/release/dream-builder.exe",
+      "sizeBytes": 11470336,
+      "builtAtUtc": "2026-07-23T14:22:08Z",
+      "sha256": "90D3A1CDA1284EB761E54DC3DFA4B36A093A112B3DBEB3D19ACAB28473BD1910"
+    },
+    "installer": {
+      "relativePath": "target/release/bundle/nsis/Dream Builder Fantasy Tree_0.1.0_x64-setup.exe",
+      "sizeBytes": 2693944,
+      "builtAtUtc": "2026-07-23T14:22:08Z",
+      "sha256": "2022189FD202905B50F72F353C8EB59B49F3912184D7516F72BA594E8F5C84CC"
+    }
+  },
+  "performanceEvidence": {
+    "relativePath": "docs/game/evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json",
+    "sha256": "B0553D761C7C19E4FF300F0FCB3D1B4E6955D5182AEEDBA893511BF651D4B68E",
+    "completedTargetDuration": true,
+    "runtime": "tauri",
+    "source": "rust"
+  },
+  "targetDevice": {
+    "id": "M2-WIN-I7-10850H-GTX1650TI",
+    "model": "Lenovo 20TKCTO1WW",
+    "display": "3840x2160@59Hz",
+    "scalePercent": 250,
+    "viewport": "1220x744",
+    "devicePixelRatio": 2.625
+  }
+}

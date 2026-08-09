@@ -17,15 +17,16 @@ use crate::persistence;
 use crate::state::{AppState, Settings};
 use tauri::{AppHandle, State};
 
-/// Build (or return cached) scene for `seed`, recording it in history.
+/// Build (or return cached) scene for `seed`, making it active and recording it.
 #[tauri::command]
 pub fn generate_tree(seed: u64, state: State<'_, AppState>) -> Result<TreeScene, AppError> {
+    state.set_active_seed(seed);
+    state.record_seed(seed);
     if let Some(cached) = state.cached_scene(seed) {
         return Ok(cached);
     }
     let scene = FantasyTreeGenerator.generate(seed.into());
     state.cache_scene(&scene);
-    state.record_seed(seed);
     Ok(scene)
 }
 
@@ -60,6 +61,9 @@ pub fn save_settings(
     state: State<'_, AppState>,
     settings: Settings,
 ) -> Result<(), AppError> {
+    settings
+        .validate()
+        .map_err(|reason| AppError::InvalidSettings(reason.to_string()))?;
     state.set_settings(settings.clone());
     persistence::save_settings(&app, &settings)
 }

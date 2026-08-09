@@ -18,6 +18,10 @@ pub enum AppError {
     #[error("no interactive tree detail exists for id '{0}'")]
     InvalidDetail(String),
 
+    /// Settings crossed the native boundary with an unsupported value.
+    #[error("invalid settings: {0}")]
+    InvalidSettings(String),
+
     /// Reading or writing persisted settings failed.
     #[error("settings persistence failed: {0}")]
     Persistence(String),
@@ -32,6 +36,7 @@ impl AppError {
     pub fn code(&self) -> &'static str {
         match self {
             AppError::InvalidDetail(_) => "invalid_detail",
+            AppError::InvalidSettings(_) => "invalid_settings",
             AppError::Persistence(_) => "persistence_error",
             AppError::Export(_) => "export_error",
         }
@@ -67,5 +72,11 @@ mod tests {
         let json = serde_json::to_value(AppError::Export("disk full".to_string())).unwrap();
         assert_eq!(json["code"], "export_error");
         assert!(json["message"].as_str().unwrap().contains("disk full"));
+    }
+
+    #[test]
+    fn invalid_settings_carries_stable_code() {
+        let error = AppError::InvalidSettings("master volume".to_string());
+        assert_eq!(error.code(), "invalid_settings");
     }
 }

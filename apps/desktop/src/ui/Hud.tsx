@@ -1,7 +1,10 @@
-import { GlassBadge, GlassPanel } from '@dream-builder/liquid-glass';
+import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../state/store';
 import { DetailsPanel } from './DetailsPanel';
 import { HelpOverlay } from './HelpOverlay';
+import { PerformancePanel } from './PerformancePanel';
+import { QuestPanel } from './QuestPanel';
 import { SeedForm } from './SeedForm';
 import { Toolbar } from './Toolbar';
 
@@ -10,15 +13,25 @@ interface Props {
   onScreenshot(): void;
   onExport(): void;
   onExportScene(): void;
+  onOpenMenu(): void;
+  onRestartChapter(): void;
 }
 
 const STATUS_TEXT = {
-  rust: 'Rust 已连接',
-  fallback: '本地回退',
-  loading: '加载中…',
+  rust: '原生世界',
+  fallback: '浏览器预览',
+  loading: '世界加载中',
 } as const;
 
-export function Hud({ onResetCamera, onScreenshot, onExport, onExportScene }: Props) {
+export function Hud({
+  onResetCamera,
+  onScreenshot,
+  onExport,
+  onExportScene,
+  onOpenMenu,
+  onRestartChapter,
+}: Props) {
+  const [performanceOpen, setPerformanceOpen] = useState(false);
   const seed = useAppStore((state) => state.seed);
   const source = useAppStore((state) => state.source);
   const warning = useAppStore((state) => state.warning);
@@ -33,35 +46,58 @@ export function Hud({ onResetCamera, onScreenshot, onExport, onExportScene }: Pr
     return state.scene.details.find((detail) => detail.id === id)?.title ?? id;
   });
 
+  useEffect(() => {
+    if (helpOpen && performanceOpen) setPerformanceOpen(false);
+  }, [helpOpen, performanceOpen]);
+
   return (
     <section className="hud">
       <GlassPanel interactive className="hud__panel">
         <div className="hud__header">
-          <h1 className="hud__title">智慧树</h1>
-          <GlassBadge className={source === 'rust' ? 'hud__badge--ok' : 'hud__badge--warn'}>
-            {STATUS_TEXT[source ?? 'loading']}
-          </GlassBadge>
+          <div>
+            <span className="hud__eyebrow">第一章 · 微光归途</span>
+            <h1 className="hud__title">智慧树之森</h1>
+          </div>
         </div>
 
         <div className="hud__line">
-          {hoverLabel ? `当前悬停：${hoverLabel}` : '移动鼠标探索符文、水晶与叶簇。'}
+          {hoverLabel ? `正在聆听：${hoverLabel}` : '沿微光探索；靠近目标时按 E 与森林共鸣。'}
         </div>
 
+        <QuestPanel />
         <DetailsPanel detail={selectedDetail} />
 
         {warning ? <div className="hud__error">{warning}</div> : null}
 
-        <SeedForm seed={seed} onRegenerate={setSeed} />
         <Toolbar
           onResetCamera={onResetCamera}
           onScreenshot={onScreenshot}
-          onExport={onExport}
-          onExportScene={onExportScene}
+          onOpenMenu={onOpenMenu}
           onToggleHelp={toggleHelp}
         />
+        <details className="hud__creator-tools">
+          <summary>森林工坊</summary>
+          <div className="hud__creator-content">
+            <div className="hud__runtime">运行方式：{STATUS_TEXT[source ?? 'loading']}</div>
+            <SeedForm seed={seed} onRegenerate={setSeed} />
+            <div className="hud__actions">
+              <GlassButton onClick={onExport}>导出 3D 模型</GlassButton>
+              <GlassButton onClick={onExportScene}>导出世界数据</GlassButton>
+            </div>
+          </div>
+        </details>
       </GlassPanel>
 
-      <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <HelpOverlay
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        onOpenPerformance={() => {
+          setHelpOpen(false);
+          setPerformanceOpen(true);
+        }}
+        onRestartChapter={onRestartChapter}
+      />
+      <PerformancePanel open={performanceOpen} onClose={() => setPerformanceOpen(false)} />
     </section>
   );
 }

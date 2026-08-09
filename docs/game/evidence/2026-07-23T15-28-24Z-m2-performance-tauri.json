@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-07-23T15:28:24.949Z",
+  "endedAt": "2026-07-23T15:38:24.964Z",
+  "durationMs": 600014.9,
+  "targetDurationMs": 600000,
+  "completedTargetDuration": true,
+  "context": {
+    "runtime": "tauri",
+    "seed": 1640796687,
+    "reducedMotion": false,
+    "source": "rust",
+    "viewport": {
+      "width": 1220,
+      "height": 744,
+      "devicePixelRatio": 2.625
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1650 Ti with Max-Q Design (0x00001F95) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgl2": true,
+    "timeToFirstFrameMs": 1006.4
+  },
+  "session": {
+    "frameCount": 35997,
+    "averageFps": 59.99,
+    "onePercentLowFps": 57.14,
+    "meanFrameTimeMs": 16.67,
+    "minFrameTimeMs": 4.4,
+    "p50FrameTimeMs": 17,
+    "p95FrameTimeMs": 17,
+    "p99FrameTimeMs": 17.5,
+    "maxFrameTimeMs": 50.7,
+    "framesOver16_67Ms": 20104,
+    "framesOver33_33Ms": 2,
+    "framesOver50Ms": 1
+  },
+  "renderPeaks": {
+    "drawCalls": 203,
+    "triangles": 18787,
+    "geometries": 188,
+    "textures": 26,
+    "jsHeapBytes": 37945669
+  },
+  "phases": [
+    {
+      "name": "scene-load",
+      "durationMs": 1026.4,
+      "startedOffsetMs": 79164.8,
+      "endedOffsetMs": 80191.2,
+      "frameCount": 62,
+      "averageFps": 60.41,
+      "onePercentLowFps": 38.46,
+      "meanFrameTimeMs": 16.67,
+      "minFrameTimeMs": 9.5,
+      "p50FrameTimeMs": 17,
+      "p95FrameTimeMs": 17,
+      "p99FrameTimeMs": 26,
+      "maxFrameTimeMs": 26,
+      "framesOver16_67Ms": 38,
+      "framesOver33_33Ms": 0,
+      "framesOver50Ms": 0
+    },
+    {
+      "name": "cleansing",
+      "durationMs": 30097.5,
+      "startedOffsetMs": 387546.7,
+      "endedOffsetMs": 417644.2,
+      "frameCount": 1803,
+      "averageFps": 59.91,
+      "onePercentLowFps": 57.14,
+      "meanFrameTimeMs": 16.69,
+      "minFrameTimeMs": 10.1,
+      "p50FrameTimeMs": 17,
+      "p95FrameTimeMs": 17,
+      "p99FrameTimeMs": 17.5,
+      "maxFrameTimeMs": 50.7,
+      "framesOver16_67Ms": 1015,
+      "framesOver33_33Ms": 1,
+      "framesOver50Ms": 1
+    }
+  ],
+  "markers": [
+    {
+      "name": "capture-started",
+      "offsetMs": 0
+    },
+    {
+      "name": "scene-seed:1640796687",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "source:rust",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "checkpoint:ruinGate",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "light-seeds:3",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "memory-fragments:0",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "restoration:restored",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "tree-stage:1",
+      "offsetMs": 8.7
+    },
+    {
+      "name": "checkpoint:spawn",
+      "offsetMs": 61444.1
+    },
+    {
+      "name": "light-seeds:0",
+      "offsetMs": 61444.1
+    },
+    {
+      "name": "restoration:dormant",
+      "offsetMs": 61444.1
+    },
+    {
+      "name": "tree-stage:0",
+      "offsetMs": 61444.1
+    },
+    {
+      "name": "scene-load-started",
+      "offsetMs": 79164.8
+    },
+    {
+      "name": "scene-seed:1224073538",
+      "offsetMs": 79174.5
+    },
+    {
+      "name": "scene-data-ready",
+      "offsetMs": 79180.7
+    },
+    {
+      "name": "scene-load-settled",
+      "offsetMs": 80191.1
+    },
+    {
+      "name": "light-seeds:1",
+      "offsetMs": 94096
+    },
+    {
+      "name": "light-seeds:2",
+      "offsetMs": 154424.9
+    },
+    {
+      "name": "checkpoint:creek",
+      "offsetMs": 276357.7
+    },
+    {
+      "name": "light-seeds:3",
+      "offsetMs": 345607.9
+    },
+    {
+      "name": "restoration:ready",
+      "offsetMs": 345607.9
+    },
+    {
+      "name": "checkpoint:ruinGate",
+      "offsetMs": 382262.6
+    },
+    {
+      "name": "restoration:cleansing",
+      "offsetMs": 387546.6
+    },
+    {
+      "name": "restoration:restored",
+      "offsetMs": 417644.2
+    },
+    {
+      "name": "tree-stage:1",
+      "offsetMs": 417644.2
+    },
+    {
+      "name": "capture-stopped",
+      "offsetMs": 600014.9
+    }
+  ],
+  "droppedMarkers": 0,
+  "droppedPhases": 0,
+  "limitations": [
+    "GPU frame time is not available from this WebGL probe.",
+    "Frame times are CPU-observed animation intervals and can include browser scheduling delays.",
+    "Only bounded aggregate histograms, capped phases, and capped event markers are retained; raw frames are not stored."
+  ]
+}

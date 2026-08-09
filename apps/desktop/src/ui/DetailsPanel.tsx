@@ -3,14 +3,7 @@ import { GlassCard } from '@dream-builder/liquid-glass';
 import type { CSSProperties } from 'react';
 
 export function DetailsPanel({ detail }: { detail: DetailInfo | null }) {
-  if (!detail) {
-    return (
-      <GlassCard className="hud__detail">
-        <h2>未选择细节</h2>
-        <p>点击发光的叶簇、符文或水晶，这里会显示后端返回的信息。</p>
-      </GlassCard>
-    );
-  }
+  if (!detail) return null;
 
   const percent = Math.round(detail.energy * 100);
   const meterStyle = { '--energy': `${percent}%` } as CSSProperties;

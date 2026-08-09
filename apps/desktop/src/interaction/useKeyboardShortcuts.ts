@@ -13,7 +13,7 @@ export interface ShortcutHandlers {
   onToggleHud(): void;
   onToggleFullscreen(): void;
   onScreenshot(): void;
-  onDeselect(): void;
+  onEscape(): void;
   onToggleHelp(): void;
   onRegenerate(): void;
 }
@@ -25,6 +25,7 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (document.querySelector('[aria-modal="true"]')) return;
       const target = event.target as HTMLElement | null;
       if (target && (target.isContentEditable || isFormField(target))) return;
 
@@ -39,14 +40,14 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
         case 'f':
           h.onToggleFullscreen();
           break;
-        case 's':
+        case 'p':
           h.onScreenshot();
           break;
         case 'g':
           h.onRegenerate();
           break;
         case 'escape':
-          h.onDeselect();
+          h.onEscape();
           break;
         case '?':
         case '/':

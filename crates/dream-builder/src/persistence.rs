@@ -22,6 +22,7 @@ pub fn load_settings<R: Runtime>(app: &AppHandle<R>) -> Settings {
     store
         .get(SETTINGS_KEY)
         .and_then(|value| serde_json::from_value(value).ok())
+        .filter(|settings: &Settings| settings.validate().is_ok())
         .unwrap_or_default()
 }
 

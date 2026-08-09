@@ -18,8 +18,20 @@ pub mod state;
 use crate::state::AppState;
 use tauri::Manager;
 
+fn install_panic_logger() {
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |panic_info| {
+        log::error!(
+            target: "dream_builder::panic",
+            "unhandled native panic: {panic_info}"
+        );
+        default_hook(panic_info);
+    }));
+}
+
 /// Build and run the Tauri application.
 pub fn run() {
+    install_panic_logger();
     tauri::Builder::default()
         // One running instance; a second launch focuses the existing window.
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {

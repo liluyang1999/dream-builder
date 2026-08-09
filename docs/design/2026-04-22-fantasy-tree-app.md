@@ -1,6 +1,8 @@
 # Fantasy Tree Desktop App Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Historical archive:** this implementation plan describes the pre-React prototype and is not an active
+> instruction set. Use `docs/game/` for current product decisions and `knowledge/index.html` for the current
+> architecture; the unchecked boxes below are preserved only as design history.
 
 **Goal:** Build a complete Tauri desktop application that renders an interactive procedural 3D fantasy tree with a Rust backend and a Three.js frontend.
 

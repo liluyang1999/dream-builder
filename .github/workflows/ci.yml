@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: TypeScript / React
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run frontend quality gate
+        run: pnpm check
+
+  backend:
+    name: Rust / Tauri
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Install Rust quality components
+        run: rustup component add rustfmt clippy
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run tests
+        run: cargo test --workspace --locked
+      - name: Run Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings

@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Dream Builder Fantasy Tree",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "identifier": "com.dreambuilder.fantasytree",
   "build": {
     "beforeDevCommand": "pnpm -C .. dev",
@@ -35,11 +35,15 @@
     "icon": ["icons/icon.ico"],
     "publisher": "Dream Builder",
     "copyright": "© 2026 Dream Builder",
-    "category": "Education",
-    "shortDescription": "智慧树 · 程序化 3D 互动桌面程序",
-    "longDescription": "Dream Builder 智慧树是一个由 Tauri 2 + Rust + React + Three.js 打造的本地原生 3D 互动程序，用于教学演示全栈桌面应用开发。",
+    "category": "Game",
+    "shortDescription": "在温暖的卡通森林中寻找光种，唤醒失色的智慧树",
+    "longDescription": "《智慧树之森》是一款单人离线第三人称卡通森林冒险游戏。探索蘑菇坡、溪流与遗迹，收集三枚光种，聆听森林记忆并完成净化，让中央智慧树与周围生态重新发光。",
     "licenseFile": "installer/LICENSE.txt",
     "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
       "nsis": {
         "installMode": "currentUser",
         "languages": ["SimpChinese", "English"],

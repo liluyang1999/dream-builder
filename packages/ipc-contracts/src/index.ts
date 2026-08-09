@@ -137,18 +137,51 @@ export type AppError = z.infer<typeof appErrorSchema>;
 export const themeSchema = z.enum(['auto', 'light', 'dark']);
 export type Theme = z.infer<typeof themeSchema>;
 
+export const graphicsQualitySchema = z.enum(['low', 'balanced', 'high']);
+export type GraphicsQuality = z.infer<typeof graphicsQualitySchema>;
+
+export const textScaleSchema = z.enum(['normal', 'large']);
+export type TextScale = z.infer<typeof textScaleSchema>;
+
+const percentageSchema = z.number().int().min(0).max(100);
+
 export const settingsSchema = z.object({
   seed: z.number().int().nonnegative(),
   theme: themeSchema,
   reducedMotion: z.boolean(),
+  graphicsQuality: graphicsQualitySchema.default('balanced'),
+  masterVolume: percentageSchema.default(80),
+  musicVolume: percentageSchema.default(55),
+  effectsVolume: percentageSchema.default(75),
+  cameraSensitivity: z.number().int().min(50).max(150).default(100),
+  highContrast: z.boolean().default(false),
+  textScale: textScaleSchema.default('normal'),
+  showHints: z.boolean().default(true),
 });
 export type Settings = z.infer<typeof settingsSchema>;
+
+export const DEFAULT_SETTINGS: Settings = {
+  seed: 424242,
+  theme: 'auto',
+  reducedMotion: false,
+  graphicsQuality: 'balanced',
+  masterVolume: 80,
+  musicVolume: 55,
+  effectsVolume: 75,
+  cameraSensitivity: 100,
+  highContrast: false,
+  textScale: 'normal',
+  showHints: true,
+};
 
 /** A discriminated-union `Result`, used at the validation boundary. */
 export type ParseResult<T> = { ok: true; value: T } | { ok: false; reason: string };
 
 /** Validate an unknown value against a schema into a `ParseResult`. */
-export function parseWith<T>(schema: z.ZodType<T>, value: unknown): ParseResult<T> {
+export function parseWith<Schema extends z.ZodTypeAny>(
+  schema: Schema,
+  value: unknown,
+): ParseResult<z.output<Schema>> {
   const result = schema.safeParse(value);
   if (result.success) {
     return { ok: true, value: result.data };

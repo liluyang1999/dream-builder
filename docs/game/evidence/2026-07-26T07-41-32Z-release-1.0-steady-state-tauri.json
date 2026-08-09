@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "startedAt": "2026-07-26T07:41:32.824Z",
+  "endedAt": "2026-07-26T07:51:32.838Z",
+  "durationMs": 600014.5,
+  "targetDurationMs": 600000,
+  "completedTargetDuration": true,
+  "context": {
+    "runtime": "tauri",
+    "seed": 1224073538,
+    "reducedMotion": false,
+    "source": "rust",
+    "viewport": {
+      "width": 1220,
+      "height": 744,
+      "devicePixelRatio": 2.625
+    },
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36 Edg/150.0.0.0",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1650 Ti with Max-Q Design (0x00001F95) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "webgl2": true,
+    "timeToFirstFrameMs": 1128.3
+  },
+  "session": {
+    "frameCount": 35996,
+    "averageFps": 59.99,
+    "onePercentLowFps": 58.82,
+    "meanFrameTimeMs": 16.67,
+    "minFrameTimeMs": 4.9,
+    "p50FrameTimeMs": 17,
+    "p95FrameTimeMs": 17,
+    "p99FrameTimeMs": 17,
+    "maxFrameTimeMs": 73.4,
+    "framesOver16_67Ms": 21085,
+    "framesOver33_33Ms": 3,
+    "framesOver50Ms": 1
+  },
+  "renderPeaks": {
+    "drawCalls": 166,
+    "triangles": 24192,
+    "geometries": 157,
+    "textures": 14,
+    "jsHeapBytes": 23368503
+  },
+  "phases": [],
+  "markers": [
+    {
+      "name": "capture-started",
+      "offsetMs": 0
+    },
+    {
+      "name": "scene-seed:1224073538",
+      "offsetMs": 36
+    },
+    {
+      "name": "source:rust",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "checkpoint:ruinGate",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "light-seeds:3",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "memory-fragments:0",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "restoration:restored",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "tree-stage:1",
+      "offsetMs": 36.1
+    },
+    {
+      "name": "capture-stopped",
+      "offsetMs": 600014.5
+    }
+  ],
+  "droppedMarkers": 0,
+  "droppedPhases": 0,
+  "limitations": [
+    "GPU frame time is not available from this WebGL probe.",
+    "Frame times are CPU-observed animation intervals and can include browser scheduling delays.",
+    "Only bounded aggregate histograms, capped phases, and capped event markers are retained; raw frames are not stored."
+  ]
+}

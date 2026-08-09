@@ -3,9 +3,9 @@ import { describe, expect, test } from 'vitest';
 import { DetailsPanel } from '../ui/DetailsPanel';
 
 describe('DetailsPanel', () => {
-  test('shows a placeholder when nothing is selected', () => {
-    render(<DetailsPanel detail={null} />);
-    expect(screen.getByText('未选择细节')).toBeTruthy();
+  test('stays out of the player HUD until a detail is selected', () => {
+    const { container } = render(<DetailsPanel detail={null} />);
+    expect(container.childElementCount).toBe(0);
   });
 
   test('renders the selected detail title and energy percentage', () => {

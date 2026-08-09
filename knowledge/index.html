@@ -1,0 +1,1647 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="《智慧树之森》Tauri 2、TypeScript、React 19、Three.js 与 Rust 全栈教学档案"
+    />
+    <title>《智慧树之森》全栈教学档案 · Dream Builder</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --page: #07120f;
+        --page-deep: #030806;
+        --surface: rgba(16, 38, 31, 0.88);
+        --surface-strong: #122f26;
+        --surface-soft: rgba(29, 65, 52, 0.55);
+        --line: rgba(164, 228, 185, 0.2);
+        --line-strong: rgba(197, 242, 186, 0.42);
+        --text: #edf8ef;
+        --muted: #b7ccb9;
+        --faint: #84a28b;
+        --mint: #7ee2ad;
+        --lime: #d4f27d;
+        --gold: #ffc96d;
+        --violet: #cbb7ff;
+        --danger: #ffb4a8;
+        --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
+        --radius: 22px;
+        --content: 1180px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: auto;
+        scroll-padding-top: 88px;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 78% 4%, rgba(49, 153, 112, 0.18), transparent 29rem),
+          radial-gradient(circle at 12% 17%, rgba(188, 143, 255, 0.1), transparent 25rem),
+          linear-gradient(180deg, var(--page), var(--page-deep));
+        color: var(--text);
+        font-size: 16px;
+        line-height: 1.75;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background-image:
+          linear-gradient(rgba(126, 226, 173, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(126, 226, 173, 0.025) 1px, transparent 1px);
+        background-size: 42px 42px;
+        content: "";
+        mask-image: linear-gradient(to bottom, black, transparent 75%);
+      }
+
+      a {
+        color: var(--mint);
+        text-underline-offset: 0.22em;
+      }
+
+      a:hover {
+        color: var(--lime);
+      }
+
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      summary:focus-visible {
+        outline: 3px solid var(--gold);
+        outline-offset: 3px;
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      }
+
+      code {
+        border: 1px solid rgba(126, 226, 173, 0.16);
+        border-radius: 6px;
+        background: rgba(3, 13, 10, 0.68);
+        padding: 0.08em 0.34em;
+        color: #d6f7e1;
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #050d0a;
+        padding: 1rem 1.1rem;
+        color: #d5e9d8;
+        line-height: 1.55;
+      }
+
+      pre code {
+        border: 0;
+        background: transparent;
+        padding: 0;
+      }
+
+      kbd {
+        display: inline-block;
+        border: 1px solid rgba(255, 255, 255, 0.23);
+        border-bottom-width: 3px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 0 0.42em;
+        color: var(--text);
+        font-size: 0.84em;
+        line-height: 1.55;
+      }
+
+      .skip-link {
+        position: fixed;
+        top: 0.8rem;
+        left: 0.8rem;
+        z-index: 20;
+        transform: translateY(-180%);
+        border-radius: 8px;
+        background: var(--lime);
+        padding: 0.6rem 0.9rem;
+        color: #10200f;
+        font-weight: 800;
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line);
+        padding: 5.8rem max(1.2rem, calc((100vw - var(--content)) / 2)) 4.5rem;
+      }
+
+      .hero::after {
+        position: absolute;
+        right: -8rem;
+        bottom: -13rem;
+        width: 36rem;
+        height: 36rem;
+        border: 1px solid rgba(212, 242, 125, 0.12);
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 3rem rgba(126, 226, 173, 0.03),
+          0 0 0 8rem rgba(126, 226, 173, 0.018);
+        content: "";
+      }
+
+      .hero__eyebrow {
+        margin: 0 0 1rem;
+        color: var(--mint);
+        font-size: 0.82rem;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin-top: 0;
+        line-height: 1.25;
+        text-wrap: balance;
+      }
+
+      h1 {
+        max-width: 900px;
+        margin-bottom: 1rem;
+        font-size: clamp(2.5rem, 7vw, 5.4rem);
+        letter-spacing: -0.045em;
+      }
+
+      h1 span {
+        display: block;
+        background: linear-gradient(100deg, var(--lime), var(--mint), #83d9d4);
+        background-clip: text;
+        color: transparent;
+      }
+
+      h2 {
+        margin-bottom: 0.8rem;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        letter-spacing: -0.025em;
+      }
+
+      h3 {
+        margin-bottom: 0.55rem;
+        color: #f4fbf4;
+        font-size: 1.25rem;
+      }
+
+      h4 {
+        margin-bottom: 0.4rem;
+        color: var(--lime);
+        font-size: 1rem;
+      }
+
+      p {
+        margin-top: 0;
+      }
+
+      .hero__lead {
+        max-width: 780px;
+        color: var(--muted);
+        font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+      }
+
+      .badges,
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+      }
+
+      .badge,
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        background: rgba(9, 27, 21, 0.8);
+        padding: 0.4rem 0.72rem;
+        color: #d9f3df;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .badge--gold {
+        border-color: rgba(255, 201, 109, 0.48);
+        color: var(--gold);
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--line);
+        background: rgba(3, 10, 7, 0.88);
+        backdrop-filter: blur(18px) saturate(140%);
+      }
+
+      .topbar__inner {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        max-width: var(--content);
+        margin: 0 auto;
+        padding: 0.7rem 1.2rem;
+      }
+
+      .topbar strong {
+        white-space: nowrap;
+        color: var(--lime);
+      }
+
+      .topbar nav {
+        display: flex;
+        flex: 1;
+        gap: 0.3rem;
+        overflow-x: auto;
+        scrollbar-width: thin;
+      }
+
+      .topbar nav a {
+        flex: 0 0 auto;
+        border-radius: 8px;
+        padding: 0.35rem 0.55rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+        text-decoration: none;
+      }
+
+      .topbar nav a:hover {
+        background: var(--surface-soft);
+        color: var(--text);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 230px minmax(0, 1fr);
+        gap: 2rem;
+        max-width: var(--content);
+        margin: 0 auto;
+        padding: 3rem 1.2rem 7rem;
+      }
+
+      .toc {
+        position: sticky;
+        top: 5.4rem;
+        align-self: start;
+        max-height: calc(100vh - 7rem);
+        overflow-y: auto;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: rgba(7, 23, 17, 0.72);
+        padding: 0.9rem;
+      }
+
+      .toc p {
+        margin: 0.15rem 0 0.55rem;
+        color: var(--faint);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .toc a {
+        display: block;
+        border-radius: 8px;
+        padding: 0.34rem 0.48rem;
+        color: var(--muted);
+        font-size: 0.86rem;
+        line-height: 1.35;
+        text-decoration: none;
+      }
+
+      .toc a:hover {
+        background: rgba(126, 226, 173, 0.1);
+        color: var(--text);
+      }
+
+      main {
+        min-width: 0;
+      }
+
+      section {
+        margin-bottom: 4.5rem;
+      }
+
+      .section-kicker {
+        margin-bottom: 0.4rem;
+        color: var(--mint);
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      .section-lead {
+        max-width: 800px;
+        color: var(--muted);
+        font-size: 1.06rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .grid--3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background:
+          linear-gradient(145deg, rgba(27, 61, 48, 0.67), rgba(8, 24, 18, 0.84));
+        padding: 1.25rem;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .card p:last-child,
+      .card ul:last-child,
+      .card ol:last-child {
+        margin-bottom: 0;
+      }
+
+      .card--accent {
+        border-color: rgba(212, 242, 125, 0.35);
+        background:
+          linear-gradient(145deg, rgba(56, 85, 41, 0.55), rgba(10, 28, 20, 0.9));
+      }
+
+      .card--warning {
+        border-color: rgba(255, 201, 109, 0.34);
+      }
+
+      .callout {
+        border-left: 4px solid var(--mint);
+        border-radius: 0 14px 14px 0;
+        background: rgba(12, 38, 27, 0.78);
+        padding: 1rem 1.15rem;
+      }
+
+      .callout--gold {
+        border-left-color: var(--gold);
+      }
+
+      .callout--violet {
+        border-left-color: var(--violet);
+      }
+
+      .callout strong:first-child {
+        color: var(--lime);
+      }
+
+      ul,
+      ol {
+        padding-left: 1.35rem;
+      }
+
+      li + li {
+        margin-top: 0.34rem;
+      }
+
+      .diagram {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 0.6rem;
+        margin: 1.3rem 0;
+      }
+
+      .diagram__node {
+        position: relative;
+        display: grid;
+        place-content: center;
+        min-height: 118px;
+        border: 1px solid var(--line-strong);
+        border-radius: 16px;
+        background: rgba(12, 34, 25, 0.88);
+        padding: 0.8rem;
+        text-align: center;
+      }
+
+      .diagram__node:not(:last-child)::after {
+        position: absolute;
+        top: 50%;
+        right: -0.58rem;
+        z-index: 2;
+        color: var(--gold);
+        content: "→";
+        font-weight: 900;
+        transform: translate(50%, -50%);
+      }
+
+      .diagram__node strong {
+        display: block;
+        color: var(--lime);
+      }
+
+      .diagram__node span {
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1.45;
+      }
+
+      .layer-stack {
+        display: grid;
+        gap: 0.55rem;
+        margin: 1.2rem 0;
+      }
+
+      .layer {
+        display: grid;
+        grid-template-columns: 9rem minmax(0, 1fr);
+        gap: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(11, 30, 23, 0.74);
+        padding: 0.75rem 0.9rem;
+      }
+
+      .layer strong {
+        color: var(--mint);
+      }
+
+      .layer span {
+        color: var(--muted);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: rgba(7, 22, 16, 0.76);
+        font-size: 0.92rem;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 0.75rem 0.85rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--lime);
+        font-weight: 750;
+      }
+
+      tr:last-child th,
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(8, 26, 19, 0.66);
+        padding: 0.85rem 1rem;
+      }
+
+      details + details {
+        margin-top: 0.7rem;
+      }
+
+      summary {
+        cursor: pointer;
+        color: var(--lime);
+        font-weight: 750;
+      }
+
+      details[open] summary {
+        margin-bottom: 0.7rem;
+      }
+
+      .path-list {
+        display: grid;
+        gap: 0.5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .path-list li {
+        display: grid;
+        grid-template-columns: minmax(13rem, 0.9fr) minmax(0, 1.1fr);
+        gap: 0.8rem;
+        border-bottom: 1px dashed var(--line);
+        padding-bottom: 0.5rem;
+      }
+
+      .path-list li:last-child {
+        border-bottom: 0;
+      }
+
+      .path-list span {
+        color: var(--muted);
+      }
+
+      .status-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.8rem;
+        padding: 0;
+        list-style: none;
+      }
+
+      .status-list li {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(8, 28, 20, 0.75);
+        padding: 0.9rem;
+      }
+
+      .status-list strong {
+        display: block;
+        color: var(--mint);
+      }
+
+      .footer {
+        border-top: 1px solid var(--line);
+        padding: 2.5rem 1.2rem 4rem;
+        color: var(--faint);
+        text-align: center;
+      }
+
+      .footer strong {
+        color: var(--muted);
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          position: static;
+          max-height: none;
+          columns: 2;
+        }
+
+        .grid--3,
+        .status-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .diagram {
+          grid-template-columns: 1fr;
+        }
+
+        .diagram__node {
+          min-height: 88px;
+        }
+
+        .diagram__node:not(:last-child)::after {
+          top: auto;
+          right: 50%;
+          bottom: -0.65rem;
+          content: "↓";
+          transform: translate(50%, 50%);
+        }
+      }
+
+      @media (max-width: 680px) {
+        body {
+          font-size: 15px;
+        }
+
+        .hero {
+          padding-top: 4rem;
+        }
+
+        .topbar strong {
+          display: none;
+        }
+
+        .grid,
+        .grid--3,
+        .status-list {
+          grid-template-columns: 1fr;
+        }
+
+        .toc {
+          columns: 1;
+        }
+
+        .layer,
+        .path-list li {
+          grid-template-columns: 1fr;
+          gap: 0.25rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      @media print {
+        :root {
+          color-scheme: light;
+          --text: #152019;
+          --muted: #3f5245;
+          --faint: #52685a;
+          --line: #cdd8d0;
+          --line-strong: #9fb2a4;
+          --mint: #12663d;
+          --lime: #355d0a;
+        }
+
+        body,
+        .card,
+        .callout,
+        .diagram__node,
+        .layer,
+        table,
+        details {
+          background: white;
+          color: var(--text);
+          box-shadow: none;
+        }
+
+        .topbar,
+        .toc,
+        .skip-link {
+          display: none;
+        }
+
+        .layout {
+          display: block;
+          max-width: none;
+          padding: 1rem;
+        }
+
+        section {
+          break-inside: avoid-page;
+        }
+
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="hero">
+      <p class="hero__eyebrow">Dream Builder · Knowledge Archive</p>
+      <h1>《智慧树之森》<span>全栈教学档案</span></h1>
+      <p class="hero__lead">
+        一份从产品体验出发，贯穿 Tauri 2、Windows WebView2、TypeScript、React 19、
+        react-three-fiber、Three.js、Zustand、Rust、IPC、安全、测试与 Windows 发布的源码导读。
+        它描述的是当前仓库实际实现，而不是理想化示例。
+      </p>
+      <div class="badges" aria-label="档案摘要">
+        <span class="badge badge--gold">产品版本 1.1</span>
+        <span class="badge">技术版本 1.1.0</span>
+        <span class="badge">Tauri 2 + WebView2 Evergreen</span>
+        <span class="badge">React 19 + R3F</span>
+        <span class="badge">Rust 2024</span>
+        <span class="badge">单人离线 · Windows x64</span>
+      </div>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong>知识地图</strong>
+        <nav aria-label="快速导航">
+          <a href="#overview">现状</a>
+          <a href="#architecture">架构</a>
+          <a href="#typescript-react">前端</a>
+          <a href="#state-persistence">状态</a>
+          <a href="#graphics">3D</a>
+          <a href="#rust">Rust</a>
+          <a href="#tauri">Tauri</a>
+          <a href="#webview2">WebView2</a>
+          <a href="#quality">质量</a>
+          <a href="#release">发布</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="完整目录">
+        <p>从这里开始</p>
+        <a href="#how-to-read">阅读方式</a>
+        <a href="#overview">01 · 项目现状</a>
+        <a href="#architecture">02 · 总体架构</a>
+        <a href="#repository">03 · 单仓工程</a>
+        <a href="#runtime-flow">04 · 运行全链路</a>
+        <p>前端与游戏</p>
+        <a href="#typescript-react">05 · TypeScript + React</a>
+        <a href="#state-persistence">06 · 状态、存档与输入</a>
+        <a href="#graphics">07 · 3D 与声音</a>
+        <a href="#performance">08 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="#ipc">09 · IPC 契约</a>
+        <a href="#rust">10 · Rust 后端</a>
+        <a href="#tauri">11 · Tauri 框架</a>
+        <a href="#webview2">12 · WebView2 策略</a>
+        <a href="#security">13 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="#version-dependencies">14 · 版本与依赖</a>
+        <a href="#quality">15 · 质量门禁</a>
+        <a href="#release">16 · Windows 发布</a>
+        <a href="#code-map">17 · 源码索引</a>
+        <a href="#learning-path">18 · 学习路线</a>
+        <a href="#glossary">19 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="how-to-read">
+          <p class="section-kicker">Reading guide</p>
+          <h2>怎样使用这份档案</h2>
+          <p class="section-lead">
+            先建立“谁负责什么”的心智模型，再沿一条真实请求进入代码。每个概念都按
+            “是什么、为什么在这里使用、代码在哪里、容易犯什么错”来解释。路径链接指向仓库内真实文件；
+            版本、性能与发布结论都区分自动化证据和仍需人工完成的外部门槛。
+          </p>
+          <div class="grid grid--3">
+            <article class="card">
+              <h3>第一次阅读</h3>
+              <p>依次读“项目现状 → 总体架构 → 运行全链路”，先理解双运行时、数据边界和游戏循环。</p>
+            </article>
+            <article class="card">
+              <h3>前端学习</h3>
+              <p>从 TypeScript/React、状态机、第三人称运动到 R3F 场景，边读边运行 <code>pnpm dev</code>。</p>
+            </article>
+            <article class="card">
+              <h3>桌面与 Rust 学习</h3>
+              <p>从 IPC 契约进入 Rust 命令，再看 Tauri Builder、权限、WebView2 与 NSIS 发布。</p>
+            </article>
+          </div>
+          <div class="callout callout--gold">
+            <strong>事实边界：</strong>当前代码已经形成完整的短篇单章游戏和 Windows 候选包工程，
+            但五名首次接触玩家观察、实体手柄完整听测、干净账户覆盖升级以及受信任代码签名仍是外部证据。
+            自动化全部通过也不能替代这些发布门槛。最新产品口径见
+            <a href="../docs/game/README.md">docs/game/README.md</a>。
+          </div>
+        </section>
+
+        <section id="overview">
+          <p class="section-kicker">01 · Product snapshot</p>
+          <h2>当前项目究竟是什么</h2>
+          <p class="section-lead">
+            Dream Builder Fantasy Tree 的玩家名称是《智慧树之森》。它已从“可旋转观察的程序化智慧树”
+            演进为一个单人、离线、第三人称卡通森林盒庭：玩家探索三条支路，收集三枚光种，阅读森林记忆，
+            完成四拍方向净化，并看到中央智慧树、光照、地表、音景和章节门一起复苏。
+          </p>
+          <ul class="status-list">
+            <li><strong>体验闭环</strong>标题、继续/新游戏、暂停、设置、章节结尾、继续漫游和安全退出。</li>
+            <li><strong>世界系统</strong>中央林地、蘑菇坡、溪流、遗迹门、碰撞、检查点和可重建装饰。</li>
+            <li><strong>玩家系统</strong>键鼠与标准手柄、相机相对移动、冲刺、重置、互动和方向谜题。</li>
+            <li><strong>反馈系统</strong>卡通光照、Bloom、粒子、程序化音景、进度声效、减少动态和高对比。</li>
+            <li><strong>可靠性</strong>v2 进度快照、v1 迁移、最近有效备份、损坏隔离、恢复提示和单实例。</li>
+            <li><strong>交付工程</strong>Windows EXE、双语 NSIS、哈希清单、来源指纹、签名门禁和卸载验收。</li>
+          </ul>
+          <div class="grid">
+            <article class="card card--accent">
+              <h3>产品版本 1.1</h3>
+              <p>
+                玩家看到的版本采用两段式 <code>主版本.功能版本</code>。每个小功能增加第二段；只有非常大的
+                功能模块升级第一段。当前新增了版本契约、本地 pnpm 存储约束、WebView2 策略明确化、依赖安全修复
+                与统一教学档案，因此从 1.0 前进到 1.1。
+              </p>
+            </article>
+            <article class="card">
+              <h3>技术版本 1.1.0</h3>
+              <p>
+                Cargo、npm、Tauri 与 Windows 文件元数据要求合法 SemVer，所以内部清单保留兼容补丁位
+                <code>.0</code>。这不是第二套产品版本；它只是 <code>1.1 → 1.1.0</code> 的机械映射，由
+                <a href="../version.json">version.json</a> 和校验脚本强制一致。
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="architecture">
+          <p class="section-kicker">02 · Architecture</p>
+          <h2>总体架构：两个运行环境、三层规则</h2>
+          <p class="section-lead">
+            项目不是“Rust 把每一帧算好再交给网页”。正确分工是：Rust/Tauri 负责原生生命周期、持久状态、
+            确定性场景与低频边界；React/R3F 负责逐帧输入、运动、相机、呈现和界面。浏览器开发模式没有 Rust，
+            因而用 Web Worker 生成兼容场景，保持前端可以单独开发和测试。
+          </p>
+          <div class="diagram" role="img" aria-label="从玩家输入到原生后端和三维呈现的数据流">
+            <div class="diagram__node"><strong>玩家</strong><span>键鼠 / 手柄 / 指针</span></div>
+            <div class="diagram__node"><strong>React</strong><span>界面、会话、状态编排</span></div>
+            <div class="diagram__node"><strong>R3F / Three</strong><span>逐帧运动、相机、WebGL</span></div>
+            <div class="diagram__node"><strong>Tauri IPC</strong><span>命令、事件、ACL</span></div>
+            <div class="diagram__node"><strong>Rust</strong><span>生成、原生状态、存储</span></div>
+          </div>
+          <div class="layer-stack">
+            <div class="layer"><strong>纯规则层</strong><span>游戏进度、方向谜题、输入归一化、运动与碰撞、选择 reducer。无 React、无 Three、无磁盘副作用。</span></div>
+            <div class="layer"><strong>适配层</strong><span>React hooks、GameplayController、PlayerController、treeApi、Worker client，把平台输入转换为纯规则动作。</span></div>
+            <div class="layer"><strong>呈现与副作用层</strong><span>R3F 场景、HUD、音频、Tauri 命令、持久化、文件导出、菜单、事件和安装器。</span></div>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <h3>Tauri 桌面运行</h3>
+              <p>
+                <code>pnpm tauri dev/build</code> 创建原生窗口。Windows 内部由 Wry 驱动 WebView2；
+                <a href="../apps/desktop/src/ipc/treeApi.ts">treeApi.ts</a> 调用 Rust 命令并订阅事件。
+                场景数据由 Rust 生成，原生设置通过 Tauri Store 保存。
+              </p>
+            </article>
+            <article class="card">
+              <h3>浏览器开发运行</h3>
+              <p>
+                <code>pnpm dev</code> 只启动 Vite。<a href="../apps/desktop/src/ipc/runtime.ts">runtime.ts</a>
+                判断没有 Tauri 后，让 <a href="../apps/desktop/src/workers/fallback.worker.ts">fallback.worker.ts</a>
+                在 Worker 中生成场景。它是开发容错路径，不是原生发布架构的替代。
+              </p>
+            </article>
+          </div>
+          <div class="callout">
+            <strong>核心不变量：</strong>相同 seed 的 Rust 生成必须确定；任何跨 IPC 的载荷必须经 Zod 校验；
+            渲染只能消费已提交的进度，不能自行发明“已经收集”或“已经净化”的状态；逐帧运动不经过 IPC。
+          </div>
+        </section>
+
+        <section id="repository">
+          <p class="section-kicker">03 · Monorepo</p>
+          <h2>pnpm workspace 与 Cargo workspace 为什么共处一仓</h2>
+          <p class="section-lead">
+            这是一个双工作区单仓：JavaScript/TypeScript 由 pnpm 管理，Rust 由 Cargo 管理。根目录提供统一版本、
+            锁文件、质量命令和发布入口，使一次跨边界改动可以在同一个提交里验证全部消费者。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>位置</th><th>职责</th><th>关键约束</th></tr></thead>
+              <tbody>
+                <tr><th><a href="../apps/desktop/src/App.tsx">apps/desktop</a></th><td>Vite + React 19 + R3F 桌面前端与浏览器回退</td><td>严格 TypeScript、中文 UI、组件测试、按需分块</td></tr>
+                <tr><th><a href="../packages/ipc-contracts/src/index.ts">packages/ipc-contracts</a></th><td>Zod 运行时 schema 与推导出的 TS 类型</td><td>所有不可信边界先按 <code>unknown</code> 解析</td></tr>
+                <tr><th><a href="../packages/liquid-glass/src/index.ts">packages/liquid-glass</a></th><td>可复用玻璃主题 React 组件</td><td>主题、画质、减少动态与焦点可访问性</td></tr>
+                <tr><th><a href="../crates/dream-builder/src/lib.rs">crates/dream-builder</a></th><td>Rust 领域、生成、状态、事件、Tauri 外壳</td><td>确定性、薄命令、最小权限、零 Clippy 告警</td></tr>
+                <tr><th><a href="../docs/game/README.md">docs/game</a></th><td>当前产品方向、验收矩阵、运行证据与交付手册</td><td>未通过的人工门槛必须保持可见</td></tr>
+                <tr><th><a href="./index.html">knowledge</a></th><td>唯一的综合教学档案</td><td>自包含 HTML、链接可验证、移动与打印可读</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>配置的单一真相源</h3>
+          <ul>
+            <li><a href="../tsconfig.base.json">tsconfig.base.json</a> 集中严格类型选项，各 TS 包只补充自身环境。</li>
+            <li><a href="../biome.json">biome.json</a> 同时承担格式化和静态检查，避免 ESLint/Prettier 规则漂移。</li>
+            <li><a href="../vitest.config.ts">vitest.config.ts</a> 用 projects 模型发现应用与共享包测试。</li>
+            <li><a href="../Cargo.toml">Cargo.toml</a> 统一 edition、技术版本、lints 与 release profile。</li>
+            <li><a href="../version.json">version.json</a> 是产品版本与技术兼容版本的唯一映射。</li>
+            <li><a href="../pnpm-workspace.yaml">pnpm-workspace.yaml</a> 同时约束成员、依赖覆盖和本地缓存位置。</li>
+          </ul>
+          <h3>pnpm 数据绝不写到磁盘根目录</h3>
+          <pre><code>storeDir: .pnpm-store
+cacheDir: .pnpm-cache
+virtualStoreDir: node_modules/.pnpm
+enableGlobalVirtualStore: false</code></pre>
+          <p>
+            内容寻址仓库位于 <code>&lt;repo&gt;/.pnpm-store/</code>，元数据缓存位于
+            <code>&lt;repo&gt;/.pnpm-cache/</code>，虚拟依赖树位于
+            <code>&lt;repo&gt;/node_modules/.pnpm/</code>。三者均被 Git 忽略，
+            <a href="../scripts/verify-pnpm-layout.ps1">verify-pnpm-layout.ps1</a> 会解析真实绝对路径，
+            拒绝盘符根目录、用户级全局虚拟仓库或越出项目的配置。
+          </p>
+        </section>
+
+        <section id="runtime-flow">
+          <p class="section-kicker">04 · End-to-end flow</p>
+          <h2>沿一条真实请求读完整系统</h2>
+          <p class="section-lead">
+            下面以“玩家进入世界并接近一枚光种”为主线，把启动、设置、场景、逐帧运动、状态提交、保存和反馈串起来。
+          </p>
+          <ol>
+            <li><strong>启动：</strong><a href="../apps/desktop/src/main.tsx">main.tsx</a> 创建 React 根节点，错误边界包围应用；特殊查询参数可进入本地 M2 证据工具。</li>
+            <li><strong>水合：</strong><a href="../apps/desktop/src/App.tsx">App.tsx</a> 先读取本地进度，再向 Rust 请求设置；设置确认前不抢先加载错误 seed。</li>
+            <li><strong>场景：</strong><code>treeApi.loadScene(seed)</code> 在 Tauri 中 <code>invoke('generate_tree')</code>，在浏览器中调用 Worker。返回值先经 <code>treeSceneSchema</code> 验证。</li>
+            <li><strong>呈现：</strong><a href="../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas.tsx</a> 把场景、世界、光照、粒子和后处理挂入 R3F Canvas。</li>
+            <li><strong>输入：</strong>键盘、手柄被归一化为移动与动作意图；<a href="../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 根据相机水平前向、时间步和碰撞布局算新位置。</li>
+            <li><strong>接近：</strong><a href="../apps/desktop/src/scene/GameplayController.tsx">GameplayController.tsx</a> 只负责距离检测与输入适配，触发 <code>reveal-seed</code> 或 <code>collect-seed</code> 动作。</li>
+            <li><strong>提交：</strong><a href="../apps/desktop/src/game/gameProgress.ts">reduceGameProgress</a> 检查合法转换，返回不可变新快照；非法跳转直接保持原状态。</li>
+            <li><strong>持久化：</strong>Zustand store 只在真实进度改变后写 v2 快照，写入前保留上一份有效快照作为备份。</li>
+            <li><strong>反馈：</strong>R3F 根据已提交快照播放光种消散和树木复苏；AudioDirector 根据进度差异播放声效；QuestPanel 更新目标。</li>
+            <li><strong>原生事件：</strong>Rust 周期性发出 <code>magic-field</code>，前端放进 ref，粒子在 <code>useFrame</code> 内读取，不让 React 每帧重渲染。</li>
+          </ol>
+          <div class="callout callout--violet">
+            <strong>为什么强调“提交”：</strong>视觉动画可能被跳帧、卸载或减少动态设置缩短；如果动画本身决定进度，
+            存档与 UI 会失真。这里先由纯状态机完成原子转换，再让所有视觉与声音成为该事实的消费者。
+          </div>
+        </section>
+
+        <section id="typescript-react">
+          <p class="section-kicker">05 · TypeScript + React 19</p>
+          <h2>前端：用严格类型把框架留在边缘</h2>
+          <p class="section-lead">
+            TypeScript 不是给 JavaScript 加注释，而是让边界、状态转换和组件契约在编译期可证明。
+            React 则负责把这些数据映射为界面和生命周期；高频游戏数学留在纯函数与 R3F 帧循环中。
+          </p>
+          <div class="grid">
+            <article class="card">
+              <h3>严格编译选项</h3>
+              <p>
+                <code>strict</code>、<code>noUncheckedIndexedAccess</code>、
+                <code>exactOptionalPropertyTypes</code>、<code>noImplicitOverride</code> 与
+                <code>verbatimModuleSyntax</code> 同时开启。数组索引因此是 <code>T | undefined</code>，
+                可选属性也不能用“显式 undefined”冒充缺失。
+              </p>
+            </article>
+            <article class="card">
+              <h3><code>unknown</code> 后再收窄</h3>
+              <p>
+                IPC、JSON 文件、本地存档和性能证据都是不可信数据。它们先保持 <code>unknown</code>，
+                再由 Zod 或专用解析器验证。禁止用 <code>as SomeType</code> 跳过边界检查。
+              </p>
+            </article>
+            <article class="card">
+              <h3>可辨识联合</h3>
+              <p>
+                <code>GameProgressAction</code>、<code>SelectionAction</code>、Worker 协议和
+                <code>SceneLoadResult</code> 都用字面量字段区分分支。<code>switch</code> 让新增状态暴露未处理点。
+              </p>
+            </article>
+            <article class="card">
+              <h3>标准装饰器</h3>
+              <p>
+                <a href="../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的
+                <code>@logged</code> 和 <code>@measure</code> 使用 TC39 标准方法装饰器，为 IPC 加日志与计时，
+                不依赖旧式 <code>experimentalDecorators</code>。
+              </p>
+            </article>
+          </div>
+          <h3>React 的职责分层</h3>
+          <div class="layer-stack">
+            <div class="layer"><strong>入口</strong><span><code>main.tsx</code> 只决定挂载哪个根应用，并安装 StrictMode 与错误边界。</span></div>
+            <div class="layer"><strong>编排</strong><span><code>App.tsx</code> 管设置水合、场景加载、原生订阅、导出、菜单和跨系统回调。</span></div>
+            <div class="layer"><strong>状态</strong><span><code>state/store.ts</code> 暴露选择器和动作，委托纯 reducer；组件不直接改内部对象。</span></div>
+            <div class="layer"><strong>适配</strong><span>Controller 组件把浏览器事件、手柄轮询、接近判定和 R3F ref 转换为领域动作。</span></div>
+            <div class="layer"><strong>呈现</strong><span>UI 与 Scene 组件根据 props/store 切片渲染，避免承担持久化或业务决策。</span></div>
+          </div>
+          <h3>Hooks 在这里解决什么问题</h3>
+          <ul>
+            <li><code>useEffect</code> 管理外部系统同步：IPC 请求、事件监听、键盘监听、设置持久化，而不是计算可派生值。</li>
+            <li><code>useRef</code> 保存每帧读取的魔法场、场景命令 API、玩家位置与最新回调，更新它们不会触发 React 树重绘。</li>
+            <li><code>useMemo</code> 缓存昂贵且纯的几何/实例矩阵；依赖必须真实完整，不能拿空数组“冻结”错误值。</li>
+            <li><code>useCallback</code> 只在回调身份会影响订阅或子组件时使用；不把它当作无条件性能装饰。</li>
+            <li>StrictMode 会故意重复挂载 effect。<a href="../apps/desktop/src/ipc/asyncSubscriptionScope.ts">asyncSubscriptionScope.ts</a> 专门处理“监听 promise 尚未返回，组件已经卸载”的竞态。</li>
+          </ul>
+          <div class="callout">
+            <strong>错误边界的边界：</strong>React Error Boundary 捕获渲染和生命周期错误，但不会自动捕获事件处理器、
+            异步 promise 或 Rust 崩溃。后者必须在调用点处理，并由日志、错误状态或原生 panic hook 提供证据。
+          </div>
+        </section>
+
+        <section id="state-persistence">
+          <p class="section-kicker">06 · State, save, input</p>
+          <h2>状态、存档、输入与运动为何要分开</h2>
+          <p class="section-lead">
+            游戏最容易失控的地方，是把按键、位置、任务、动画和存档塞进同一个组件。
+            本项目把“瞬时输入”“逐帧运动”“持久进度”“界面会话”和“原生设置”拆成不同寿命的状态。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>状态种类</th><th>拥有者</th><th>寿命与示例</th></tr></thead>
+              <tbody>
+                <tr><th>输入意图</th><td><code>playerInput.ts</code> / Gamepad</td><td>一帧或一次按下；移动向量、互动、冲刺、暂停。</td></tr>
+                <tr><th>运动状态</th><td><code>PlayerController.tsx</code></td><td>连续帧；位置、速度、朝向，由纯运动函数推进。</td></tr>
+                <tr><th>游戏进度</th><td><code>gameProgress.ts</code> + Zustand</td><td>跨会话；光种、节点、树阶段、门、检查点、记忆。</td></tr>
+                <tr><th>会话 UI</th><td>Zustand</td><td>当前运行；标题/游玩/暂停、覆盖层、选择、警告。</td></tr>
+                <tr><th>用户设置</th><td>前端 store + Rust Store</td><td>跨启动；主题、画质、音量、相机、无障碍。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>进度状态机的不变量</h3>
+          <pre><code>light seed: hidden → revealed → collected
+three collected: node dormant → ready
+puzzle open: ready → cleansing
+success: cleansing → restored + treeStage 1 + gateUnlocked
+cancel/failure: cleansing → ready（不扣光种）</code></pre>
+          <p>
+            <a href="../apps/desktop/src/game/gameProgress.ts">gameProgress.ts</a> 用字面量联合、
+            <code>Record&lt;LightSeedId, LightSeedState&gt;</code> 和纯 reducer 表达这些规则。
+            解析旧存档时重新计算 <code>collectedCount</code>，并验证树阶段和门状态必须与净化状态一致；
+            这能拒绝“字段看似合法，但组合互相矛盾”的快照。
+          </p>
+          <h3>存档恢复策略</h3>
+          <ol>
+            <li>优先读取 <code>dream-builder.progress.v2</code>，通过完整不变量校验才接受。</li>
+            <li>主快照损坏时，把原始文本隔离到 corrupt key，再尝试最近一份有效 backup。</li>
+            <li>只有主快照不存在时才迁移 v1；迁移补上检查点与记忆字段，不迁移中途 cleansing 状态。</li>
+            <li>正常写入前先把上一份有效主快照变成 backup；“开始新旅程”则原子替换并清理旧备份。</li>
+            <li>Storage 不可用或写失败时保持当前会话可玩，并通过 UI 提示，不能静默假装已经保存。</li>
+          </ol>
+          <h3>运动与碰撞</h3>
+          <p>
+            <a href="../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 把 WASD、方向键和手柄轴统一成
+            归一化意图；<a href="../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 将它转换到相机水平坐标系，
+            按加速/减速和最大步长推进。世界边界、圆形障碍与矩形障碍来自
+            <a href="../apps/desktop/src/game/forestLayout.ts">forestLayout.ts</a>，同一份布局同时被碰撞和呈现消费，
+            避免“看见的墙”和“撞到的墙”漂移。
+          </p>
+          <div class="grid">
+            <article class="card">
+              <h3>为什么不用物理引擎</h3>
+              <p>当前只有平面行走、静态障碍和显式边界。纯数学碰撞更小、更确定、更易测；出现斜坡、动态刚体或大量碰撞前，引入物理引擎只会增加同步成本。</p>
+            </article>
+            <article class="card">
+              <h3>为什么相机不进 Rust</h3>
+              <p>相机和玩家运动每帧更新，把它们经 IPC 往返会增加延迟与序列化负担。Rust 负责低频、可持久、可重放的数据，帧循环留在 WebView。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="graphics">
+          <p class="section-kicker">07 · Realtime graphics and audio</p>
+          <h2>3D 世界：React 声明场景，Three 执行渲染</h2>
+          <p class="section-lead">
+            react-three-fiber（R3F）不是另一套 3D 引擎；它是 Three.js 的 React renderer。
+            JSX 描述场景图，R3F 把 <code>&lt;mesh&gt;</code>、材质、光源和相机映射为 Three 对象，
+            最终仍由 WebGL 在 WebView2 中绘制。
+          </p>
+          <div class="grid grid--3">
+            <article class="card"><h3>Canvas</h3><p><a href="../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas</a> 配置相机、DPR、色调映射、场景 API、后处理和截图所需的 drawing buffer。</p></article>
+            <article class="card"><h3>世界</h3><p><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld</a> 组合玩家、卡通森林、光种、记忆、检查点和净化节点。</p></article>
+            <article class="card"><h3>智慧树</h3><p><a href="../apps/desktop/src/scene/TreeContent.tsx">TreeContent</a> 把 Rust 返回的枝干、叶簇、符文、水晶与地面光环组合为场景。</p></article>
+            <article class="card"><h3>程序化森林</h3><p><a href="../apps/desktop/src/scene/CartoonForest.tsx">CartoonForest</a> 按 seed 和质量档生成可重建装饰，但关键路径与碰撞保持稳定。</p></article>
+            <article class="card"><h3>粒子</h3><p><a href="../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles</a> 用 BufferGeometry 和 <code>useFrame</code> 更新位置，从 ref 读取后端场。</p></article>
+            <article class="card"><h3>后处理</h3><p>Bloom 只服务发光物体；画质档与减少动态控制成本和强度，不能让装饰破坏目标可读性。</p></article>
+          </div>
+          <h3>关键图形概念</h3>
+          <details open>
+            <summary>实例化与 draw call</summary>
+            <p>
+              每棵草、每片叶都单独 mesh 会产生大量 draw call。叶簇等重复物体使用
+              <code>InstancedMesh</code>：共享几何和材质，只为每个实例提供变换矩阵。它牺牲部分逐对象自由，
+              换来显著减少 CPU 提交开销。
+            </p>
+          </details>
+          <details>
+            <summary>材质、色调映射与 Bloom</summary>
+            <p>
+              PBR 材质根据光照计算表面；emissive 让对象自身发亮；ACES 色调映射把 HDR 亮度压回屏幕范围；
+              Bloom 再把超过阈值的亮部扩散。三者顺序和曝光共同决定“发光”是否通透而不糊成一片。
+            </p>
+          </details>
+          <details>
+            <summary>GLSL 水晶与 Fresnel</summary>
+            <p>
+              <a href="../apps/desktop/src/scene/materials/crystalMaterial.ts">crystalMaterial.ts</a>
+              在顶点阶段传递视图法线和视线方向，在片元阶段以
+              <code>pow(1 - dot(normal, viewDir), power)</code> 形成掠射角更亮的 Fresnel 边缘，
+              再用时间 uniform 制作流光。hover 与选中只调 uniform，不重建材质。
+            </p>
+          </details>
+          <details>
+            <summary>第三人称相机</summary>
+            <p>
+              PlayerController 维护玩家后上方偏移，把相机和 target 随玩家位移一起平移；移动方向只取相机
+              水平前向，俯视不会让角色钻入地面。减少动态模式降低相机滞后和强反馈，保证舒适性。
+            </p>
+          </details>
+          <h3>液态玻璃 UI</h3>
+          <p>
+            <a href="../packages/liquid-glass/src/GlassProvider.tsx">GlassProvider</a> 统一主题和质量，
+            <a href="../packages/liquid-glass/src/liquid-glass.css">liquid-glass.css</a> 用半透明 tint、
+            <code>backdrop-filter</code>、边缘高光和阴影建立层次。浏览器不支持模糊、系统要求减少动态或设备能力较弱时，
+            会退化到稳定不透明面板；视觉效果不能成为可读性的前置条件。
+          </p>
+          <h3>程序化音频</h3>
+          <p>
+            <a href="../apps/desktop/src/audio/forestAudio.ts">forestAudio.ts</a> 使用 Web Audio API 合成环境层，
+            <a href="../apps/desktop/src/audio/progressAudio.ts">progressAudio.ts</a> 将进度差异映射为短声效。
+            AudioDirector 在首次用户手势后安全恢复 AudioContext，分别应用主音量、环境音和效果音；静音与页面卸载必须释放节点，
+            避免后台声音和资源泄漏。
+          </p>
+        </section>
+
+        <section id="performance">
+          <p class="section-kicker">08 · Performance evidence</p>
+          <h2>性能不是一个 FPS 数字，而是一条可复核证据链</h2>
+          <p class="section-lead">
+            场景必须在真实 Tauri/WebView2 目标设备上持续运行，才能代表交付体验。项目内置记录器只保存有界聚合，
+            同时避免收集玩家路径或逐帧行为数据。
+          </p>
+          <ul>
+            <li><a href="../apps/desktop/src/scene/PerformanceProbe.tsx">PerformanceProbe</a> 在帧循环读取帧间隔与 Three renderer 统计。</li>
+            <li><a href="../apps/desktop/src/performance/performanceMetrics.ts">PerformanceMetricsRecorder</a> 用固定 0.5ms 直方图估计分位数，不保留无限增长的原始帧数组。</li>
+            <li>状态 marker 最多 128 个、phase 最多 32 个；名称与环境字符串有长度上限，导入报告也重新校验。</li>
+            <li>报告给出平均 FPS、1% low 等价值、P50/P95/P99、最长帧、慢帧比例、draw calls、三角形和可用堆峰值。</li>
+            <li><code>scene-load</code> 与 <code>cleansing</code> 单独分段，不能用稳态平均值掩盖加载或净化尖峰。</li>
+            <li>浏览器主循环只能观察 CPU/呈现间隔，不能直接得到 GPU frame time；需要 GPU 指标时另用目标设备分析器。</li>
+          </ul>
+          <div class="grid">
+            <article class="card card--accent"><h3>已归档事实</h3><p>目标 Windows 设备已有十分钟原生性能报告，覆盖场景加载与净化，并通过当前 M2 帧率预算。</p></article>
+            <article class="card card--warning"><h3>仍未替代的事实</h3><p>真实性能通过不代表五位新玩家能理解目标；自动化和证据工作台都不能代替真人无提示观察。</p></article>
+          </div>
+        </section>
+
+        <section id="ipc">
+          <p class="section-kicker">09 · IPC contract</p>
+          <h2>IPC：跨语言边界必须同时有静态类型和运行时证据</h2>
+          <p class="section-lead">
+            TypeScript 类型在运行时会被擦除，Rust 类型也不会自动保护已经变成 JSON 的数据。
+            因此 IPC 的正确模型是：Rust 按 serde 合约序列化，前端先把载荷视为 <code>unknown</code>，
+            经 Zod 成功解析后才进入应用核心。
+          </p>
+          <div class="diagram" role="img" aria-label="IPC 请求响应验证流程">
+            <div class="diagram__node"><strong>React 调用</strong><span>treeApi 方法</span></div>
+            <div class="diagram__node"><strong>Tauri invoke</strong><span>命令名 + 参数</span></div>
+            <div class="diagram__node"><strong>Rust command</strong><span>State / Result</span></div>
+            <div class="diagram__node"><strong>serde JSON</strong><span>camelCase wire</span></div>
+            <div class="diagram__node"><strong>Zod parse</strong><span>成功后才有 TS 类型</span></div>
+          </div>
+          <h3>当前命令面</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>命令</th><th>责任</th><th>失败语义</th></tr></thead>
+              <tbody>
+                <tr><th><code>generate_tree</code></th><td>设置活动 seed、记录历史、命中缓存或确定性生成场景</td><td><code>Result&lt;TreeScene, AppError&gt;</code></td></tr>
+                <tr><th><code>detail_info</code></th><td>按场景对象 id 返回符文/水晶/叶簇说明</td><td>未知 id 是结构化错误</td></tr>
+                <tr><th><code>magic_field</code></th><td>按 seed 与 tick 计算一次魔法脉冲</td><td>纯确定性返回</td></tr>
+                <tr><th><code>get_settings</code></th><td>读取 Rust 管理的当前设置</td><td>前端无法读取时保留安全默认</td></tr>
+                <tr><th><code>save_settings</code></th><td>先校验范围，再更新内存并写 Tauri Store</td><td>持久化失败返回 AppError</td></tr>
+                <tr><th><code>seed_history</code></th><td>返回有界、去重、最近优先的 seed</td><td>无副作用读取</td></tr>
+                <tr><th><code>export_scene</code></th><td>异步序列化并写入用户选择的 JSON 路径</td><td>序列化/文件错误结构化返回</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>事件与请求的区别</h3>
+          <p>
+            命令是请求/响应，适合“给我一个场景”“保存这份设置”；事件是后端主动推送，适合周期魔法场和原生菜单。
+            <a href="../crates/dream-builder/src/events.rs">events.rs</a> 发出 <code>magic-field</code>，
+            <a href="../crates/dream-builder/src/menu.rs">menu.rs</a> 把菜单 id 转成 <code>menu:&lt;id&gt;</code>。
+            每个前端事件 payload 仍要校验；事件并不因为来自本进程就自动可信。
+          </p>
+          <h3>修改 wire 格式时的四方同步</h3>
+          <ol>
+            <li>Rust domain struct 与 serde rename/enum 表示；</li>
+            <li><code>packages/ipc-contracts</code> 的 Zod schema 和推导类型；</li>
+            <li>浏览器 Worker 回退生成器与协议；</li>
+            <li>Rust 序列化集成测试、Zod 契约测试和前端消费者测试。</li>
+          </ol>
+          <div class="callout callout--gold">
+            <strong>常见错误：</strong>只改 TS interface 不会改变运行时校验；只改 Rust 字段会让旧前端回退；
+            用 <code>as TreeScene</code> 会把协议错误推迟到渲染深处，变成更难诊断的 WebGL 故障。
+          </div>
+        </section>
+
+        <section id="rust">
+          <p class="section-kicker">10 · Rust backend</p>
+          <h2>Rust 后端：领域模型、确定性生成与原生副作用</h2>
+          <p class="section-lead">
+            Rust 部分同时是库和可执行程序。<code>main.rs</code> 保持极薄，只调用库的 <code>run()</code>；
+            可测试逻辑放在 domain、generation、magic 和 state 中，Tauri 命令只做边界适配。
+          </p>
+          <div class="layer-stack">
+            <div class="layer"><strong>domain/</strong><span><code>Vec3</code>、<code>Seed</code>、<code>Energy</code>、树场景、细节、魔法场和 builder；只表达数据与不变量。</span></div>
+            <div class="layer"><strong>generation/</strong><span>RNG trait、SeededRng、SceneGenerator trait 与 FantasyTreeGenerator；给定 seed 可重放。</span></div>
+            <div class="layer"><strong>state.rs</strong><span>设置、seed 历史、活动 seed 与场景缓存，封装在 <code>Arc&lt;Mutex&lt;Inner&gt;&gt;</code>。</span></div>
+            <div class="layer"><strong>commands.rs</strong><span>七个薄 IPC 命令；输入校验、状态访问、异步导出与结构化错误。</span></div>
+            <div class="layer"><strong>lib.rs</strong><span>插件、菜单、setup、托管状态、后台事件、命令注册和进程生命周期。</span></div>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <h3>所有权与借用</h3>
+              <p>
+                只读取 id 的函数接收 <code>&amp;str</code>，生成器借用 <code>&amp;mut impl Rng</code>；
+                只有返回或跨线程/状态边界时才拥有并克隆数据。克隆不是“让借用检查器安静”的默认工具。
+              </p>
+            </article>
+            <article class="card">
+              <h3>Newtype 与不变量</h3>
+              <p>
+                <code>Seed(u64)</code> 防止任意数字混用；<code>Energy(f32)</code> 只能通过夹紧构造，
+                因而任何已存在的 Energy 都落在 0..1。serde transparent 保持 wire 仍是数字。
+              </p>
+            </article>
+            <article class="card">
+              <h3>Trait 与泛型接缝</h3>
+              <p>
+                <code>Rng</code> 只要求实现 <code>next_u32</code>，默认方法派生浮点与范围；
+                <code>SceneGenerator</code> 定义生成与细节查询，使调用方依赖能力而不是具体算法。
+              </p>
+            </article>
+            <article class="card">
+              <h3>Builder 与枚举</h3>
+              <p>
+                <code>TreeSceneBuilder</code> 用移动 self 的链式 API 组装结果；<code>DetailKind</code> 与
+                <code>AppError</code> 用穷尽 match，让新增变体在遗漏处理处产生编译错误。
+              </p>
+            </article>
+          </div>
+          <h3>错误处理</h3>
+          <p>
+            <a href="../crates/dream-builder/src/errors.rs">AppError</a> 由 <code>thiserror</code> 派生错误文本，
+            并手写 Serialize 稳定输出 <code>{ code, message }</code>。可预期失败返回 <code>Result</code> 并用
+            <code>?</code> 传播；panic 只代表不变量或启动级错误。panic hook 会把崩溃写入日志，
+            但绝不能把秘密或用户数据塞进错误文本。
+          </p>
+          <h3>共享状态与异步纪律</h3>
+          <p>
+            <a href="../crates/dream-builder/src/state.rs">AppState</a> 克隆的是 <code>Arc</code>，不是复制状态。
+            每个方法内部短暂加锁，复制所需值后立即释放。<a href="../crates/dream-builder/src/events.rs">事件任务</a>
+            在 <code>interval.tick().await</code> 之后才读取设置，绝不让同步 Mutex guard 跨越 await。
+            文件导出使用 <code>tokio::fs::write</code>，避免阻塞异步执行器线程。
+          </p>
+          <h3>确定性生成</h3>
+          <p>
+            SeededRng 的输出只由 seed 与调用序列决定；FantasyTreeGenerator 依序生成树干、树冠、符文和水晶，
+            细节 id 也稳定。确定性让缓存、导出、故障复现、测试和跨会话重建成立。任何“为了视觉随机”而读取系统时间或
+            平台随机源都会破坏这条合同；需要会话变化时，应显式引入独立 seed 并把它纳入存档。
+          </p>
+        </section>
+
+        <section id="tauri">
+          <p class="section-kicker">11 · Tauri 2</p>
+          <h2>Tauri：原生外壳不是一个打包按钮</h2>
+          <p class="section-lead">
+            Tauri 把系统 WebView、Rust 进程、窗口、菜单、托盘、插件和权限系统装配成一个桌面应用。
+            它的核心价值不是“把网站变 EXE”，而是以明确授权的 IPC 把 Web UI 与原生能力连接起来。
+          </p>
+          <h3>Builder 启动顺序</h3>
+          <ol>
+            <li>安装 panic logger，使未捕获 Rust panic 进入诊断日志；</li>
+            <li>安装 single-instance，第二次启动时聚焦主窗口；</li>
+            <li>安装 log、store、dialog、fs 和 opener 插件；</li>
+            <li>构建原生菜单并把点击转发为前端事件；</li>
+            <li>在 setup 中载入设置、创建 AppState、注册托盘并启动魔法场任务；</li>
+            <li>通过 <code>generate_handler!</code> 注册命令；</li>
+            <li><code>generate_context!()</code> 嵌入编译期配置并进入事件循环。</li>
+          </ol>
+          <h3>托管状态 <code>State&lt;'_, AppState&gt;</code></h3>
+          <p>
+            <code>app.manage(state)</code> 把一个线程安全值交给 Tauri 容器。命令形参中的 <code>State</code>
+            是带生命周期的借用句柄，命令不能把它任意保存到全局。AppState 内部再用 Arc/Mutex 管理共享所有权与可变性。
+          </p>
+          <h3>插件与动态导入</h3>
+          <p>
+            Rust 插件提供原生实现，前端对应 JS 包提供类型安全调用。保存对话框、路径和 opener 只在 Tauri 分支动态导入，
+            既避免浏览器开发模式执行原生 API，也把可选代码移出首屏 bundle。插件装上并不等于前端自动有权限，仍需 capability 授权。
+          </p>
+          <h3>窗口、菜单与单实例</h3>
+          <p>
+            <a href="../crates/dream-builder/tauri.conf.json">tauri.conf.json</a> 定义主窗口尺寸、最小尺寸、背景色、居中和 Win11 Mica；
+            不支持 Mica 的系统会优雅忽略。原生菜单和托盘使用稳定 id，前端统一处理动作。二次启动不会创建第二个世界实例，
+            而是显示、取消最小化并聚焦现有窗口，避免并发写存档。
+          </p>
+          <h3>Tauri 路径基准的容易混淆点</h3>
+          <div class="grid">
+            <article class="card">
+              <h3><code>before*Command</code></h3>
+              <p>运行 cwd 是包含 Tauri 配置目录的父目录，即 <code>crates/</code>，所以使用 <code>pnpm -C .. dev/build</code> 才回到仓库根。</p>
+            </article>
+            <article class="card">
+              <h3><code>frontendDist</code></h3>
+              <p>它相对配置文件 <code>crates/dream-builder/tauri.conf.json</code>，所以是 <code>../../apps/desktop/dist</code>。两者不是同一个基准。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="webview2">
+          <p class="section-kicker">12 · Windows WebView runtime</p>
+          <h2>WebView2：使用 Evergreen，不固定运行时版本</h2>
+          <p class="section-lead">
+            Windows 打包版的前端确实运行在 Microsoft Edge WebView2 Runtime 中，但 React 代码没有直接创建或调用
+            CoreWebView2。调用链由 Tauri → tauri-runtime-wry → Wry → WebView2 COM 完成；前端面对的是标准 Web API
+            和 Tauri API，而不是某个特定版本的 WebView2 SDK 对象。
+          </p>
+          <div class="callout">
+            <strong>结论：</strong>不锁定 WebView2 Runtime 版本是本项目正确的默认策略。Evergreen Runtime 由 Windows/
+            Microsoft Edge Update 维护，各用户在某一时刻的补丁版本可能不同，因此无法也不应要求“所有机器严格同一 WebView2 版本”。
+            应统一的是受支持行为、Web 标准与回归测试，不是运行时补丁号。
+          </div>
+          <h3>当前配置到底做了什么</h3>
+          <pre><code>"webviewInstallMode": {
+  "type": "downloadBootstrapper",
+  "silent": true
+}</code></pre>
+          <p>
+            这是 Tauri 的 Evergreen 引导安装模式：安装器检查运行时，缺失时由 Microsoft bootstrapper 获取合适的 Evergreen Runtime；
+            已安装时应用直接使用系统运行时。配置没有 <code>fixedRuntime</code> 路径，也没有版本字段。
+            <a href="../scripts/verify-version-contract.ps1">verify-version-contract.ps1</a> 会阻止误改成固定运行时。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>方案</th><th>优点</th><th>代价</th><th>本项目</th></tr></thead>
+              <tbody>
+                <tr><th>Evergreen bootstrapper</th><td>体积小、持续安全更新、Windows 10/11 普遍可用</td><td>用户补丁版本不同；首次缺失时需要获取运行时</td><td><strong>采用</strong></td></tr>
+                <tr><th>Offline installer</th><td>安装时不依赖网络，仍安装 Evergreen</td><td>安装包更大；需要随包维护引导文件</td><td>仅离线部署需求明确时评估</td></tr>
+                <tr><th>Fixed Version</th><td>每台机器使用完全相同引擎</td><td>约增加约 180MB、应用自行承担安全更新与兼容维护</td><td>不采用</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>开发浏览器与发布 WebView 的差异</h3>
+          <ul>
+            <li><code>pnpm dev</code> 只是 Vite 服务器；你用 Chrome 打开就是 Chrome，用 Edge 打开就是 Edge，不自动变成 WebView2。</li>
+            <li><code>pnpm tauri dev</code> 和安装后的 EXE 才由 Tauri 创建 WebView2 原生窗口，并启用 IPC、菜单和插件。</li>
+            <li>因此必须同时做浏览器快速测试和真实 Tauri 冒烟；只在 Chrome 通过不能证明 WebView2 原生集成通过。</li>
+            <li>WebView2 与 Edge 共用 Chromium/平台技术，但 Runtime 是面向嵌入式应用的独立安装与更新通道。</li>
+          </ul>
+          <h3>怎样验证而不错误锁版本</h3>
+          <ol>
+            <li>静态验证配置是 <code>downloadBootstrapper</code> 且不存在 fixed path；</li>
+            <li>在支持的最低/当前 Windows 环境安装并首次启动；</li>
+            <li>确认 <code>msedgewebview2.exe</code> 子进程、原生 IPC、WebGL、音频与导出工作；</li>
+            <li>记录测试时的 Windows 与 Runtime 版本用于复现，但不要把该值写成应用启动的硬性等号；</li>
+            <li>WebView2 大版本变化后用 CI、目标机和干净账户回归关键流程。</li>
+          </ol>
+          <p>
+            延伸阅读：
+            <a href="https://v2.tauri.app/distribute/windows-installer/">Tauri Windows installer</a>、
+            <a href="https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/evergreen-vs-fixed-version">Microsoft Evergreen 与 Fixed Version</a>。
+          </p>
+        </section>
+
+        <section id="security">
+          <p class="section-kicker">13 · Security boundaries</p>
+          <h2>桌面应用仍然有浏览器边界、文件边界与供应链边界</h2>
+          <p class="section-lead">
+            “离线单机”不等于没有攻击面。WebView 内容、IPC 参数、本地 JSON、文件路径、插件权限、依赖安装和发布产物都需要明确边界。
+          </p>
+          <div class="grid">
+            <article class="card">
+              <h3>Capability / ACL</h3>
+              <p>
+                <a href="../crates/dream-builder/capabilities/default.json">default.json</a> 只授权 main 窗口需要的
+                core/window、dialog、store、fs 与 opener 能力。命令已注册但未授权时，前端调用仍应被拒绝。
+              </p>
+            </article>
+            <article class="card">
+              <h3>CSP</h3>
+              <p>
+                配置限制默认资源、图片、样式、字体和连接来源，只开放 Tauri IPC 所需 scheme。
+                <code>unsafe-inline</code> 目前只用于样式；脚本没有放开远程源或 inline 执行。
+              </p>
+            </article>
+            <article class="card">
+              <h3>边界校验</h3>
+              <p>Rust 设置先验证范围；前端 IPC 与证据导入按 schema；存档验证跨字段一致性；性能文本有长度上限。</p>
+            </article>
+            <article class="card">
+              <h3>隐私最小化</h3>
+              <p>性能记录不保留逐帧路径，M2 工具只用 P01–P05 匿名编号，不联网、不自动上传、不采姓名账号。</p>
+            </article>
+          </div>
+          <h3>文件导出的信任边界</h3>
+          <p>
+            路径来自用户主动保存对话框，Rust 负责实际写入。错误需要带操作上下文，但不能回显秘密内容。
+            应用不递归扫描用户磁盘，也不在后台删除目录。发布脚本只操作经过解析、位于项目 output 或系统临时根下的明确路径。
+          </p>
+          <h3>依赖与构建供应链</h3>
+          <ul>
+            <li>pnpm 与 Cargo 锁文件提交入库，CI 使用 frozen/locked 模式。</li>
+            <li><code>pnpm audit</code> 检查 JavaScript 公告；高风险传递依赖通过精确 override 修补，并重新生成锁文件。</li>
+            <li>只允许必要的包安装脚本（Biome 与 esbuild），减少任意生命周期脚本执行面。</li>
+            <li>代码签名证书只从当前用户证书库按指纹读取；PFX、密码和私钥绝不进入仓库或日志。</li>
+            <li>候选包与生产包在清单中明确区分；未签名文件不能因为哈希正确就宣称生产发布。</li>
+          </ul>
+        </section>
+
+        <section id="version-dependencies">
+          <p class="section-kicker">14 · Versioning and dependencies</p>
+          <h2>两段产品版本与三段工具版本怎样同时保持诚实</h2>
+          <p class="section-lead">
+            用户要求的版本语义由两段数字表达，底层工具的格式要求则由机械兼容层承担。两者必须从一个文件派生并自动对照，
+            不能靠开发者手工记忆在多个清单中同步。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>位置</th><th>当前值</th><th>原因</th></tr></thead>
+              <tbody>
+                <tr><th>游戏 UI / 文档 / Changelog</th><td><code>1.1</code></td><td>对外两段产品版本</td></tr>
+                <tr><th>发布目录与交付文件名</th><td><code>output/release/1.1</code></td><td>面向玩家和发布人员</td></tr>
+                <tr><th>release manifest</th><td><code>version: 1.1</code> + <code>technicalVersion: 1.1.0</code></td><td>同时可读与可验证</td></tr>
+                <tr><th>package.json / Cargo / Tauri</th><td><code>1.1.0</code></td><td>npm、Cargo、Tauri SemVer 解析要求</td></tr>
+                <tr><th>Windows EXE / 卸载项</th><td><code>1.1.0</code>（可能带文件 build 位）</td><td>平台文件与安装元数据要求</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>升级规则</h3>
+          <ul>
+            <li><strong>小的新功能：</strong>第二段加一，例如 1.1 → 1.2；技术版本自动映射为 1.2.0。</li>
+            <li><strong>非常大的功能模块：</strong>第一段加一，第二段归零，例如 1.9 → 2.0；技术版本为 2.0.0。</li>
+            <li><strong>修复与内部重构：</strong>不单独暴露第三段；随下一产品版本交付或在同一 1.x 候选内重新构建并用来源哈希区分。</li>
+            <li><strong>历史证据：</strong>归档 JSON 中的旧技术版本保持原样，它是当时产物身份，不应为了“看起来统一”而篡改。</li>
+          </ul>
+          <h3>依赖版本与产品版本不是一回事</h3>
+          <p>
+            React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；“产品 1.1”不要求它们也等于 1.1。
+            依赖升级必须看 API、锁文件、公告、目标平台与实际回归。当前依赖解析还通过 override 固定
+            <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.17</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
+          </p>
+        </section>
+
+        <section id="quality">
+          <p class="section-kicker">15 · Quality gates</p>
+          <h2>“没有 LSP 告警”要落到可重复的编译与静态门禁</h2>
+          <p class="section-lead">
+            编辑器的 LSP 诊断依赖本机插件与当前打开文件，不能作为唯一交付证据。项目把同类检查固化为命令：
+            TypeScript 编译器、Biome、Vitest、Vite、Rustfmt、Clippy、Cargo tests 与原生打包共同构成新鲜证据。
+          </p>
+          <pre><code>pnpm check
+cargo fmt --check
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo check --workspace --all-targets --locked</code></pre>
+          <h3><code>pnpm check</code> 内部顺序</h3>
+          <ol>
+            <li><code>version:verify</code>：两段产品版本、三段技术版本与 WebView2 Evergreen 配置；</li>
+            <li><code>knowledge:verify</code>：HTML 结构、覆盖主题、重复 id、锚点和本地链接；</li>
+            <li><code>pnpm:verify-layout</code>：store/cache/virtual store 都在项目根内；</li>
+            <li><code>biome check</code>：格式、可疑代码和导入组织；</li>
+            <li><code>tsc --noEmit</code>：所有工作区包严格类型检查；</li>
+            <li><code>vitest run</code>：纯规则、契约、组件、存档、性能与开发变换测试；</li>
+            <li><code>vite build</code>：生产分块与 bundle 大小预算。</li>
+          </ol>
+          <div class="grid">
+            <article class="card">
+              <h3>纯单元测试</h3>
+              <p>状态机、碰撞、方向谜题、输入、音频差异、统计直方图和 schema 可在 Node/jsdom 中快速确定地运行。</p>
+            </article>
+            <article class="card">
+              <h3>组件测试</h3>
+              <p>Testing Library 从角色、标签和用户行为断言标题、设置、帮助、覆盖层与证据工具，不依赖私有实现。</p>
+            </article>
+            <article class="card">
+              <h3>跨边界测试</h3>
+              <p>Rust 集成测试验证 camelCase 序列化和引用完整性；Vite transform 测试防止浏览器开发模式装饰器语法回归。</p>
+            </article>
+            <article class="card">
+              <h3>真实运行</h3>
+              <p>浏览器冒烟验证 WebGL/UI，Tauri 冒烟验证 WebView2、IPC、菜单、单实例、日志和退出，安装生命周期验证 Windows 集成。</p>
+            </article>
+          </div>
+          <h3>测试设计纪律</h3>
+          <ul>
+            <li>测试外部行为和不变量，不锁死组件内部变量或随机实现细节。</li>
+            <li>用注入时钟、确定 seed 和显式事件代替不受控等待；性能记录器的自动停止也要可控测试。</li>
+            <li>不通过删除断言、跳过测试或扩大阈值来“修复”失败；先确定产品合同是否真的改变。</li>
+            <li>打包成功不等于安装成功，安装成功不等于首次启动成功，首次启动成功不等于真人可玩性通过。</li>
+          </ul>
+        </section>
+
+        <section id="release">
+          <p class="section-kicker">16 · Windows release</p>
+          <h2>从源码到可安装候选包的证据链</h2>
+          <p class="section-lead">
+            Tauri 构建会先产出 Rust/前端组合的 <code>dream-builder.exe</code>，再由 NSIS 生成当前用户安装包。
+            项目发布脚本在其上增加版本、源码状态、哈希、签名和文件集检查，防止拿错旧产物。
+          </p>
+          <div class="diagram" role="img" aria-label="Windows 发布流程">
+            <div class="diagram__node"><strong>质量门禁</strong><span>TS + Rust + HTML</span></div>
+            <div class="diagram__node"><strong>Tauri build</strong><span>前端 dist + Rust EXE</span></div>
+            <div class="diagram__node"><strong>NSIS</strong><span>双语当前用户安装器</span></div>
+            <div class="diagram__node"><strong>组装</strong><span>1.1 文件名、许可、手册</span></div>
+            <div class="diagram__node"><strong>独立验证</strong><span>来源、哈希、签名、精确文件集</span></div>
+          </div>
+          <h3>候选包的六个文件</h3>
+          <ul>
+            <li><code>Dream-Builder-Fantasy-Tree_1.1_x64.exe</code>：便携入口；</li>
+            <li><code>Dream-Builder-Fantasy-Tree_1.1_x64-setup.exe</code>：推荐 NSIS 安装器；</li>
+            <li><code>LICENSE.txt</code> 与 <code>README-zh-CN.md</code>；</li>
+            <li><code>SHA256SUMS.txt</code>：四个交付载荷的摘要；</li>
+            <li><code>release-manifest.json</code>：schema 4、产品/技术版本、来源提交、源码树指纹、文件和签名状态。</li>
+          </ul>
+          <h3>源码指纹为何不只看 Git commit</h3>
+          <p>
+            本地候选可能在 dirty worktree 构建；只记 HEAD 会把多个不同源码状态写成同一身份。脚本枚举受 Git 管理和未忽略文件，
+            对路径、大小与 SHA-256 形成排序索引，再计算整棵源码树指纹。产物生成后任何源文件变化都会让独立验证拒绝旧清单。
+          </p>
+          <h3>候选、生产和签名</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>类型</th><th>允许状态</th><th>可以怎样称呼</th></tr></thead>
+              <tbody>
+                <tr><th>本地候选</th><td>显式允许 dirty；EXE 必须明确 NotSigned；清单记录 sourceDirty</td><td>开发候选，不得公开宣称正式版</td></tr>
+                <tr><th>干净候选</th><td>干净提交、全部门禁、未签名</td><td>可复核发行候选，仍非生产分发</td></tr>
+                <tr><th>生产包</th><td>干净源码、证书库有效代码签名、时间戳、两份 EXE 均 Valid</td><td>满足其余人工门槛后才可正式发布</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>安装与卸载合同</h3>
+          <p>
+            <a href="../scripts/release-install-state.ps1">release-install-state.ps1</a> 在安装后检查唯一卸载项、
+            技术版本 1.1.0、安装目录、主 EXE 和快捷方式；卸载后要求卸载项、程序目录、快捷方式和进程全部消失。
+            玩家数据可按升级/诊断政策保留，脚本只报告其存在，不读取或删除。完整手册见
+            <a href="../docs/game/release-runbook.md">release-runbook.md</a>。
+          </p>
+        </section>
+
+        <section id="code-map">
+          <p class="section-kicker">17 · Source map</p>
+          <h2>按问题寻找源码，而不是按文件名猜</h2>
+          <ul class="path-list">
+            <li><a href="../apps/desktop/src/App.tsx"><code>App.tsx</code></a><span>设置/场景水合、订阅、跨系统编排、导出与会话入口</span></li>
+            <li><a href="../apps/desktop/src/state/store.ts"><code>state/store.ts</code></a><span>Zustand 状态、选择器动作、进度提交与持久化桥接</span></li>
+            <li><a href="../apps/desktop/src/game/gameProgress.ts"><code>game/gameProgress.ts</code></a><span>光种、检查点、记忆、净化、树与门的纯状态机</span></li>
+            <li><a href="../apps/desktop/src/game/playerMotion.ts"><code>game/playerMotion.ts</code></a><span>相机相对移动、加减速、分步推进与静态碰撞</span></li>
+            <li><a href="../apps/desktop/src/scene/SceneCanvas.tsx"><code>scene/SceneCanvas.tsx</code></a><span>R3F Canvas、相机、灯光、Bloom、截图与 glTF API</span></li>
+            <li><a href="../apps/desktop/src/scene/GameplayController.tsx"><code>scene/GameplayController.tsx</code></a><span>接近判定、互动输入与领域动作的适配器</span></li>
+            <li><a href="../apps/desktop/src/ipc/treeApi.ts"><code>ipc/treeApi.ts</code></a><span>唯一 Rust IPC 客户端、Zod 验证、事件订阅和浏览器回退</span></li>
+            <li><a href="../packages/ipc-contracts/src/index.ts"><code>ipc-contracts/index.ts</code></a><span>跨边界 schema、类型推导、设置默认值与解析结果</span></li>
+            <li><a href="../crates/dream-builder/src/lib.rs"><code>Rust lib.rs</code></a><span>Tauri Builder、插件、setup、命令注册与进程生命周期</span></li>
+            <li><a href="../crates/dream-builder/src/commands.rs"><code>Rust commands.rs</code></a><span>命令边界、托管状态、设置验证和异步导出</span></li>
+            <li><a href="../crates/dream-builder/src/generation/fantasy_tree.rs"><code>generation/fantasy_tree.rs</code></a><span>确定性树干、树冠、符文、水晶和细节元数据</span></li>
+            <li><a href="../crates/dream-builder/src/state.rs"><code>Rust state.rs</code></a><span>设置不变量、Arc/Mutex、seed 历史与场景缓存</span></li>
+            <li><a href="../crates/dream-builder/tauri.conf.json"><code>tauri.conf.json</code></a><span>窗口、CSP、NSIS、Mica、WebView2 Evergreen 与产品元数据</span></li>
+            <li><a href="../scripts/release-build.ps1"><code>release-build.ps1</code></a><span>完整门禁、Tauri 构建、签名、交付组装和清单</span></li>
+            <li><a href="../scripts/verify-version-contract.ps1"><code>verify-version-contract.ps1</code></a><span>产品/技术版本映射与 WebView2 策略防漂移</span></li>
+          </ul>
+        </section>
+
+        <section id="learning-path">
+          <p class="section-kicker">18 · Guided learning</p>
+          <h2>建议的六段学习路线</h2>
+          <ol>
+            <li><strong>先运行浏览器版：</strong><code>pnpm dev</code>，完成标题到净化，观察没有 Rust 时的回退警告。</li>
+            <li><strong>读纯规则：</strong>从 gameProgress、purificationPuzzle、playerInput、playerMotion 的测试开始，理解确定状态转换。</li>
+            <li><strong>接上 React：</strong>追踪 store → GameplayController → UI/Scene，观察组件怎样消费同一快照。</li>
+            <li><strong>进入 3D：</strong>从 SceneCanvas 到 GameplayWorld，再拆解 TreeContent、CartoonForest、实例化、shader 和性能探针。</li>
+            <li><strong>跨过 IPC：</strong>比较 Zod schema 与 Rust serde struct，跟踪 <code>generate_tree</code> 请求和 <code>magic-field</code> 事件。</li>
+            <li><strong>运行原生与发布：</strong><code>pnpm tauri dev</code> 验证 WebView2/IPC，再阅读 capability、CSP、发布清单和安装状态脚本。</li>
+          </ol>
+          <div class="callout callout--violet">
+            <strong>一次安全练习：</strong>给 IPC 场景增加一个可选、向后兼容字段。先写 Rust/TS 两侧失败测试，
+            再同步 domain、serde、Zod、Worker 和消费者，最后运行全部门禁。这个练习会触及本项目最重要的架构边界。
+          </div>
+        </section>
+
+        <section id="glossary">
+          <p class="section-kicker">19 · Glossary</p>
+          <h2>术语速查</h2>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><th>Tauri</th><td>以系统 WebView 呈现前端、以 Rust 提供原生能力和安全 IPC 的桌面框架。</td></tr>
+                <tr><th>WebView2</th><td>Microsoft Edge Chromium 的 Windows 嵌入式运行时；本项目采用 Evergreen 自动维护模式。</td></tr>
+                <tr><th>Wry</th><td>Tauri 运行时使用的跨平台 WebView 抽象，在 Windows 下连接 WebView2。</td></tr>
+                <tr><th>IPC</th><td>进程/运行时边界通信；这里包括前端 invoke Rust 命令和 Rust emit 前端事件。</td></tr>
+                <tr><th>Capability</th><td>Tauri 2 的窗口级权限清单，决定前端可调用哪些 core/plugin 能力。</td></tr>
+                <tr><th>CSP</th><td>内容安全策略，限制 WebView 可加载和连接的资源来源。</td></tr>
+                <tr><th>R3F</th><td>react-three-fiber，Three.js 的 React renderer，用 JSX 声明场景图。</td></tr>
+                <tr><th>Draw call</th><td>CPU 向 GPU 提交一次绘制；大量小 mesh 会使其升高，实例化可合并重复绘制。</td></tr>
+                <tr><th>Fresnel</th><td>视线接近表面掠射角时反射更强的现象，常用于水晶、玻璃和边缘光。</td></tr>
+                <tr><th>Zustand</th><td>轻量 React 状态库；本项目用选择器订阅切片，核心转换仍由纯 reducer 决定。</td></tr>
+                <tr><th>Zod</th><td>运行时 schema 库，可在解析成功后推导 TypeScript 类型。</td></tr>
+                <tr><th>Newtype</th><td>用单字段 Rust 类型给裸值增加领域语义与构造不变量。</td></tr>
+                <tr><th><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></th><td>原子引用计数提供跨所有者共享，Mutex 提供互斥可变访问；不能跨 await 持有同步锁。</td></tr>
+                <tr><th>确定性</th><td>相同输入始终得到相同输出，是缓存、复现、测试和程序化存档重建的基础。</td></tr>
+                <tr><th>NSIS</th><td>Windows 安装器系统；本项目只生成一个当前用户、简中/英文安装包目标。</td></tr>
+                <tr><th>Authenticode</th><td>Windows 可执行文件代码签名体系；有效受信任签名是生产分发门槛。</td></tr>
+                <tr><th>1% Low</th><td>最慢约 1% 帧的等效 FPS，用于暴露平均 FPS 隐藏的卡顿。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            进一步阅读项目入口：<a href="../README.md">README</a>、
+            <a href="../docs/game/README.md">游戏愿景与路线</a>、
+            <a href="../docs/game/vertical-slice.md">垂直切片合同</a>、
+            <a href="../docs/game/release-runbook.md">Windows 交付手册</a>。
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》知识档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可直接离线打开、搜索、打印和随仓库归档。
+    </footer>
+  </body>
+</html>

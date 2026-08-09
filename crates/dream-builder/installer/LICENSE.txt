@@ -1,14 +1,14 @@
 Dream Builder Fantasy Tree — 软件许可协议 / Software License
 ================================================================
 
-版本 0.1.0
+版本 1.1
 
-本软件为教学演示用途。你可以自由地安装、运行、学习与修改本软件，
-用于个人学习与教学目的。
+你可以自由地安装、运行和游玩本软件。源代码可继续用于个人学习、
+教学与修改。
 
-This software is provided for educational and demonstration purposes.
-You may install, run, study, and modify it freely for personal learning
-and teaching.
+You may freely install, run, and play this software. Its source code may
+continue to be studied, taught, and modified for personal learning and
+educational purposes.
 
 免责声明 / Disclaimer
 ----------------------

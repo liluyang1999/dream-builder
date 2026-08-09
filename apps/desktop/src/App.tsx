@@ -9,19 +9,46 @@
  */
 import type { MagicField } from '@dream-builder/ipc-contracts';
 import { GlassProvider } from '@dream-builder/liquid-glass';
-import { useCallback, useEffect, useRef } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react';
+import { AudioDirector } from './audio/AudioDirector';
+import { GamepadNavigator } from './interaction/GamepadNavigator';
 import { useKeyboardShortcuts } from './interaction/useKeyboardShortcuts';
+import { createAsyncSubscriptionScope } from './ipc/asyncSubscriptionScope';
 import { isTauriRuntime } from './ipc/runtime';
 import { treeApi } from './ipc/treeApi';
-import { type SceneApi, SceneCanvas } from './scene/SceneCanvas';
+import { performanceCapture } from './performance/performanceCapture';
+import type { SceneApi } from './scene/SceneCanvas';
 import { useAppStore } from './state/store';
+import { ChapterCompleteOverlay } from './ui/ChapterCompleteOverlay';
+import { CreditsOverlay } from './ui/CreditsOverlay';
+import { GameMenu } from './ui/GameMenu';
 import { Hud } from './ui/Hud';
-import { OnboardingHint } from './ui/OnboardingHint';
+import { MemoryOverlay } from './ui/MemoryOverlay';
+import { OnboardingHint, resetOnboardingHint } from './ui/OnboardingHint';
+import { ProgressRecoveryNotice } from './ui/ProgressRecoveryNotice';
+import { PurificationOverlay } from './ui/PurificationOverlay';
+import { SettingsOverlay } from './ui/SettingsOverlay';
+
+const SCENE_LOAD_SETTLE_MS = 1_000;
+const sceneCanvasModule = import('./scene/SceneCanvas');
+const SceneCanvas = lazy(async () => {
+  const module = await sceneCanvasModule;
+  return { default: module.SceneCanvas };
+});
 
 export function App() {
   const seed = useAppStore((state) => state.seed);
   const scene = useAppStore((state) => state.scene);
   const reducedMotion = useAppStore((state) => state.reducedMotion);
+  const graphicsQuality = useAppStore((state) => state.graphicsQuality);
+  const masterVolume = useAppStore((state) => state.masterVolume);
+  const musicVolume = useAppStore((state) => state.musicVolume);
+  const effectsVolume = useAppStore((state) => state.effectsVolume);
+  const cameraSensitivity = useAppStore((state) => state.cameraSensitivity);
+  const highContrast = useAppStore((state) => state.highContrast);
+  const textScale = useAppStore((state) => state.textScale);
+  const showHints = useAppStore((state) => state.showHints);
+  const sessionMode = useAppStore((state) => state.sessionMode);
   const hudHidden = useAppStore((state) => state.hudHidden);
   const theme = useAppStore((state) => state.theme);
   const selectedId = useAppStore((state) => state.selection.selectedId);
@@ -31,8 +58,15 @@ export function App() {
   const setSeed = useAppStore((state) => state.setSeed);
   const toggleHud = useAppStore((state) => state.toggleHud);
   const toggleHelp = useAppStore((state) => state.toggleHelp);
+  const setHelpOpen = useAppStore((state) => state.setHelpOpen);
   const clearSelection = useAppStore((state) => state.clearSelection);
+  const startGame = useAppStore((state) => state.startGame);
+  const pauseGame = useAppStore((state) => state.pauseGame);
+  const resumeGame = useAppStore((state) => state.resumeGame);
   const hydrateSettings = useAppStore((state) => state.hydrateSettings);
+  const dispatchGameProgress = useAppStore((state) => state.dispatchGameProgress);
+  const [settingsReady, setSettingsReady] = useState(false);
+  const [onboardingRevision, setOnboardingRevision] = useState(0);
 
   const fieldRef = useRef<MagicField | null>(null);
   const sceneApiRef = useRef<SceneApi | null>(null);
@@ -54,6 +88,48 @@ export function App() {
     await exportSceneFile(seed, setWarning);
   }, [seed, setWarning]);
 
+  const handleRestartChapter = useCallback(() => {
+    sceneApiRef.current?.restartChapter();
+    dispatchGameProgress({ type: 'reset' });
+    resetOnboardingHint();
+    setOnboardingRevision((revision) => revision + 1);
+  }, [dispatchGameProgress]);
+
+  const handleNewGame = useCallback(() => {
+    handleRestartChapter();
+    startGame();
+  }, [handleRestartChapter, startGame]);
+
+  const handleTogglePause = useCallback(() => {
+    const mode = useAppStore.getState().sessionMode;
+    if (mode === 'playing') {
+      pauseGame();
+    } else if (mode === 'paused') {
+      resumeGame();
+    }
+  }, [pauseGame, resumeGame]);
+
+  const handleEscape = useCallback(() => {
+    if (useAppStore.getState().selection.selectedId) {
+      clearSelection();
+      return;
+    }
+    handleTogglePause();
+  }, [clearSelection, handleTogglePause]);
+
+  const handleQuit = useCallback(async () => {
+    if (!isTauriRuntime()) {
+      setWarning('浏览器预览无法直接关闭窗口；桌面版本可从这里安全退出。');
+      return;
+    }
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      await getCurrentWindow().close();
+    } catch (error) {
+      setWarning(`无法关闭窗口：${errorMessage(error)}`);
+    }
+  }, [setWarning]);
+
   // Keep the latest action callbacks in a ref so the native-menu subscription
   // can be registered exactly once yet always call current closures.
   const actionsRef = useRef({
@@ -74,23 +150,98 @@ export function App() {
   // --- effects ------------------------------------------------------------
   useEffect(() => {
     let active = true;
-    void treeApi.getSettings().then((settings) => {
-      if (active && settings) hydrateSettings(settings);
-    });
+    void treeApi
+      .getSettings()
+      .then((settings) => {
+        if (active && settings) hydrateSettings(settings);
+      })
+      .finally(() => {
+        if (active) setSettingsReady(true);
+      });
     return () => {
       active = false;
     };
   }, [hydrateSettings]);
 
   useEffect(() => {
+    if (!settingsReady) return;
     let active = true;
-    void treeApi.loadScene(seed).then((result) => {
-      if (active) applySceneResult(result);
-    });
+    let phaseActive = true;
+    let settleTimeout: number | null = null;
+    const finishSceneLoadPhase = (marker: string) => {
+      if (!phaseActive) return;
+      phaseActive = false;
+      performanceCapture.mark(marker);
+      performanceCapture.endPhase('scene-load');
+    };
+    performanceCapture.mark('scene-load-started');
+    performanceCapture.beginPhase('scene-load');
+    void treeApi
+      .loadScene(seed)
+      .then((result) => {
+        if (!active) return;
+        applySceneResult(result);
+        performanceCapture.mark('scene-data-ready');
+        settleTimeout = window.setTimeout(() => {
+          settleTimeout = null;
+          finishSceneLoadPhase('scene-load-settled');
+        }, SCENE_LOAD_SETTLE_MS);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        finishSceneLoadPhase('scene-load-failed');
+        setWarning(`无法加载场景：${errorMessage(error)}`);
+      });
     return () => {
       active = false;
+      if (settleTimeout !== null) window.clearTimeout(settleTimeout);
+      if (phaseActive) {
+        finishSceneLoadPhase('scene-load-cancelled');
+      }
     };
-  }, [seed, applySceneResult]);
+  }, [settingsReady, seed, applySceneResult, setWarning]);
+
+  useEffect(() => {
+    if (!settingsReady) return;
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      void treeApi
+        .saveSettings({
+          seed,
+          theme,
+          reducedMotion,
+          graphicsQuality,
+          masterVolume,
+          musicVolume,
+          effectsVolume,
+          cameraSensitivity,
+          highContrast,
+          textScale,
+          showHints,
+        })
+        .catch((error: unknown) => {
+          if (active) setWarning(`无法保存设置：${errorMessage(error)}`);
+        });
+    }, 150);
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [
+    settingsReady,
+    seed,
+    theme,
+    reducedMotion,
+    graphicsQuality,
+    masterVolume,
+    musicVolume,
+    effectsVolume,
+    cameraSensitivity,
+    highContrast,
+    textScale,
+    showHints,
+    setWarning,
+  ]);
 
   useEffect(() => {
     if (!selectedId || !scene) {
@@ -112,64 +263,103 @@ export function App() {
   }, [selectedId, scene, setSelectedDetail, setWarning]);
 
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
-    void treeApi
-      .listenMagicField((field) => {
-        fieldRef.current = field;
-      })
-      .then((fn) => {
-        unlisten = fn;
-      });
-    return () => unlisten?.();
-  }, []);
+    const subscriptions = createAsyncSubscriptionScope((error) => {
+      setWarning(`原生事件订阅失败：${errorMessage(error)}`);
+    });
 
-  useEffect(() => {
-    const unsubscribers: Array<() => void> = [];
-    const register = async (id: string, run: () => void): Promise<void> => {
-      unsubscribers.push(await treeApi.listenMenu(id, run));
-    };
-    void register('regenerate', () => actionsRef.current.regenerate());
-    void register('reset_view', () => actionsRef.current.resetView());
-    void register('toggle_hud', () => actionsRef.current.toggleHud());
-    void register('screenshot', () => actionsRef.current.screenshot());
-    void register('about', () => actionsRef.current.about());
-    return () => {
-      for (const fn of unsubscribers) fn();
-    };
-  }, []);
+    subscriptions.add(
+      treeApi.listenMagicField((field) => {
+        fieldRef.current = field;
+      }),
+    );
+    subscriptions.add(treeApi.listenMenu('regenerate', () => actionsRef.current.regenerate()));
+    subscriptions.add(treeApi.listenMenu('reset_view', () => actionsRef.current.resetView()));
+    subscriptions.add(treeApi.listenMenu('toggle_hud', () => actionsRef.current.toggleHud()));
+    subscriptions.add(treeApi.listenMenu('screenshot', () => actionsRef.current.screenshot()));
+    subscriptions.add(treeApi.listenMenu('about', () => actionsRef.current.about()));
+
+    return () => subscriptions.close();
+  }, [setWarning]);
 
   useKeyboardShortcuts({
     onResetCamera: handleResetCamera,
     onToggleHud: toggleHud,
     onToggleFullscreen: toggleFullscreen,
     onScreenshot: () => void handleScreenshot(),
-    onDeselect: clearSelection,
+    onEscape: handleEscape,
     onToggleHelp: toggleHelp,
     onRegenerate: () => setSeed(randomSeed()),
   });
 
   return (
-    <GlassProvider theme={theme} className="app-root">
-      <div className={hudHidden ? 'app-shell hud-hidden' : 'app-shell'}>
+    <GlassProvider
+      theme={theme}
+      quality={graphicsQuality}
+      className={[
+        'app-root',
+        highContrast ? 'app-root--high-contrast' : '',
+        textScale === 'large' ? 'app-root--large-text' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div
+        className={['app-shell', hudHidden ? 'hud-hidden' : '', `app-shell--${sessionMode}`]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <AudioDirector />
+        <GamepadNavigator />
         <div className="scene-host">
           {scene ? (
-            <SceneCanvas
-              scene={scene}
-              reducedMotion={reducedMotion}
-              fieldRef={fieldRef}
-              apiRef={sceneApiRef}
-            />
-          ) : null}
+            <Suspense fallback={<SceneLoading />}>
+              <SceneCanvas
+                scene={scene}
+                reducedMotion={reducedMotion}
+                fieldRef={fieldRef}
+                apiRef={sceneApiRef}
+              />
+            </Suspense>
+          ) : (
+            <SceneLoading />
+          )}
         </div>
-        <Hud
-          onResetCamera={handleResetCamera}
-          onScreenshot={() => void handleScreenshot()}
-          onExport={() => void handleExportGltf()}
-          onExportScene={() => void handleExportScene()}
+        {sessionMode !== 'title' ? (
+          <Hud
+            onResetCamera={handleResetCamera}
+            onScreenshot={() => void handleScreenshot()}
+            onExport={() => void handleExportGltf()}
+            onExportScene={() => void handleExportScene()}
+            onOpenMenu={pauseGame}
+            onRestartChapter={handleRestartChapter}
+          />
+        ) : null}
+        <MemoryOverlay />
+        <PurificationOverlay />
+        {showHints && sessionMode === 'playing' ? (
+          <OnboardingHint key={onboardingRevision} />
+        ) : null}
+        <GameMenu
+          onNewGame={handleNewGame}
+          onOpenHelp={() => setHelpOpen(true)}
+          onQuit={() => void handleQuit()}
         />
-        <OnboardingHint />
+        <SettingsOverlay />
+        <CreditsOverlay />
+        <ProgressRecoveryNotice />
+        <ChapterCompleteOverlay onScreenshot={() => void handleScreenshot()} />
       </div>
     </GlassProvider>
+  );
+}
+
+function SceneLoading() {
+  return (
+    <div className="scene-loading" role="status">
+      <span className="scene-loading__orb" aria-hidden="true" />
+      <strong>正在唤醒森林</strong>
+      <span>让光穿过树冠……</span>
+    </div>
   );
 }
 
