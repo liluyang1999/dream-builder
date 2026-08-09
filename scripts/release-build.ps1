@@ -13,6 +13,7 @@ Set-StrictMode -Version Latest
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $temporarySigningDirectory = $null
 . (Join-Path $PSScriptRoot "lib\version-contract.ps1")
+. (Join-Path $PSScriptRoot "lib\file-hash.ps1")
 Push-Location $repositoryRoot
 
 try {
@@ -55,7 +56,7 @@ try {
             $fullPath = Join-Path $Root $nativeRelativePath
             if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
                 $item = Get-Item -LiteralPath $fullPath
-                $hash = (Get-FileHash -LiteralPath $fullPath -Algorithm SHA256).Hash
+                $hash = Get-DreamBuilderSha256 -LiteralPath $fullPath
                 "$relativePath`t$($item.Length)`t$hash"
             } else {
                 "$relativePath`tMISSING"
@@ -248,7 +249,7 @@ try {
     $deliverables = @($portableOutput, $installerOutput, $licenseOutput, $runbookOutput)
     $fileRecords = foreach ($path in $deliverables) {
         $item = Get-Item -LiteralPath $path
-        $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+        $hash = Get-DreamBuilderSha256 -LiteralPath $path
         [ordered]@{
             name = $item.Name
             sizeBytes = $item.Length

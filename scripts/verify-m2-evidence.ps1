@@ -7,6 +7,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
+. (Join-Path $PSScriptRoot "lib\file-hash.ps1")
 if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
     $ManifestPath = Join-Path $repoRoot "docs\game\evidence\m2-target-build.json"
 }
@@ -63,7 +64,7 @@ $expectedReportHash = [string]$manifest.performanceEvidence.sha256
 if ($expectedReportHash -notmatch '^[A-Fa-f0-9]{64}$') {
     throw "The M2 performance report has an invalid expected SHA-256 value."
 }
-$actualReportHash = (Get-FileHash -LiteralPath $reportPath -Algorithm SHA256).Hash.ToUpperInvariant()
+$actualReportHash = Get-DreamBuilderSha256 -LiteralPath $reportPath
 if ($actualReportHash -ne $expectedReportHash.ToUpperInvariant()) {
     throw "Performance report hash mismatch.`nExpected: $expectedReportHash`nActual: $actualReportHash`nFile: $reportPath"
 }

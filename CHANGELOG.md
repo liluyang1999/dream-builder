@@ -50,6 +50,9 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
   exact binary measured in 2026-07.
 - The Tauri CLI is pinned exactly to the upstream version from which the custom
   two-component NSIS display-version template was derived.
+- SHA-256 evidence and release verification use a repository-owned streaming
+  .NET implementation so stripped Windows CI sessions do not depend on the
+  optional `Get-FileHash` cmdlet being available.
 
 ### Security
 
