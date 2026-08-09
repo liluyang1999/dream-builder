@@ -811,16 +811,16 @@ dependencies = [
 
 [[package]]
 name = "dream-builder"
-version = "1.1.0"
+version = "1.0.0"
 dependencies = [
  "anyhow",
+ "embed-resource",
  "log",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
- "tauri-plugin-fs",
  "tauri-plugin-log",
  "tauri-plugin-opener",
  "tauri-plugin-single-instance",

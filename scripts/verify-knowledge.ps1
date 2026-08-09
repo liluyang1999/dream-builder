@@ -28,8 +28,8 @@ $requiredPatterns = [ordered]@{
     "Quality gates" = 'id="quality"'
     "Release operations" = 'id="release"'
     "Glossary" = 'id="glossary"'
-    "Public version" = 'output/release/1\.1'
-    "Technical version" = 'technicalVersion: 1\.1\.0'
+    "Public version" = 'output/release/1\.0'
+    "Windows display version" = 'DisplayVersion'
     "Evergreen runtime" = 'WebView2 Evergreen'
     "Project-local pnpm store" = '\.pnpm-store/'
     "Project-local pnpm cache" = '\.pnpm-cache/'
@@ -42,6 +42,9 @@ foreach ($entry in $requiredPatterns.GetEnumerator()) {
 
 if ($html -match '(?i)\b(TODO|TBD|FIXME)\b') {
     throw "Knowledge archive contains an unfinished placeholder."
+}
+if ($html -match '(?i)technicalVersion' -or $html -match '(?<![0-9.])1\.0\.0(?![0-9.])') {
+    throw "Knowledge archive must expose only the two-component product version."
 }
 if ($html -match '(?i)<(?:script|link)\b[^>]*(?:src|href)="https?://') {
     throw "Knowledge archive must not depend on remote scripts or stylesheets."

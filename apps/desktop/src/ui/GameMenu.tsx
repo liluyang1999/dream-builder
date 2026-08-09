@@ -1,6 +1,7 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
 import { useEffect, useRef, useState } from 'react';
 import { INITIAL_GAME_PROGRESS } from '../game/gameProgress';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { useAppStore } from '../state/store';
 
 interface Props {
@@ -22,28 +23,30 @@ export function GameMenu({ onNewGame, onOpenHelp, onQuit }: Props) {
   const setCreditsOpen = useAppStore((state) => state.setCreditsOpen);
   const [confirmingNewGame, setConfirmingNewGame] = useState(false);
   const primaryRef = useRef<HTMLButtonElement>(null);
+  const confirmNewGameRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const hasProgress = !sameProgress(progress, INITIAL_GAME_PROGRESS);
   const visible = sessionMode !== 'playing' && !settingsOpen && !creditsOpen && !helpOpen;
+  const paused = sessionMode === 'paused';
+
+  useModalFocus({
+    open: visible,
+    dialogRef,
+    initialFocusRef: primaryRef,
+    onEscape: () => {
+      if (confirmingNewGame) setConfirmingNewGame(false);
+      else if (paused) resumeGame();
+    },
+  });
 
   useEffect(() => {
     if (!visible) {
       setConfirmingNewGame(false);
       return;
     }
-    primaryRef.current?.focus();
-  }, [visible]);
-
-  useEffect(() => {
-    if (!visible || sessionMode !== 'paused') return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      resumeGame();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [visible, sessionMode, resumeGame]);
+    (confirmingNewGame ? confirmNewGameRef : primaryRef).current?.focus();
+  }, [visible, confirmingNewGame]);
 
   if (!visible) return null;
 
@@ -51,6 +54,7 @@ export function GameMenu({ onNewGame, onOpenHelp, onQuit }: Props) {
     return (
       <div className="game-menu">
         <GlassPanel
+          ref={dialogRef}
           className="game-menu__panel game-menu__panel--confirm"
           role="alertdialog"
           aria-modal="true"
@@ -62,7 +66,7 @@ export function GameMenu({ onNewGame, onOpenHelp, onQuit }: Props) {
           <p id="new-game-description">当前章节进度会被替换。画面、音频与操作设置会保留。</p>
           <div className="game-menu__actions">
             <GlassButton
-              ref={primaryRef}
+              ref={confirmNewGameRef}
               variant="primary"
               onClick={() => {
                 setConfirmingNewGame(false);
@@ -78,10 +82,10 @@ export function GameMenu({ onNewGame, onOpenHelp, onQuit }: Props) {
     );
   }
 
-  const paused = sessionMode === 'paused';
   return (
     <div className="game-menu">
       <GlassPanel
+        ref={dialogRef}
         className="game-menu__panel"
         role="dialog"
         aria-modal="true"

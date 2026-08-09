@@ -1,6 +1,6 @@
 {
   "name": "dream-builder",
-  "version": "1.1.0",
+  "version": "1.0.0",
   "private": true,
   "packageManager": "pnpm@11.16.0",
   "engines": {
@@ -8,6 +8,7 @@
   },
   "scripts": {
     "version:verify": "powershell -NoLogo -NoProfile -File scripts/verify-version-contract.ps1",
+    "desktop:verify-security": "powershell -NoLogo -NoProfile -File scripts/verify-desktop-security.ps1",
     "knowledge:verify": "powershell -NoLogo -NoProfile -File scripts/verify-knowledge.ps1",
     "pnpm:verify-layout": "powershell -NoLogo -NoProfile -File scripts/verify-pnpm-layout.ps1",
     "dev": "pnpm --filter @dream-builder/desktop dev",
@@ -19,19 +20,18 @@
     "lint": "biome check .",
     "fmt": "biome format --write .",
     "tauri": "cd crates/dream-builder && tauri",
-    "m2:verify": "powershell -NoLogo -NoProfile -File scripts/m2-playtest.ps1",
-    "m2:playtest": "powershell -NoLogo -NoProfile -File scripts/m2-playtest.ps1 -Launch",
+    "m2:verify": "powershell -NoLogo -NoProfile -File scripts/verify-m2-evidence.ps1",
     "release:build": "powershell -NoLogo -NoProfile -File scripts/release-build.ps1",
     "release:build:signed": "powershell -NoLogo -NoProfile -File scripts/release-build.ps1 -RequireSigned",
     "release:verify": "powershell -NoLogo -NoProfile -File scripts/release-verify.ps1",
     "release:verify:production": "powershell -NoLogo -NoProfile -File scripts/release-verify.ps1 -RequireCleanSource -RequireSigned",
     "release:verify:installed": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Installed",
     "release:verify:uninstalled": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Absent",
-    "check": "pnpm version:verify && pnpm knowledge:verify && pnpm pnpm:verify-layout && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm version:verify && pnpm desktop:verify-security && pnpm knowledge:verify && pnpm pnpm:verify-layout && pnpm m2:verify && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tauri-apps/cli": "^2.11.4",
+    "@tauri-apps/cli": "2.11.4",
     "typescript": "^5.9.3",
     "vite": "^6.4.3",
     "vitest": "^3.2.7"

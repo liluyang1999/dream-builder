@@ -31,7 +31,7 @@ dream-builder/
 ├── knowledge/
 │   └── index.html      # current self-contained Chinese architecture archive
 ├── scripts/            # contract, dependency-layout, knowledge, and release checks
-├── version.json        # public two-component version -> technical SemVer mapping
+├── version.json        # sole player-visible two-component product version
 ├── README.md
 ├── CLAUDE.md → @AGENTS.md
 └── AGENTS.md
@@ -45,7 +45,8 @@ This project is developed on Windows with **pnpm** (Node 24, pnpm 11). From Powe
 
 ```bash
 pnpm install                  # installs all workspace packages
-pnpm version:verify           # public/technical versions + WebView2 Evergreen contract
+pnpm version:verify           # public version display + tooling/WebView2 contracts
+pnpm desktop:verify-security  # CSP + least-privilege Tauri capability contract
 pnpm knowledge:verify         # teaching HTML structure, anchors, coverage, and local links
 pnpm pnpm:verify-layout       # all pnpm stores/caches remain below the repository root
 pnpm dev                      # Vite dev server on http://127.0.0.1:1420 (strict port)
@@ -56,8 +57,7 @@ pnpm lint                     # biome check .
 pnpm fmt                      # biome format --write .
 pnpm build                    # tsc type-check then vite build → apps/desktop/dist
 pnpm check                    # contracts + pnpm layout + lint + typecheck + test + build
-pnpm m2:verify                # verify the exact M2 EXE + performance report hashes
-pnpm m2:playtest              # verify, then launch that exact playtest build
+pnpm m2:verify                # verify the archived native report hash and performance gates
 ```
 
 Rust backend (requires Rust toolchain + MSVC for Windows bundling), run from repo root:
@@ -115,7 +115,7 @@ When changing the wire format, update the Rust domain/serde shape, the Zod contr
 ## Conventions specific to this repo
 
 - **Strict TS, ES modules, bundler resolution.** No JS files; tests are colocated under `apps/desktop/src/tests/`. Pure tests use Node and component tests use jsdom through Vitest environment selection.
-- **Two-component public versions.** `version.json::productVersion` is `major.feature`: small product features increment `feature`; a substantial module increments `major` and resets `feature`. npm, Cargo, Tauri, and Windows metadata use the mechanically derived `major.feature.0` `technicalVersion`. Never edit one manifest version in isolation.
+- **Two-component public versions.** `version.json::productVersion` is the sole product version and uses `major.feature`. npm, Cargo, and Tauri machine manifests receive a mechanically derived SemVer compatibility value, but player UI, docs, release manifests/files, Windows EXE version strings, and Installed Apps must show only `productVersion`. Never expose or maintain a second product version, and never edit one manifest in isolation.
 - **Project-local pnpm data.** `storeDir`, `cacheDir`, and `virtualStoreDir` must resolve below the repository root, and the global virtual store stays disabled. Do not add user-level or drive-root pnpm configuration.
 - **UI strings are Chinese.** Status, error, and detail copy is zh-CN in both Rust and TS. Match that when editing user-visible text unless told otherwise.
 - **Default seed is `424242`** in both the Zustand store and Rust `Settings::default`. Settings hydrate before the first scene load; seed changes update the active Rust state immediately and persist as one settings snapshot.

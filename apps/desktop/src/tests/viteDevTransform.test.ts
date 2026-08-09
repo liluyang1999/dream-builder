@@ -39,6 +39,18 @@ describe('Vite development transform', () => {
     expect(typeof css).toBe('string');
     expect(css).not.toMatch(/color:\s*rgba\(\s*244\s*,\s*239\s*,\s*226/);
     expect(css.match(/color:\s*var\(--lg-fg\)/g)?.length ?? 0).toBeGreaterThanOrEqual(6);
+    expect(css).toMatch(
+      /\.app-root\[data-lg-theme="light"\]\s*\{[^}]*--product-heading:\s*#17261f;[^}]*--product-highlight:\s*#704900;/s,
+    );
+    expect(css).toMatch(
+      /\.game-menu__panel h1,[\s\S]*?\.credits-overlay__panel h2\s*\{[^}]*color:\s*var\(--product-heading\);/,
+    );
+    expect(css).toMatch(
+      /\.app-root\[data-lg-theme="light"\]\.app-root--high-contrast \.lg-panel,[\s\S]*?border-color:\s*rgba\(8, 24, 17, 0\.72\);/,
+    );
+    expect(css).toMatch(
+      /\.app-root--high-contrast \.game-menu__footer,[\s\S]*?\.app-root--high-contrast \.settings-overlay__footer p,[\s\S]*?opacity:\s*1;/,
+    );
   });
 
   test('keeps HUD utility overlays positioned above the shared glass surface rule', async () => {

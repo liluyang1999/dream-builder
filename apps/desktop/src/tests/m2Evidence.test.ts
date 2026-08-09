@@ -172,7 +172,7 @@ function passingBundle(): M2EvidenceBundle {
     schemaVersion: M2_EVIDENCE_SCHEMA_VERSION,
     createdAt: '2026-07-23T05:00:00.000Z',
     build: {
-      appVersion: '1.1',
+      appVersion: '1.0',
       worktreeId: 'local-dirty-3f7d6454',
       artifactSha256: '3f7d64540a0cd3861f6c32553d46ffd4dcfa506d2a857dfcccef1fc514bbf6e1',
     },

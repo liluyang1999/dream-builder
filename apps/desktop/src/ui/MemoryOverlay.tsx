@@ -1,30 +1,29 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { MEMORY_FRAGMENT_PLACEMENT } from '../game/forestLayout';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { useAppStore } from '../state/store';
 
 export function MemoryOverlay() {
   const activeMemoryId = useAppStore((state) => state.activeMemoryId);
   const closeMemory = useAppStore((state) => state.closeMemory);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const open = activeMemoryId === MEMORY_FRAGMENT_PLACEMENT.id;
 
-  useEffect(() => {
-    if (!activeMemoryId) return;
-    closeButtonRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      closeMemory();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeMemoryId, closeMemory]);
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: closeMemory,
+  });
 
-  if (!activeMemoryId || activeMemoryId !== MEMORY_FRAGMENT_PLACEMENT.id) return null;
+  if (!open) return null;
 
   return (
     <div className="memory-overlay">
       <GlassPanel
+        ref={dialogRef}
         className="memory-overlay__card"
         role="dialog"
         aria-modal="true"

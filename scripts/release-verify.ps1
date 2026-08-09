@@ -84,7 +84,6 @@ try {
 
     $versionContract = Get-DreamBuilderVersionContract -RepositoryRoot $repositoryRoot
     $version = $versionContract.ProductVersion
-    $technicalVersion = $versionContract.TechnicalVersion
     $tauriConfig = $versionContract.TauriConfig
 
     $resolvedReleaseDirectory = if ([string]::IsNullOrWhiteSpace($ReleaseDirectory)) {
@@ -121,10 +120,14 @@ try {
 
     $manifestPath = Join-Path $resolvedReleaseDirectory "release-manifest.json"
     $manifest = Read-JsonFile $manifestPath
-    Assert-Equal ([int]$manifest.schemaVersion) 4 "Manifest schema version"
+    Assert-Equal ([int]$manifest.schemaVersion) 5 "Manifest schema version"
     Assert-Equal ([string]$manifest.product) ([string]$tauriConfig.productName) "Product name"
     Assert-Equal ([string]$manifest.version) $version "Manifest version"
-    Assert-Equal ([string]$manifest.technicalVersion) $technicalVersion "Manifest technical version"
+    foreach ($internalField in @("technicalVersion", "binaryProductVersion")) {
+        if ($null -ne $manifest.PSObject.Properties[$internalField]) {
+            throw "Public release manifest must not expose internal field '$internalField'."
+        }
+    }
     Assert-Equal ([string]$manifest.platform) "windows-x64" "Target platform"
     $releaseKind = [string]$manifest.releaseKind
     if ($releaseKind -notin @("candidate", "production")) {
@@ -222,15 +225,16 @@ try {
         ) "$($record.name) checksum manifest entry"
     }
 
-    $portablePath = Join-Path $resolvedReleaseDirectory $portableName
-    $binaryVersionInfo = (Get-Item -LiteralPath $portablePath).VersionInfo
-    foreach ($versionField in @(
-        [string]$binaryVersionInfo.ProductVersion,
-        [string]$binaryVersionInfo.FileVersion,
-        [string]$manifest.binaryProductVersion
-    )) {
-        if (-not $versionField.StartsWith($technicalVersion, [StringComparison]::Ordinal)) {
-            throw "Binary version '$versionField' does not match technical version '$technicalVersion'."
+    foreach ($versionedExecutableName in @($portableName, $installerName)) {
+        $versionedExecutablePath = Join-Path $resolvedReleaseDirectory $versionedExecutableName
+        $binaryVersionInfo = (Get-Item -LiteralPath $versionedExecutablePath).VersionInfo
+        foreach ($versionField in @(
+            [string]$binaryVersionInfo.ProductVersion,
+            [string]$binaryVersionInfo.FileVersion
+        )) {
+            if ($versionField.Trim() -ne $version) {
+                throw "Player-visible version '$versionField' in '$versionedExecutableName' does not match product version '$version'."
+            }
         }
     }
 
@@ -292,7 +296,6 @@ try {
     [pscustomobject]@{
         Product = [string]$manifest.product
         Version = $version
-        TechnicalVersion = $technicalVersion
         Platform = [string]$manifest.platform
         ReleaseKind = $releaseKind
         SourceCommit = [string]$manifest.sourceCommit

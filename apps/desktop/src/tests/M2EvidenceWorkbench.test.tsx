@@ -22,7 +22,7 @@ describe('M2EvidenceWorkbench', () => {
       '1220',
     );
     expect((screen.getByLabelText('渲染视口高度（CSS px）') as HTMLInputElement).value).toBe('744');
-    expect((screen.getByLabelText('应用版本') as HTMLInputElement).value).toBe('1.1');
+    expect((screen.getByLabelText('应用版本') as HTMLInputElement).value).toBe('1.0');
   });
 
   test('keeps participant identity out of the form contract', () => {

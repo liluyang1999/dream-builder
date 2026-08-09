@@ -1,21 +1,19 @@
 {
-  "schemaVersion": 1,
-  "purpose": "m2-playtest-target-build",
-  "appVersion": "0.1.0",
+  "schemaVersion": 2,
+  "purpose": "m2-performance-evidence-archive",
   "source": {
     "gitHead": "a54fc6503ec7d64048a09492c4a7356a0edda752",
     "worktreeState": "dirty",
     "worktreeId": "a54fc6503ec7-dirty"
   },
   "artifacts": {
+    "availability": "identity-only",
     "executable": {
-      "relativePath": "target/release/dream-builder.exe",
       "sizeBytes": 11470336,
       "builtAtUtc": "2026-07-23T14:22:08Z",
       "sha256": "90D3A1CDA1284EB761E54DC3DFA4B36A093A112B3DBEB3D19ACAB28473BD1910"
     },
     "installer": {
-      "relativePath": "target/release/bundle/nsis/Dream Builder Fantasy Tree_0.1.0_x64-setup.exe",
       "sizeBytes": 2693944,
       "builtAtUtc": "2026-07-23T14:22:08Z",
       "sha256": "2022189FD202905B50F72F353C8EB59B49F3912184D7516F72BA594E8F5C84CC"

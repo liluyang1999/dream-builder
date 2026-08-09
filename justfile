@@ -73,10 +73,6 @@ release-verify-installed:
 release-verify-uninstalled:
     pnpm release:verify:uninstalled
 
-# Verify the exact M2 playtest EXE and archived performance report.
+# Verify the archived native M2 report hash, provenance, phases, and budget.
 m2-verify:
     pnpm m2:verify
-
-# Verify and launch the exact M2 playtest build.
-m2-playtest:
-    pnpm m2:playtest

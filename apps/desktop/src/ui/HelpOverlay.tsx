@@ -1,5 +1,6 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useModalFocus } from '../interaction/useModalFocus';
 
 const SHORTCUTS: ReadonlyArray<[string, string]> = [
   ['WASD', '移动守林人'],
@@ -31,17 +32,35 @@ export function HelpOverlay({
   onRestartChapter(): void;
 }) {
   const [confirmingRestart, setConfirmingRestart] = useState(false);
-
-  useEffect(() => {
-    if (!open) setConfirmingRestart(false);
-  }, [open]);
-
-  if (!open) return null;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const restartButtonRef = useRef<HTMLButtonElement>(null);
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
 
   const close = () => {
     setConfirmingRestart(false);
     onClose();
   };
+
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: restartButtonRef,
+    onEscape: () => {
+      if (confirmingRestart) setConfirmingRestart(false);
+      else close();
+    },
+    onQuestionMark: close,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setConfirmingRestart(false);
+      return;
+    }
+    (confirmingRestart ? confirmButtonRef : restartButtonRef).current?.focus();
+  }, [open, confirmingRestart]);
+
+  if (!open) return null;
 
   const restart = () => {
     onRestartChapter();
@@ -49,7 +68,13 @@ export function HelpOverlay({
   };
 
   return (
-    <GlassPanel className="hud__help" role="dialog" aria-modal="true" aria-label="键盘与手柄操作">
+    <GlassPanel
+      ref={dialogRef}
+      className="hud__help"
+      role="dialog"
+      aria-modal="true"
+      aria-label="键盘与手柄操作"
+    >
       <strong>探索操作</strong>
       <ul>
         {SHORTCUTS.map(([key, label]) => (
@@ -62,14 +87,16 @@ export function HelpOverlay({
         <div className="hud__restart" role="alert">
           <p>这会清除本章进度、检查点和已读记忆，并重新显示入门提示；画面与辅助设置不会改变。</p>
           <div className="hud__restart-actions">
-            <GlassButton variant="primary" onClick={restart}>
+            <GlassButton ref={confirmButtonRef} variant="primary" onClick={restart}>
               确认重开
             </GlassButton>
             <GlassButton onClick={() => setConfirmingRestart(false)}>取消</GlassButton>
           </div>
         </div>
       ) : (
-        <GlassButton onClick={() => setConfirmingRestart(true)}>重新开始本章</GlassButton>
+        <GlassButton ref={restartButtonRef} onClick={() => setConfirmingRestart(true)}>
+          重新开始本章
+        </GlassButton>
       )}
       <GlassButton onClick={onOpenPerformance}>性能记录</GlassButton>
       <GlassButton onClick={close}>关闭</GlassButton>

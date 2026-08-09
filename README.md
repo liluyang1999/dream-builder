@@ -3,7 +3,7 @@
 《智慧树之森》是一款单人离线第三人称卡通森林游戏。玩家作为能听见森林记忆的小小守林人，
 探索中央林地、蘑菇坡、溪流与遗迹，收集三枚光种并完成方向净化，让失色的智慧树和周围生态重新发光。
 
-当前产品版本为 **1.1**。标题—探索—净化—章节结尾闭环、自动存档与损坏恢复、键鼠与标准手柄、
+当前产品版本为 **1.0**。标题—探索—净化—章节结尾闭环、自动存档与损坏恢复、键鼠与标准手柄、
 音频、画质与无障碍设置、截图/场景导出、单实例及 Windows 安装工程均已实现。目标设备的原生十分钟
 性能报告和当前用户安装—首次启动—卸载闭环已有归档；五名首次接触玩家观察、实体手柄完整听测、
 干净账户覆盖升级和受信任代码签名仍是正式发布前的外部门槛。
@@ -42,7 +42,7 @@ dream-builder/
 ├── docs/game/             # 当前产品方向、验收证据与交付手册
 ├── knowledge/index.html   # 唯一的综合中文教学档案
 ├── scripts/               # 版本、依赖布局、知识档案与发布验证
-└── version.json           # 1.1 → 1.1.0 的唯一版本映射
+└── version.json           # 唯一的两段式公开版本源
 ```
 
 ## 环境与 pnpm 数据位置
@@ -69,9 +69,10 @@ M2 主持人证据工作台使用 `http://127.0.0.1:1420/?tool=m2-evidence`。�
 
 ## 版本规则
 
-对玩家、文档、发布目录和交付文件使用两段式版本 `主版本.功能版本`：小功能增加第二段，
-非常大的功能模块增加第一段并把第二段归零。npm、Cargo、Tauri 和 Windows 元数据要求合法
-三段 SemVer，因此内部只做机械映射：产品 **1.1** 对应技术 **1.1.0**。
+对玩家、文档、发布目录和交付文件只使用两段式版本 `主版本.功能版本`。当前版本从
+**1.0** 开始；后续大版本增加第一段并把第二段归零，小版本增加第二段。npm、Cargo 与
+Tauri 的机器清单必须满足各自的 SemVer 语法，因此构建时会从公开版本机械派生兼容值，
+但该值不得再出现在游戏界面、Windows“已安装的应用”、EXE 版本字符串、发布清单或资料中。
 
 根 [version.json](version.json) 是唯一真相源，`pnpm version:verify` 会核对所有工作区清单、
 Cargo、Tauri、WebView2 策略和该映射。历史证据 JSON 中记录的旧技术版本保持原样。
@@ -86,8 +87,9 @@ cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo check --workspace --all-targets --locked
 ```
 
-`pnpm check` 依次验证版本/WebView2、教学 HTML、本地 pnpm 布局、Biome、TypeScript、Vitest、
-Vite 生产构建和 bundle 预算。GitHub Actions 在 Windows 上执行同一组前端与 Rust 门禁。
+`pnpm check` 依次验证版本/WebView2、桌面 CSP 与最小权限、教学 HTML、本地 pnpm 布局、
+归档 M2 性能证据、Biome、TypeScript、Vitest、Vite 生产构建和 bundle 预算。GitHub Actions
+在 Windows 上执行同一组前端与 Rust 门禁；可单独运行 `pnpm desktop:verify-security` 复核桌面边界。
 
 ## Windows 构建与发布候选
 
@@ -99,7 +101,7 @@ pnpm release:verify
 
 Tauri 原始入口为 `target/release/dream-builder.exe`，NSIS 安装包位于
 `target/release/bundle/nsis/`。发布脚本会把玩家可读的交付文件组装到
-`output/release/1.1/`，并重新验证精确文件集、产品/技术版本、来源提交、源码树 SHA-256、
+`output/release/1.0/`，并重新验证精确文件集、两段式产品版本、来源提交、源码树 SHA-256、
 文件哈希、许可/手册副本和 Authenticode 状态。
 
 未签名文件只能称为候选版。生产分发必须从干净提交运行 `pnpm release:build:signed`，使用

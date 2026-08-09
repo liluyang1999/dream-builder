@@ -1,5 +1,6 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { useAppStore } from '../state/store';
 
 export function ChapterCompleteOverlay({ onScreenshot }: { onScreenshot(): void }) {
@@ -8,24 +9,21 @@ export function ChapterCompleteOverlay({ onScreenshot }: { onScreenshot(): void 
   const dismiss = useAppStore((state) => state.dismissChapterComplete);
   const returnToTitle = useAppStore((state) => state.returnToTitle);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    continueButtonRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      dismiss();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, dismiss]);
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: continueButtonRef,
+    onEscape: dismiss,
+  });
 
   if (!open) return null;
 
   return (
     <div className="chapter-complete">
       <GlassPanel
+        ref={dialogRef}
         className="chapter-complete__panel"
         role="dialog"
         aria-modal="true"

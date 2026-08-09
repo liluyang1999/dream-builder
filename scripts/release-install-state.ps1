@@ -29,7 +29,6 @@ try {
     $tauriConfig = $versionContract.TauriConfig
     $productName = [string]$tauriConfig.productName
     $version = $versionContract.ProductVersion
-    $technicalVersion = $versionContract.TechnicalVersion
 
     $uninstallRoots = @(
         "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
@@ -85,8 +84,8 @@ try {
         }
         $entry = $installEntries[0]
         $displayVersion = [string](Get-OptionalPropertyValue $entry "DisplayVersion")
-        if ($displayVersion -ne $technicalVersion) {
-            throw "Installed version '$displayVersion' does not match technical version '$technicalVersion'."
+        if ($displayVersion -ne $version) {
+            throw "Installed Apps version '$displayVersion' does not match product version '$version'."
         }
         $installLocation = (
             [string](Get-OptionalPropertyValue $entry "InstallLocation")
@@ -101,15 +100,26 @@ try {
         if ([string]::IsNullOrWhiteSpace($uninstallString)) {
             throw "The uninstall entry does not declare an uninstall command."
         }
+        $uninstallerPath = Join-Path $installLocation "uninstall.exe"
+        if (-not (Test-Path -LiteralPath $uninstallerPath -PathType Leaf)) {
+            throw "The installed uninstaller does not exist: $uninstallerPath"
+        }
+        $uninstallerVersionInfo = (Get-Item -LiteralPath $uninstallerPath).VersionInfo
+        foreach ($uninstallerVersion in @(
+            [string]$uninstallerVersionInfo.ProductVersion,
+            [string]$uninstallerVersionInfo.FileVersion
+        )) {
+            if ($uninstallerVersion.Trim() -ne $version) {
+                throw "Player-visible uninstaller version '$uninstallerVersion' does not match product version '$version'."
+            }
+        }
 
         $mainExecutables = @(
             Get-ChildItem -LiteralPath $installLocation -Filter "*.exe" -File |
                 Where-Object {
                     $_.Name -notmatch "uninstall" -and
-                    $_.VersionInfo.ProductVersion.StartsWith(
-                        $technicalVersion,
-                        [StringComparison]::Ordinal
-                    )
+                    $_.VersionInfo.ProductVersion.Trim() -eq $version -and
+                    $_.VersionInfo.FileVersion.Trim() -eq $version
                 }
         )
         if ($mainExecutables.Count -ne 1) {
@@ -123,9 +133,9 @@ try {
             ExpectedState = $ExpectedState
             Product = $productName
             Version = $version
-            TechnicalVersion = $technicalVersion
             InstallLocation = $installLocation
             MainExecutable = $mainExecutables[0].FullName
+            Uninstaller = $uninstallerPath
             UninstallEntry = [string]$entry.PSPath
             Shortcuts = @($shortcuts | Select-Object -ExpandProperty FullName)
             RunningProcesses = $processes.Count
@@ -151,7 +161,6 @@ try {
             ExpectedState = $ExpectedState
             Product = $productName
             Version = $version
-            TechnicalVersion = $technicalVersion
             UninstallEntries = 0
             ProgramDirectories = 0
             Shortcuts = 0

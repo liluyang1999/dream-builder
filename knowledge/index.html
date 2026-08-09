@@ -733,8 +733,7 @@
         它描述的是当前仓库实际实现，而不是理想化示例。
       </p>
       <div class="badges" aria-label="档案摘要">
-        <span class="badge badge--gold">产品版本 1.1</span>
-        <span class="badge">技术版本 1.1.0</span>
+        <span class="badge badge--gold">产品版本 1.0</span>
         <span class="badge">Tauri 2 + WebView2 Evergreen</span>
         <span class="badge">React 19 + R3F</span>
         <span class="badge">Rust 2024</span>
@@ -837,19 +836,18 @@
           </ul>
           <div class="grid">
             <article class="card card--accent">
-              <h3>产品版本 1.1</h3>
+              <h3>产品版本 1.0</h3>
               <p>
-                玩家看到的版本采用两段式 <code>主版本.功能版本</code>。每个小功能增加第二段；只有非常大的
-                功能模块升级第一段。当前新增了版本契约、本地 pnpm 存储约束、WebView2 策略明确化、依赖安全修复
-                与统一教学档案，因此从 1.0 前进到 1.1。
+                玩家看到的版本采用两段式 <code>主版本.功能版本</code>，当前正式从 1.0 开始。版本契约、
+                本地 pnpm 存储约束、WebView2 策略、依赖安全修复与统一教学档案都归入这一个 1.0 产品版本。
               </p>
             </article>
             <article class="card">
-              <h3>技术版本 1.1.0</h3>
+              <h3>单一显示口径</h3>
               <p>
-                Cargo、npm、Tauri 与 Windows 文件元数据要求合法 SemVer，所以内部清单保留兼容补丁位
-                <code>.0</code>。这不是第二套产品版本；它只是 <code>1.1 → 1.1.0</code> 的机械映射，由
-                <a href="../version.json">version.json</a> 和校验脚本强制一致。
+                Cargo、npm 与 Tauri 的机器清单必须满足各自的 SemVer 语法，构建脚本会机械补足所需格式，
+                但不会把它当成第二套产品版本。游戏、资料、发布清单、Windows 文件属性与“已安装的应用”
+                都只显示 <a href="../version.json">version.json</a> 中的 1.0。
               </p>
             </article>
           </div>
@@ -1400,7 +1398,8 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
               <h3>Capability / ACL</h3>
               <p>
                 <a href="../crates/dream-builder/capabilities/default.json">default.json</a> 只授权 main 窗口需要的
-                core/window、dialog、store、fs 与 opener 能力。命令已注册但未授权时，前端调用仍应被拒绝。
+                core 关闭窗口、保存对话框、导出文件定位，以及限定在 <code>$APPLOG</code> 下的日志目录打开能力。
+                存档与日志插件只由 Rust 后端使用，不向 WebView 暴露；未使用的直接文件系统插件已经移除。
               </p>
             </article>
             <article class="card">
@@ -1419,6 +1418,11 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
               <p>性能记录不保留逐帧路径，M2 工具只用 P01–P05 匿名编号，不联网、不自动上传、不采姓名账号。</p>
             </article>
           </div>
+          <p>
+            <code>pnpm desktop:verify-security</code> 会拒绝远程开发源、CSP 通配符或
+            <code>unsafe-eval</code>、多余 capability、越界路径以及重新注册直接文件系统插件；它也是
+            <code>pnpm check</code> 的固定阶段。
+          </p>
           <h3>文件导出的信任边界</h3>
           <p>
             路径来自用户主动保存对话框，Rust 负责实际写入。错误需要带操作上下文，但不能回显秘密内容。
@@ -1436,7 +1440,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
 
         <section id="version-dependencies">
           <p class="section-kicker">14 · Versioning and dependencies</p>
-          <h2>两段产品版本与三段工具版本怎样同时保持诚实</h2>
+          <h2>用一个两段式产品版本控制全部展示</h2>
           <p class="section-lead">
             用户要求的版本语义由两段数字表达，底层工具的格式要求则由机械兼容层承担。两者必须从一个文件派生并自动对照，
             不能靠开发者手工记忆在多个清单中同步。
@@ -1445,24 +1449,24 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
             <table>
               <thead><tr><th>位置</th><th>当前值</th><th>原因</th></tr></thead>
               <tbody>
-                <tr><th>游戏 UI / 文档 / Changelog</th><td><code>1.1</code></td><td>对外两段产品版本</td></tr>
-                <tr><th>发布目录与交付文件名</th><td><code>output/release/1.1</code></td><td>面向玩家和发布人员</td></tr>
-                <tr><th>release manifest</th><td><code>version: 1.1</code> + <code>technicalVersion: 1.1.0</code></td><td>同时可读与可验证</td></tr>
-                <tr><th>package.json / Cargo / Tauri</th><td><code>1.1.0</code></td><td>npm、Cargo、Tauri SemVer 解析要求</td></tr>
-                <tr><th>Windows EXE / 卸载项</th><td><code>1.1.0</code>（可能带文件 build 位）</td><td>平台文件与安装元数据要求</td></tr>
+                <tr><th>游戏 UI / 文档 / Changelog</th><td><code>1.0</code></td><td>唯一的产品版本</td></tr>
+                <tr><th>发布目录与交付文件名</th><td><code>output/release/1.0</code></td><td>面向玩家和发布人员</td></tr>
+                <tr><th>release manifest</th><td><code>version: 1.0</code></td><td>不再暴露第二个版本字段</td></tr>
+                <tr><th>package.json / Cargo / Tauri</th><td>构建兼容值（不展示）</td><td>只满足工具解析要求</td></tr>
+                <tr><th>Windows EXE / 已安装的应用</th><td><code>1.0</code></td><td>安装器、主程序、卸载器与 DisplayVersion 一致</td></tr>
               </tbody>
             </table>
           </div>
           <h3>升级规则</h3>
           <ul>
-            <li><strong>小的新功能：</strong>第二段加一，例如 1.1 → 1.2；技术版本自动映射为 1.2.0。</li>
-            <li><strong>非常大的功能模块：</strong>第一段加一，第二段归零，例如 1.9 → 2.0；技术版本为 2.0.0。</li>
-            <li><strong>修复与内部重构：</strong>不单独暴露第三段；随下一产品版本交付或在同一 1.x 候选内重新构建并用来源哈希区分。</li>
-            <li><strong>历史证据：</strong>归档 JSON 中的旧技术版本保持原样，它是当时产物身份，不应为了“看起来统一”而篡改。</li>
+            <li><strong>小的新功能：</strong>只增加第二段，不对玩家暴露额外补丁位。</li>
+            <li><strong>非常大的功能模块：</strong>增加第一段并把第二段归零。</li>
+            <li><strong>修复与内部重构：</strong>在同一候选内重新构建时用来源提交与哈希区分，不制造第二套产品版本。</li>
+            <li><strong>历史证据：</strong>原始测量 JSON 保持不可改写；当前产品资料只引用两段式版本。</li>
           </ul>
           <h3>依赖版本与产品版本不是一回事</h3>
           <p>
-            React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；“产品 1.1”不要求它们也等于 1.1。
+            React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；产品版本 1.0 不要求依赖采用相同数字。
             依赖升级必须看 API、锁文件、公告、目标平台与实际回归。当前依赖解析还通过 override 固定
             <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.17</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
           </p>
@@ -1528,16 +1532,16 @@ cargo check --workspace --all-targets --locked</code></pre>
             <div class="diagram__node"><strong>质量门禁</strong><span>TS + Rust + HTML</span></div>
             <div class="diagram__node"><strong>Tauri build</strong><span>前端 dist + Rust EXE</span></div>
             <div class="diagram__node"><strong>NSIS</strong><span>双语当前用户安装器</span></div>
-            <div class="diagram__node"><strong>组装</strong><span>1.1 文件名、许可、手册</span></div>
+            <div class="diagram__node"><strong>组装</strong><span>1.0 文件名、许可、手册</span></div>
             <div class="diagram__node"><strong>独立验证</strong><span>来源、哈希、签名、精确文件集</span></div>
           </div>
           <h3>候选包的六个文件</h3>
           <ul>
-            <li><code>Dream-Builder-Fantasy-Tree_1.1_x64.exe</code>：便携入口；</li>
-            <li><code>Dream-Builder-Fantasy-Tree_1.1_x64-setup.exe</code>：推荐 NSIS 安装器；</li>
+            <li><code>Dream-Builder-Fantasy-Tree_1.0_x64.exe</code>：便携入口；</li>
+            <li><code>Dream-Builder-Fantasy-Tree_1.0_x64-setup.exe</code>：推荐 NSIS 安装器；</li>
             <li><code>LICENSE.txt</code> 与 <code>README-zh-CN.md</code>；</li>
             <li><code>SHA256SUMS.txt</code>：四个交付载荷的摘要；</li>
-            <li><code>release-manifest.json</code>：schema 4、产品/技术版本、来源提交、源码树指纹、文件和签名状态。</li>
+            <li><code>release-manifest.json</code>：schema 5、唯一产品版本、来源提交、源码树指纹、文件和签名状态。</li>
           </ul>
           <h3>源码指纹为何不只看 Git commit</h3>
           <p>
@@ -1558,7 +1562,7 @@ cargo check --workspace --all-targets --locked</code></pre>
           <h3>安装与卸载合同</h3>
           <p>
             <a href="../scripts/release-install-state.ps1">release-install-state.ps1</a> 在安装后检查唯一卸载项、
-            技术版本 1.1.0、安装目录、主 EXE 和快捷方式；卸载后要求卸载项、程序目录、快捷方式和进程全部消失。
+            两段式版本 1.0、安装目录、主 EXE 和快捷方式；卸载后要求卸载项、程序目录、快捷方式和进程全部消失。
             玩家数据可按升级/诊断政策保留，脚本只报告其存在，不读取或删除。完整手册见
             <a href="../docs/game/release-runbook.md">release-runbook.md</a>。
           </p>

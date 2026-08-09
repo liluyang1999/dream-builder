@@ -1,5 +1,6 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { isTauriRuntime } from '../ipc/runtime';
 import {
   type PerformanceCaptureSnapshot,
@@ -23,6 +24,15 @@ export function PerformancePanel({ open, onClose }: { open: boolean; onClose(): 
   const seed = useAppStore((state) => state.seed);
   const source = useAppStore((state) => state.source);
   const reducedMotion = useAppStore((state) => state.reducedMotion);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const primaryActionRef = useRef<HTMLButtonElement>(null);
+
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: primaryActionRef,
+    onEscape: onClose,
+  });
 
   if (!open) return null;
 
@@ -46,7 +56,13 @@ export function PerformancePanel({ open, onClose }: { open: boolean; onClose(): 
   };
 
   return (
-    <GlassPanel className="performance-panel" role="dialog" aria-label="性能记录">
+    <GlassPanel
+      ref={dialogRef}
+      className="performance-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="性能记录"
+    >
       <div className="performance-panel__header">
         <div>
           <span>本地诊断工具</span>
@@ -73,11 +89,15 @@ export function PerformancePanel({ open, onClose }: { open: boolean; onClose(): 
 
       <div className="performance-panel__actions">
         {snapshot.status === 'recording' ? (
-          <GlassButton variant="primary" onClick={() => performanceCapture.stop()}>
+          <GlassButton
+            ref={primaryActionRef}
+            variant="primary"
+            onClick={() => performanceCapture.stop()}
+          >
             停止并生成报告
           </GlassButton>
         ) : (
-          <GlassButton variant="primary" onClick={start}>
+          <GlassButton ref={primaryActionRef} variant="primary" onClick={start}>
             {snapshot.status === 'complete' ? '重新记录' : '开始 10 分钟记录'}
           </GlassButton>
         )}

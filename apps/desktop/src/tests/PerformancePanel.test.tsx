@@ -36,4 +36,17 @@ describe('PerformancePanel', () => {
     expect(onClose).toHaveBeenCalledOnce();
     expect(performanceCapture.getSnapshot().status).toBe('recording');
   });
+
+  test('traps global game shortcuts behind a modal and closes with Escape', () => {
+    const onClose = vi.fn();
+    render(<PerformancePanel open onClose={onClose} />);
+
+    expect(screen.getByRole('dialog', { name: '性能记录' }).getAttribute('aria-modal')).toBe(
+      'true',
+    );
+    expect(screen.getByRole('button', { name: '开始 10 分钟记录' })).toBe(document.activeElement);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledOnce();
+  });
 });

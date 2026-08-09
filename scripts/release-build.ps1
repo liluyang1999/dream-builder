@@ -77,7 +77,7 @@ try {
 
     $versionContract = Get-DreamBuilderVersionContract -RepositoryRoot $repositoryRoot
     $productVersion = $versionContract.ProductVersion
-    $technicalVersion = $versionContract.TechnicalVersion
+    $toolingVersion = $versionContract.ToolingVersion
     $tauriConfig = $versionContract.TauriConfig
     $capabilityConfig = Read-JsonFile (
         Join-Path $repositoryRoot "crates\dream-builder\capabilities\default.json"
@@ -208,16 +208,23 @@ try {
 
     $installerDirectory = Join-Path $repositoryRoot "target\release\bundle\nsis"
     $installerCandidates = @(
-        Get-ChildItem -LiteralPath $installerDirectory -Filter "*_$($technicalVersion)_x64-setup.exe" -File
+        Get-ChildItem -LiteralPath $installerDirectory -Filter "*_$($toolingVersion)_x64-setup.exe" -File
     )
     if ($installerCandidates.Count -ne 1) {
-        throw "Expected exactly one NSIS installer for technical version $technicalVersion; found $($installerCandidates.Count)."
+        throw "Expected exactly one NSIS installer for the current tooling version; found $($installerCandidates.Count)."
     }
     $installerPath = $installerCandidates[0].FullName
 
-    $binaryVersion = (Get-Item -LiteralPath $binaryPath).VersionInfo.ProductVersion
-    if ($binaryVersion -and -not $binaryVersion.StartsWith($technicalVersion, [StringComparison]::Ordinal)) {
-        throw "Binary ProductVersion '$binaryVersion' does not match technical version '$technicalVersion'."
+    foreach ($versionedExecutable in @($binaryPath, $installerPath)) {
+        $versionInfo = (Get-Item -LiteralPath $versionedExecutable).VersionInfo
+        foreach ($binaryVersion in @(
+            [string]$versionInfo.ProductVersion,
+            [string]$versionInfo.FileVersion
+        )) {
+            if ($binaryVersion.Trim() -ne $productVersion) {
+                throw "Player-visible version '$binaryVersion' in '$versionedExecutable' does not match product version '$productVersion'."
+            }
+        }
     }
 
     $resolvedOutputRoot = if ([IO.Path]::IsPathRooted($OutputDirectory)) {
@@ -271,17 +278,15 @@ try {
     [IO.File]::WriteAllLines($checksumPath, $checksumLines, $utf8WithoutBom)
 
     $manifest = [ordered]@{
-        schemaVersion = 4
+        schemaVersion = 5
         product = [string]$tauriConfig.productName
         version = $productVersion
-        technicalVersion = $technicalVersion
         platform = "windows-x64"
         releaseKind = if ($RequireSigned) { "production" } else { "candidate" }
         generatedAtUtc = [DateTime]::UtcNow.ToString("o")
         sourceCommit = $sourceCommit
         sourceDirty = $sourceDirty
         sourceTreeSha256 = $sourceTreeSha256
-        binaryProductVersion = $binaryVersion
         signatures = $signatureRecords
         files = $fileRecords
     }

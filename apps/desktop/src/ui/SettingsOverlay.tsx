@@ -1,6 +1,7 @@
 import type { GraphicsQuality, TextScale, Theme } from '@dream-builder/ipc-contracts';
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { useAppStore } from '../state/store';
 
 export function SettingsOverlay() {
@@ -8,24 +9,21 @@ export function SettingsOverlay() {
   const close = useAppStore((state) => state.setSettingsOpen);
   const resetPreferences = useAppStore((state) => state.resetPreferences);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    closeButtonRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      close(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, close]);
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => close(false),
+  });
 
   if (!open) return null;
 
   return (
     <div className="settings-overlay">
       <GlassPanel
+        ref={dialogRef}
         className="settings-overlay__panel"
         role="dialog"
         aria-modal="true"

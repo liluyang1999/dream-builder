@@ -35,6 +35,7 @@ describe('GameMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: '开始新旅程' }));
     expect(screen.getByRole('alertdialog')).toBeTruthy();
     expect(onNewGame).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: '确认开始新旅程' })).toBe(document.activeElement);
 
     fireEvent.click(screen.getByRole('button', { name: '确认开始新旅程' }));
     expect(onNewGame).toHaveBeenCalledOnce();

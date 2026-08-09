@@ -1,5 +1,6 @@
 import { GlassButton, GlassPanel } from '@dream-builder/liquid-glass';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { isTauriRuntime } from '../ipc/runtime';
 import { useAppStore } from '../state/store';
 import { APP_CHANNEL, APP_VERSION } from '../version';
@@ -8,19 +9,15 @@ export function CreditsOverlay() {
   const open = useAppStore((state) => state.creditsOpen);
   const setOpen = useAppStore((state) => state.setCreditsOpen);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const [diagnosticsStatus, setDiagnosticsStatus] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    closeButtonRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      setOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, setOpen]);
+  useModalFocus({
+    open,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    onEscape: () => setOpen(false),
+  });
 
   if (!open) return null;
 
@@ -44,6 +41,7 @@ export function CreditsOverlay() {
   return (
     <div className="credits-overlay">
       <GlassPanel
+        ref={dialogRef}
         className="credits-overlay__panel"
         role="dialog"
         aria-modal="true"

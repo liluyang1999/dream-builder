@@ -16,7 +16,7 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
       '@tauri-apps/cli':
-        specifier: ^2.11.4
+        specifier: 2.11.4
         version: 2.11.4
       typescript:
         specifier: ^5.9.3

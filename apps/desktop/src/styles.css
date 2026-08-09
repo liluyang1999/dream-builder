@@ -24,6 +24,32 @@ body,
 .app-root {
   width: 100%;
   height: 100%;
+  --product-heading: #fffbed;
+  --product-muted: rgba(241, 251, 244, 0.76);
+  --product-highlight: #f7c76b;
+  --product-accent-soft: #82ebbb;
+  --product-purple-text: #b99cff;
+  --product-success-text: #7df0bd;
+}
+
+.app-root[data-lg-theme="light"] {
+  --product-heading: #17261f;
+  --product-muted: rgba(18, 39, 30, 0.78);
+  --product-highlight: #704900;
+  --product-accent-soft: #146343;
+  --product-purple-text: #5d3a91;
+  --product-success-text: #176346;
+}
+
+@media (prefers-color-scheme: light) {
+  .app-root[data-lg-theme="auto"] {
+    --product-heading: #17261f;
+    --product-muted: rgba(18, 39, 30, 0.78);
+    --product-highlight: #704900;
+    --product-accent-soft: #146343;
+    --product-purple-text: #5d3a91;
+    --product-success-text: #176346;
+  }
 }
 
 .app-shell {
@@ -205,7 +231,7 @@ body,
 .hud__eyebrow {
   display: block;
   margin-bottom: 2px;
-  color: #f7c76b;
+  color: var(--product-highlight);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -241,7 +267,7 @@ body,
 }
 
 .hud__quest-header span {
-  color: #f7c76b;
+  color: var(--product-highlight);
   font-variant-numeric: tabular-nums;
 }
 
@@ -389,7 +415,7 @@ body,
 
 .hud__creator-tools summary:hover,
 .hud__creator-tools summary:focus-visible {
-  color: #f7c76b;
+  color: var(--product-highlight);
   opacity: 1;
 }
 
@@ -422,7 +448,7 @@ body,
 .hud__help strong {
   display: block;
   margin-bottom: 8px;
-  color: #f7c76b;
+  color: var(--product-highlight);
 }
 
 .hud__help ul {
@@ -487,14 +513,14 @@ body,
 }
 
 .performance-panel__header > div > span {
-  color: #b99cff;
+  color: var(--product-purple-text);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
 }
 
 .performance-panel__header strong {
-  color: #f7c76b;
+  color: var(--product-highlight);
   font-size: 1rem;
 }
 
@@ -655,7 +681,7 @@ kbd {
 
 .memory-overlay__eyebrow {
   margin-bottom: 8px;
-  color: #b99cff;
+  color: var(--product-purple-text);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -676,7 +702,7 @@ kbd {
 
 .memory-overlay__saved {
   margin: 18px 0 12px;
-  color: #7df0bd;
+  color: var(--product-success-text);
   font-size: 0.76rem;
 }
 
@@ -700,7 +726,7 @@ kbd {
 }
 
 .purification-overlay__eyebrow {
-  color: #b99cff;
+  color: var(--product-purple-text);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -784,7 +810,7 @@ kbd {
 .purification-overlay__feedback {
   min-height: 1.4em;
   margin: 14px 0 10px;
-  color: #7df0bd;
+  color: var(--product-success-text);
   font-size: 0.78rem;
 }
 
@@ -828,7 +854,17 @@ kbd {
 }
 
 .app-root--high-contrast {
-  --product-muted: rgba(255, 255, 255, 0.9);
+  --product-muted: rgba(255, 255, 255, 0.94);
+}
+
+.app-root[data-lg-theme="light"].app-root--high-contrast {
+  --product-muted: rgba(8, 24, 17, 0.96);
+}
+
+@media (prefers-color-scheme: light) {
+  .app-root[data-lg-theme="auto"].app-root--high-contrast {
+    --product-muted: rgba(8, 24, 17, 0.96);
+  }
 }
 
 .app-root--high-contrast .lg-panel,
@@ -837,9 +873,30 @@ kbd {
   border-color: rgba(255, 255, 255, 0.52);
 }
 
+.app-root[data-lg-theme="light"].app-root--high-contrast .lg-panel,
+.app-root[data-lg-theme="light"].app-root--high-contrast .lg-card,
+.app-root[data-lg-theme="light"].app-root--high-contrast .lg-button {
+  border-color: rgba(8, 24, 17, 0.72);
+}
+
+@media (prefers-color-scheme: light) {
+  .app-root[data-lg-theme="auto"].app-root--high-contrast .lg-panel,
+  .app-root[data-lg-theme="auto"].app-root--high-contrast .lg-card,
+  .app-root[data-lg-theme="auto"].app-root--high-contrast .lg-button {
+    border-color: rgba(8, 24, 17, 0.72);
+  }
+}
+
 .app-root--high-contrast .hud__line,
 .app-root--high-contrast .hud__quest p,
-.app-root--high-contrast .settings-toggle small {
+.app-root--high-contrast .settings-toggle small,
+.app-root--high-contrast .game-menu__lead,
+.app-root--high-contrast .game-menu__footer,
+.app-root--high-contrast .settings-overlay__footer p,
+.app-root--high-contrast .credits-overlay__panel > p,
+.app-root--high-contrast .progress-recovery__panel p,
+.app-root--high-contrast .chapter-complete__panel > p,
+.app-root--high-contrast .chapter-complete__panel > small {
   opacity: 1;
 }
 
@@ -907,7 +964,7 @@ kbd {
 .game-menu__eyebrow {
   display: block;
   margin-bottom: 8px;
-  color: #82ebbb;
+  color: var(--product-accent-soft);
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.2em;
@@ -918,7 +975,7 @@ kbd {
 .game-menu__panel h2,
 .credits-overlay__panel h2 {
   margin: 0;
-  color: #fffbed;
+  color: var(--product-heading);
   font-family: Georgia, "Noto Serif SC", serif;
   font-size: clamp(2rem, 6vw, 3.3rem);
   font-weight: 600;
@@ -933,7 +990,7 @@ kbd {
 .game-menu__lead,
 .game-menu__panel--confirm p {
   margin: 16px auto 24px;
-  color: var(--product-muted, rgba(241, 251, 244, 0.76));
+  color: var(--product-muted);
   line-height: 1.75;
 }
 
@@ -951,7 +1008,8 @@ kbd {
 .game-menu__footer {
   display: block;
   margin-top: 22px;
-  color: var(--product-muted, rgba(234, 248, 239, 0.52));
+  color: var(--product-muted);
+  opacity: 0.68;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
 }
@@ -981,7 +1039,7 @@ kbd {
 }
 
 .settings-overlay__header span {
-  color: #82ebbb;
+  color: var(--product-accent-soft);
   font-size: 0.7rem;
   font-weight: 750;
   letter-spacing: 0.1em;
@@ -1075,7 +1133,7 @@ kbd {
 
 .settings-overlay__footer p {
   margin: 0;
-  color: var(--product-muted, var(--lg-fg));
+  color: var(--product-muted);
   opacity: 0.62;
   font-size: 0.74rem;
 }
@@ -1087,7 +1145,7 @@ kbd {
 }
 
 .credits-overlay__panel > p {
-  color: var(--product-muted, var(--lg-fg));
+  color: var(--product-muted);
   opacity: 0.78;
   line-height: 1.75;
 }
@@ -1119,7 +1177,7 @@ kbd {
 }
 
 .credits-overlay__thanks {
-  color: #f7c76b;
+  color: var(--product-highlight);
 }
 
 .progress-recovery {
@@ -1140,12 +1198,12 @@ kbd {
 }
 
 .progress-recovery__panel strong {
-  color: #f7c76b;
+  color: var(--product-highlight);
 }
 
 .progress-recovery__panel p {
   margin: 5px 0 0;
-  color: var(--product-muted, var(--lg-fg));
+  color: var(--product-muted);
   opacity: 0.76;
   font-size: 0.76rem;
   line-height: 1.55;
@@ -1183,14 +1241,14 @@ kbd {
 
 .chapter-complete__panel h2 {
   margin: 0;
-  color: #fffbed;
+  color: var(--product-heading);
   font-family: Georgia, "Noto Serif SC", serif;
   font-size: clamp(1.8rem, 5vw, 2.8rem);
 }
 
 .chapter-complete__panel > p {
   margin: 16px auto 22px;
-  color: var(--product-muted, var(--lg-fg));
+  color: var(--product-muted);
   opacity: 0.8;
   line-height: 1.75;
 }
@@ -1222,7 +1280,7 @@ kbd {
 .chapter-complete__panel > small {
   display: block;
   margin-top: 18px;
-  color: var(--product-muted, var(--lg-fg));
+  color: var(--product-muted);
   opacity: 0.52;
 }
 

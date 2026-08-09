@@ -11,6 +11,7 @@ describe('OnboardingHint', () => {
     render(<OnboardingHint />);
 
     expect(screen.getByRole('dialog', { name: '欢迎' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '开始探索' })).toBe(document.activeElement);
     fireEvent.click(screen.getByRole('button', { name: '开始探索' }));
     expect(screen.queryByRole('dialog', { name: '欢迎' })).toBeNull();
     expect(localStorage.getItem('dream-builder.onboarded.v2')).toBe('1');

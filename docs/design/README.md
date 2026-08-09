@@ -5,4 +5,4 @@
 
 - 当前产品方向与验收标准：[`docs/game/`](../game/README.md)
 - 当前全栈教学档案：[`knowledge/index.html`](../../knowledge/index.html)
-- `dream-builder-legacy-poster.png`：早期技术演示海报，文案已经不代表 1.1 游戏定位。
+- `dream-builder-legacy-poster.png`：早期技术演示海报，文案已经不代表当前 1.0 游戏定位。

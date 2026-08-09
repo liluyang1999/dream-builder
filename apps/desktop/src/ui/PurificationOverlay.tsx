@@ -8,6 +8,7 @@ import {
   applyPurificationInput,
   createPurificationAttempt,
 } from '../game/purificationPuzzle';
+import { useModalFocus } from '../interaction/useModalFocus';
 import { useAppStore } from '../state/store';
 
 const DIRECTION_COPY: Record<RuneDirection, { glyph: string; label: string }> = {
@@ -31,6 +32,13 @@ export function PurificationOverlay() {
   const [feedback, setFeedback] = useState('按图示顺序回应四拍根脉。');
   const attemptRef = useRef(attempt);
   const northButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useModalFocus({
+    open: cleansing,
+    dialogRef,
+    initialFocusRef: northButtonRef,
+  });
 
   const applyDirection = useCallback(
     (direction: RuneDirection) => {
@@ -57,8 +65,6 @@ export function PurificationOverlay() {
     attemptRef.current = initial;
     setAttempt(initial);
     setFeedback('按图示顺序回应四拍根脉。');
-    northButtonRef.current?.focus();
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
@@ -79,6 +85,7 @@ export function PurificationOverlay() {
   return (
     <div className="purification-overlay">
       <GlassPanel
+        ref={dialogRef}
         className="purification-overlay__card"
         role="dialog"
         aria-modal="true"
