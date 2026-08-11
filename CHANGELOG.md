@@ -5,6 +5,39 @@ two-component `major.feature` contract. Build tools may receive a mechanically
 derived compatibility value, but that value is not a second product version and
 must not appear in player-facing UI, Windows Installed Apps, release files, or docs.
 
+## [Unreleased]
+
+### Changed
+
+- All documentation now lives under a single `docs/` tree. The teaching archive
+  moved from `knowledge/index.html` to `docs/index.html` and is the directory's
+  entry point, alongside the existing `docs/game/` product source of truth and
+  the historical `docs/design/` notes.
+- `pnpm knowledge:verify` became `pnpm docs:verify`
+  (`scripts/verify-knowledge.ps1` → `scripts/verify-docs.ps1`), and the public
+  version contract check no longer scans a separate `knowledge/` directory.
+
+### Added
+
+- Teaching archive coverage for three previously undocumented areas:
+  accessibility and input devices (settings contract, system reduced-motion
+  interaction, keyboard/pointer/gamepad event models, modal focus trapping),
+  the build toolchain (Vite dev server, the ES2022 decorator downlevel,
+  Rollup manual chunks with their byte budgets, `build.rs` Windows version
+  resource rewriting, and the release profile), and continuous integration
+  (both GitHub Actions workflows plus what a green run still does not prove).
+- Archive verification now requires every `<section>` to be reachable from the
+  sidebar table of contents and requires the sibling `docs/game/` and
+  `docs/design/` entry points to stay linked from the archive.
+
+### Fixed
+
+- `pnpm version:verify` failed outright after the documentation directory was
+  renamed, because it still enumerated the removed `knowledge/` path.
+- The quality-gate walkthrough in the archive listed seven `pnpm check` stages
+  and omitted `desktop:verify-security` and `m2:verify`; it now documents all
+  nine stages in their real execution order.
+
 ## [1.0] - 2026-08-10
 
 ### Added

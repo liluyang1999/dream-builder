@@ -4,5 +4,5 @@
 它们不是当前实现说明或待执行计划。
 
 - 当前产品方向与验收标准：[`docs/game/`](../game/README.md)
-- 当前全栈教学档案：[`knowledge/index.html`](../../knowledge/index.html)
+- 当前全栈教学档案：[`docs/index.html`](../index.html)
 - `dream-builder-legacy-poster.png`：早期技术演示海报，文案已经不代表当前 1.0 游戏定位。

@@ -725,12 +725,12 @@
   <body>
     <a class="skip-link" href="#main-content">跳到正文</a>
     <header class="hero">
-      <p class="hero__eyebrow">Dream Builder · Knowledge Archive</p>
+      <p class="hero__eyebrow">Dream Builder · docs/index.html</p>
       <h1>《智慧树之森》<span>全栈教学档案</span></h1>
       <p class="hero__lead">
         一份从产品体验出发，贯穿 Tauri 2、Windows WebView2、TypeScript、React 19、
-        react-three-fiber、Three.js、Zustand、Rust、IPC、安全、测试与 Windows 发布的源码导读。
-        它描述的是当前仓库实际实现，而不是理想化示例。
+        react-three-fiber、Three.js、Zustand、Rust、IPC、无障碍、构建工具链、安全、测试、
+        持续集成与 Windows 发布的源码导读。它描述的是当前仓库实际实现，而不是理想化示例。
       </p>
       <div class="badges" aria-label="档案摘要">
         <span class="badge badge--gold">产品版本 1.0</span>
@@ -750,10 +750,14 @@
           <a href="#typescript-react">前端</a>
           <a href="#state-persistence">状态</a>
           <a href="#graphics">3D</a>
+          <a href="#accessibility-input">无障碍</a>
+          <a href="#ipc">IPC</a>
           <a href="#rust">Rust</a>
           <a href="#tauri">Tauri</a>
           <a href="#webview2">WebView2</a>
+          <a href="#build-toolchain">构建</a>
           <a href="#quality">质量</a>
+          <a href="#continuous-integration">CI</a>
           <a href="#release">发布</a>
         </nav>
       </div>
@@ -771,20 +775,23 @@
         <a href="#typescript-react">05 · TypeScript + React</a>
         <a href="#state-persistence">06 · 状态、存档与输入</a>
         <a href="#graphics">07 · 3D 与声音</a>
-        <a href="#performance">08 · 性能与证据</a>
+        <a href="#accessibility-input">08 · 无障碍与输入设备</a>
+        <a href="#performance">09 · 性能与证据</a>
         <p>原生边界</p>
-        <a href="#ipc">09 · IPC 契约</a>
-        <a href="#rust">10 · Rust 后端</a>
-        <a href="#tauri">11 · Tauri 框架</a>
-        <a href="#webview2">12 · WebView2 策略</a>
-        <a href="#security">13 · 安全边界</a>
+        <a href="#ipc">10 · IPC 契约</a>
+        <a href="#rust">11 · Rust 后端</a>
+        <a href="#tauri">12 · Tauri 框架</a>
+        <a href="#webview2">13 · WebView2 策略</a>
+        <a href="#security">14 · 安全边界</a>
         <p>交付与查阅</p>
-        <a href="#version-dependencies">14 · 版本与依赖</a>
-        <a href="#quality">15 · 质量门禁</a>
-        <a href="#release">16 · Windows 发布</a>
-        <a href="#code-map">17 · 源码索引</a>
-        <a href="#learning-path">18 · 学习路线</a>
-        <a href="#glossary">19 · 术语表</a>
+        <a href="#build-toolchain">15 · 构建工具链</a>
+        <a href="#version-dependencies">16 · 版本与依赖</a>
+        <a href="#quality">17 · 质量门禁</a>
+        <a href="#continuous-integration">18 · 持续集成</a>
+        <a href="#release">19 · Windows 发布</a>
+        <a href="#code-map">20 · 源码索引</a>
+        <a href="#learning-path">21 · 学习路线</a>
+        <a href="#glossary">22 · 术语表</a>
       </aside>
 
       <main id="main-content">
@@ -814,7 +821,7 @@
             <strong>事实边界：</strong>当前代码已经形成完整的短篇单章游戏和 Windows 候选包工程，
             但五名首次接触玩家观察、实体手柄完整听测、干净账户覆盖升级以及受信任代码签名仍是外部证据。
             自动化全部通过也不能替代这些发布门槛。最新产品口径见
-            <a href="../docs/game/README.md">docs/game/README.md</a>。
+            <a href="./game/README.md">docs/game/README.md</a>。
           </div>
         </section>
 
@@ -912,10 +919,19 @@
                 <tr><th><a href="../packages/ipc-contracts/src/index.ts">packages/ipc-contracts</a></th><td>Zod 运行时 schema 与推导出的 TS 类型</td><td>所有不可信边界先按 <code>unknown</code> 解析</td></tr>
                 <tr><th><a href="../packages/liquid-glass/src/index.ts">packages/liquid-glass</a></th><td>可复用玻璃主题 React 组件</td><td>主题、画质、减少动态与焦点可访问性</td></tr>
                 <tr><th><a href="../crates/dream-builder/src/lib.rs">crates/dream-builder</a></th><td>Rust 领域、生成、状态、事件、Tauri 外壳</td><td>确定性、薄命令、最小权限、零 Clippy 告警</td></tr>
-                <tr><th><a href="../docs/game/README.md">docs/game</a></th><td>当前产品方向、验收矩阵、运行证据与交付手册</td><td>未通过的人工门槛必须保持可见</td></tr>
-                <tr><th><a href="./index.html">knowledge</a></th><td>唯一的综合教学档案</td><td>自包含 HTML、链接可验证、移动与打印可读</td></tr>
+                <tr><th><a href="./index.html">docs/index.html</a></th><td>唯一的综合教学档案，也是 <code>docs/</code> 的入口</td><td>自包含 HTML、链接可验证、移动与打印可读</td></tr>
+                <tr><th><a href="./game/README.md">docs/game</a></th><td>当前产品方向、验收矩阵、运行证据与交付手册</td><td>未通过的人工门槛必须保持可见</td></tr>
+                <tr><th><a href="./design/README.md">docs/design</a></th><td>2026-04 的历史设计札记与旧海报</td><td>只作历史参考，不再表达当前产品口径</td></tr>
+                <tr><th><a href="../scripts/release-build.ps1">scripts</a></th><td>版本、安全、教学档案、pnpm 布局、证据与发布验证</td><td>PowerShell，全部可在 CI 与本机重复执行</td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="callout">
+            <strong><code>docs/</code> 的目录合同：</strong>教学档案、当前产品口径与历史札记同处一个目录，
+            但职责互不重叠。<code>docs/index.html</code> 解释“技术为什么这样组织”，
+            <code>docs/game/</code> 记录“产品要做什么、验收到了哪一步”，<code>docs/design/</code> 只保留历史。
+            <code>pnpm docs:verify</code> 会检查档案结构、章节可达性、锚点、本地链接，
+            以及三类文档之间的入口链接是否仍然存在。
           </div>
           <h3>配置的单一真相源</h3>
           <ul>
@@ -1149,8 +1165,88 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
           </p>
         </section>
 
+        <section id="accessibility-input">
+          <p class="section-kicker">08 · Accessibility and input devices</p>
+          <h2>无障碍不是附加皮肤，输入设备也不只有键盘</h2>
+          <p class="section-lead">
+            单机离线游戏同样要面对“看不清、不能久盯动画、只用键盘、只用手柄”的玩家。
+            本项目把无障碍表达成受校验的设置项、根节点状态类和可测试的输入适配层，
+            而不是散落在各个组件里的临时判断。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>设置</th><th>类型与范围</th><th>它真正改变什么</th></tr></thead>
+              <tbody>
+                <tr><th><code>reducedMotion</code></th><td>布尔</td><td>降低相机滞后、粒子幅度与强闪反馈，但保留状态可读性</td></tr>
+                <tr><th><code>highContrast</code></th><td>布尔</td><td>根节点加 <code>app-root--high-contrast</code>，提高玻璃面板与次要文本对比</td></tr>
+                <tr><th><code>textScale</code></th><td><code>normal</code> / <code>large</code></td><td>根节点加 <code>app-root--large-text</code>，放大 HUD 与覆盖层字号</td></tr>
+                <tr><th><code>showHints</code></th><td>布尔</td><td>控制新手提示是否出现，让熟练玩家清空界面</td></tr>
+                <tr><th><code>cameraSensitivity</code></th><td>整数 50–150</td><td>缩放相机响应，照顾晕动敏感与精细操作</td></tr>
+                <tr><th><code>masterVolume</code> 等</th><td>整数 0–100</td><td>主/环境/效果三条独立音量，可完全静音仍可通关</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            这些字段和 <code>seed</code>、<code>theme</code> 在
+            <a href="../packages/ipc-contracts/src/index.ts">同一个 <code>settingsSchema</code></a> 中定义并带默认值，
+            因此“无障碍设置”与其他设置走完全相同的校验、IPC 与持久化路径：Rust 侧先验证范围，
+            再写入 Tauri Store；前端 <a href="../apps/desktop/src/App.tsx">App.tsx</a> 只把已提交的切片映射为根节点类名。
+            旧存档缺字段时由 schema 默认值补齐，不会让界面进入半初始化状态。
+          </p>
+          <div class="callout callout--gold">
+            <strong>系统偏好与游戏内设置并存：</strong>
+            <a href="../apps/desktop/src/styles.css">styles.css</a> 同时响应
+            <code>@media (prefers-reduced-motion: reduce)</code>。操作系统已经声明“减少动态”时不需要玩家再找一次开关，
+            而游戏内开关又允许在系统未声明时单独降低动效。两者是“或”的关系，不是互相覆盖。
+          </div>
+          <h3>三种输入设备，两种事件模型</h3>
+          <div class="grid grid--3">
+            <article class="card">
+              <h3>键盘：事件驱动</h3>
+              <p>
+                <a href="../apps/desktop/src/interaction/useKeyboardShortcuts.ts">useKeyboardShortcuts</a>
+                只在 window 上绑定一次监听，处理函数存在 ref 中，因此既没有陈旧闭包，也不会每次渲染都重新订阅。
+              </p>
+            </article>
+            <article class="card">
+              <h3>指针：事件驱动</h3>
+              <p>
+                <a href="../apps/desktop/src/interaction/useInteractive.ts">useInteractive</a>
+                把 R3F 的 pointer 事件转成选择 reducer 的动作，悬停与选中仍是纯状态转换。
+              </p>
+            </article>
+            <article class="card">
+              <h3>手柄：轮询驱动</h3>
+              <p>
+                Gamepad API 不提供按钮/摇杆事件，只能读取快照。
+                <a href="../apps/desktop/src/interaction/GamepadNavigator.tsx">GamepadNavigator</a>
+                在 <code>requestAnimationFrame</code> 中采样，并与上一帧比较做边沿检测。
+              </p>
+            </article>
+          </div>
+          <p>
+            差异被限制在适配层：三类设备最终都产生同一套意图（移动向量、互动、冲刺、暂停、方向），
+            由 <a href="../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 归一化后交给纯逻辑。
+            边沿检测尤其重要——长按手柄按键在每一帧都是“按下”，若不比较上一帧状态，一次按压会被当成上百次暂停切换。
+          </p>
+          <h3>模态焦点：Tab 不能逃出对话框</h3>
+          <ul>
+            <li><a href="../apps/desktop/src/interaction/useModalFocus.ts">useModalFocus</a> 打开时聚焦首个控件，关闭时把焦点还给触发它的控件。</li>
+            <li><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> 在对话框内循环，键盘用户不会“掉”到被遮挡的 HUD 上。</li>
+            <li><kbd>Esc</kbd> 与 <kbd>?</kbd> 优先交给当前对话框，而不是全局游戏快捷键。</li>
+            <li>全局快捷键遇到 <code>[aria-modal="true"]</code>、输入框或可编辑元素时主动让路，避免“打字触发截图”。</li>
+            <li>手柄在净化谜题里被映射为方向键，在其他对话框里被映射为焦点漫游，两种含义不会互相污染。</li>
+          </ul>
+          <div class="callout callout--warning">
+            <strong>自动化能证明什么：</strong>组件测试用角色、可访问名称和焦点顺序断言标题、设置、帮助与覆盖层，
+            <a href="../apps/desktop/src/tests/keyboardShortcuts.test.tsx">快捷键</a>与
+            <a href="../apps/desktop/src/tests/gamepadInput.test.ts">手柄采样</a>也有确定性测试。
+            但屏幕阅读器实机朗读、实体手柄完整听测与真人操作舒适度仍是外部门槛，不能由 jsdom 断言代替。
+          </div>
+        </section>
+
         <section id="performance">
-          <p class="section-kicker">08 · Performance evidence</p>
+          <p class="section-kicker">09 · Performance evidence</p>
           <h2>性能不是一个 FPS 数字，而是一条可复核证据链</h2>
           <p class="section-lead">
             场景必须在真实 Tauri/WebView2 目标设备上持续运行，才能代表交付体验。项目内置记录器只保存有界聚合，
@@ -1171,7 +1267,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="ipc">
-          <p class="section-kicker">09 · IPC contract</p>
+          <p class="section-kicker">10 · IPC contract</p>
           <h2>IPC：跨语言边界必须同时有静态类型和运行时证据</h2>
           <p class="section-lead">
             TypeScript 类型在运行时会被擦除，Rust 类型也不会自动保护已经变成 JSON 的数据。
@@ -1221,7 +1317,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="rust">
-          <p class="section-kicker">10 · Rust backend</p>
+          <p class="section-kicker">11 · Rust backend</p>
           <h2>Rust 后端：领域模型、确定性生成与原生副作用</h2>
           <p class="section-lead">
             Rust 部分同时是库和可执行程序。<code>main.rs</code> 保持极薄，只调用库的 <code>run()</code>；
@@ -1287,7 +1383,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="tauri">
-          <p class="section-kicker">11 · Tauri 2</p>
+          <p class="section-kicker">12 · Tauri 2</p>
           <h2>Tauri：原生外壳不是一个打包按钮</h2>
           <p class="section-lead">
             Tauri 把系统 WebView、Rust 进程、窗口、菜单、托盘、插件和权限系统装配成一个桌面应用。
@@ -1297,7 +1393,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
           <ol>
             <li>安装 panic logger，使未捕获 Rust panic 进入诊断日志；</li>
             <li>安装 single-instance，第二次启动时聚焦主窗口；</li>
-            <li>安装 log、store、dialog、fs 和 opener 插件；</li>
+            <li>安装 log、store、dialog 和 opener 四个插件——注意这里没有文件系统插件，导出写盘由 Rust 命令自己完成；</li>
             <li>构建原生菜单并把点击转发为前端事件；</li>
             <li>在 setup 中载入设置、创建 AppState、注册托盘并启动魔法场任务；</li>
             <li>通过 <code>generate_handler!</code> 注册命令；</li>
@@ -1333,7 +1429,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="webview2">
-          <p class="section-kicker">12 · Windows WebView runtime</p>
+          <p class="section-kicker">13 · Windows WebView runtime</p>
           <h2>WebView2：使用 Evergreen，不固定运行时版本</h2>
           <p class="section-lead">
             Windows 打包版的前端确实运行在 Microsoft Edge WebView2 Runtime 中，但 React 代码没有直接创建或调用
@@ -1388,7 +1484,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="security">
-          <p class="section-kicker">13 · Security boundaries</p>
+          <p class="section-kicker">14 · Security boundaries</p>
           <h2>桌面应用仍然有浏览器边界、文件边界与供应链边界</h2>
           <p class="section-lead">
             “离线单机”不等于没有攻击面。WebView 内容、IPC 参数、本地 JSON、文件路径、插件权限、依赖安装和发布产物都需要明确边界。
@@ -1438,8 +1534,81 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
           </ul>
         </section>
 
+        <section id="build-toolchain">
+          <p class="section-kicker">15 · Build toolchain</p>
+          <h2>两套构建系统：Vite 负责网页产物，Cargo 负责原生产物</h2>
+          <p class="section-lead">
+            “能跑起来”和“能交付”之间隔着构建配置。前端由 Vite 在开发期用 esbuild 转换、在发布期用 Rollup 分块；
+            Rust 侧由 Cargo 与 <code>build.rs</code> 生成可执行文件并改写 Windows 版本资源。
+            两条链路都必须可重复、可验证，并且不能悄悄改变玩家看到的版本。
+          </p>
+          <h3>开发期：Vite dev server</h3>
+          <ul>
+            <li>源码以原生 ES module 直接提供，只按需转换，因此冷启动与热更新不随项目规模线性变差。</li>
+            <li><code>server.strictPort</code> 固定 <code>127.0.0.1:1420</code>：Tauri 配置按此端口连接，端口被占用时应当失败而不是悄悄换端口。</li>
+            <li><code>clearScreen: false</code> 保留 Tauri CLI 的原生日志，否则 Rust 编译输出会被前端刷屏覆盖。</li>
+            <li><code>envPrefix: ['VITE_', 'TAURI_']</code> 让 Tauri 注入的环境变量可以进入前端，同时仍然拒绝暴露任意进程变量。</li>
+          </ul>
+          <div class="callout callout--gold">
+            <strong>为什么显式设置 <code>esbuild.target: 'es2022'</code>：</strong>
+            Vite 开发期默认按接近 <code>esnext</code> 提供源码，而 Chromium 尚不能解析 TC39 标准装饰器语法。
+            <a href="../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的 <code>@logged</code> / <code>@measure</code>
+            因此会在浏览器开发模式直接语法报错。把 target 对齐到 TypeScript 的 ES2022，
+            使开发与生产使用同一套降级规则；<a href="../apps/desktop/src/tests/viteDevTransform.test.ts">viteDevTransform.test.ts</a>
+            把这条结论固化成回归测试，避免配置被“顺手清理”掉。
+          </div>
+          <h3>发布期：Rollup 分块与预算</h3>
+          <p>
+            R3F 的 <code>Canvas</code> 会注册完整 Three 命名空间，如果和应用代码打进同一个文件，
+            每次业务改动都会让用户重新下载整个 3D 引擎。
+            <a href="../apps/desktop/viteChunks.ts">viteChunks.ts</a> 因此把依赖按稳定度切成三块：
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>chunk</th><th>内容</th><th>字节预算</th></tr></thead>
+              <tbody>
+                <tr><th><code>three-engine</code></th><td>Three 引擎本体，变化最少</td><td>700,000</td></tr>
+                <tr><th><code>react-three-runtime</code></th><td>fiber、drei、three-stdlib、maath</td><td>250,000</td></tr>
+                <tr><th><code>three-effects</code></th><td>postprocessing 与 Bloom 通道</td><td>120,000</td></tr>
+                <tr><th><code>SceneCanvas</code></th><td>按需加载的场景入口</td><td>100,000</td></tr>
+                <tr><th><code>GLTFExporter</code></th><td>只有导出时才需要的序列化器</td><td>80,000</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <ul>
+            <li><code>onlyExplicitManualChunks</code> 阻止 Rollup 把共享的 React 依赖卷进延迟加载的场景块。</li>
+            <li><a href="../scripts/verify-desktop-bundle.ps1">verify-desktop-bundle.ps1</a> 在每次 <code>pnpm build</code> 后运行：每个前缀必须恰好一个 chunk、逐块不超预算、除引擎外没有超过 500,000 字节的块。</li>
+            <li>它还检查 <code>index.html</code> 不能直接引用这些延迟 chunk——否则“代码分割”只是把一个大文件拆成几个同时下载的文件。</li>
+            <li>预算是硬失败而不是警告：<code>chunkSizeWarningLimit</code> 只影响提示，真正的门禁在脚本里。</li>
+          </ul>
+          <h3>原生期：<code>build.rs</code> 与 Windows 版本资源</h3>
+          <p>
+            <a href="../crates/dream-builder/build.rs">build.rs</a> 是 Cargo 在编译 crate 之前运行的构建脚本。它做两件事：
+            先由 <code>tauri_build</code> 嵌入配置并生成 Windows 资源文件，再在 Windows 目标上把资源里的
+            <code>FileVersion</code> 与 <code>ProductVersion</code> 改写成 <a href="../version.json">version.json</a>
+            中的两段式公开版本，最后用 <code>embed_resource</code> 重新编译资源。
+          </p>
+          <ul>
+            <li><code>cargo:rerun-if-changed</code> 指向 <code>version.json</code>，改版本号会触发重新构建而不是复用旧资源。</li>
+            <li>脚本先校验 <code>productVersion</code> 恰好两段、全为数字、无前导零，非法值直接让构建失败。</li>
+            <li>替换时统计命中次数，不等于一次就 panic。宁可构建失败，也不要产出“版本字符串只改了一半”的 EXE。</li>
+            <li>这解释了为什么 Cargo 清单里的三段式兼容值不会出现在文件属性里：它在链接前就被替换掉了。</li>
+          </ul>
+          <p>
+            release profile 统一在根 <a href="../Cargo.toml">Cargo.toml</a>：<code>lto</code> 做跨 crate 内联，
+            <code>codegen-units = 1</code> 牺牲编译并行度换取更好的优化，<code>strip</code> 去掉符号表以缩小体积。
+            这些只应用于发布构建，调试构建保持快速与可调试。
+          </p>
+          <div class="callout">
+            <strong>统一入口：</strong><a href="../justfile">justfile</a> 是跨语言任务入口，
+            <code>just check</code> / <code>just bundle</code> 包住 pnpm 与 cargo 两侧命令；
+            根 <code>package.json</code> 的脚本与之一一对应，因此本机、CI 和发布使用的是同一组命令，
+            而不是三份互相漂移的说明。
+          </div>
+        </section>
+
         <section id="version-dependencies">
-          <p class="section-kicker">14 · Versioning and dependencies</p>
+          <p class="section-kicker">16 · Versioning and dependencies</p>
           <h2>用一个两段式产品版本控制全部展示</h2>
           <p class="section-lead">
             用户要求的版本语义由两段数字表达，底层工具的格式要求则由机械兼容层承担。两者必须从一个文件派生并自动对照，
@@ -1473,7 +1642,7 @@ cancel/failure: cleansing → ready（不扣光种）</code></pre>
         </section>
 
         <section id="quality">
-          <p class="section-kicker">15 · Quality gates</p>
+          <p class="section-kicker">17 · Quality gates</p>
           <h2>“没有 LSP 告警”要落到可重复的编译与静态门禁</h2>
           <p class="section-lead">
             编辑器的 LSP 诊断依赖本机插件与当前打开文件，不能作为唯一交付证据。项目把同类检查固化为命令：
@@ -1485,14 +1654,20 @@ cargo test --workspace --locked
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo check --workspace --all-targets --locked</code></pre>
           <h3><code>pnpm check</code> 内部顺序</h3>
+          <p>
+            九个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
+            最慢的生产构建放在最后。任何一步非零退出都会中断整条链。
+          </p>
           <ol>
-            <li><code>version:verify</code>：两段产品版本、三段技术版本与 WebView2 Evergreen 配置；</li>
-            <li><code>knowledge:verify</code>：HTML 结构、覆盖主题、重复 id、锚点和本地链接；</li>
-            <li><code>pnpm:verify-layout</code>：store/cache/virtual store 都在项目根内；</li>
+            <li><code>version:verify</code>：两段式产品版本与各机器清单的兼容值映射、NSIS 显示版本、WebView2 Evergreen 配置，并扫描公开资料是否泄漏了第二套版本；</li>
+            <li><code>desktop:verify-security</code>：CSP 不含通配符或 <code>unsafe-eval</code>、capability 保持最小、路径不越界、未重新引入直接文件系统插件；</li>
+            <li><code>docs:verify</code>：教学档案的 HTML 结构、必需主题、章节可达性、重复 id、锚点、本地链接与同级文档入口；</li>
+            <li><code>pnpm:verify-layout</code>：store/cache/virtual store 解析后的绝对路径都在项目根内；</li>
+            <li><code>m2:verify</code>：归档的原生性能报告哈希、来源与帧率预算未被改写；</li>
             <li><code>biome check</code>：格式、可疑代码和导入组织；</li>
             <li><code>tsc --noEmit</code>：所有工作区包严格类型检查；</li>
             <li><code>vitest run</code>：纯规则、契约、组件、存档、性能与开发变换测试；</li>
-            <li><code>vite build</code>：生产分块与 bundle 大小预算。</li>
+            <li><code>vite build</code>：TypeScript 编译、生产分块，以及 <code>verify-desktop-bundle.ps1</code> 的 chunk 预算。</li>
           </ol>
           <div class="grid">
             <article class="card">
@@ -1521,8 +1696,52 @@ cargo check --workspace --all-targets --locked</code></pre>
           </ul>
         </section>
 
+        <section id="continuous-integration">
+          <p class="section-kicker">18 · Continuous integration</p>
+          <h2>CI 的价值在于“别人的机器也能重现”，不在于绿色徽章</h2>
+          <p class="section-lead">
+            本机门禁证明的是“在我的机器上、用我此刻的缓存通过了”。持续集成把同一组命令搬到一台干净的
+            Windows runner 上执行，用来暴露未提交文件、锁文件漂移、平台假设和只在本地存在的工具。
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>工作流</th><th>触发</th><th>做什么</th></tr></thead>
+              <tbody>
+                <tr><th><a href="../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test 与 Clippy</td></tr>
+                <tr><th><a href="../.github/workflows/release.yml">release.yml</a></th><td>手动触发或 <code>v*</code> 标签</td><td>跑完整发布门禁并上传带校验和的未签名 Windows 候选包</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>几个配置为什么是这样写的</h3>
+          <ul>
+            <li><strong><code>runs-on: windows-latest</code>：</strong>Windows 是唯一受支持的目标。门禁脚本是 PowerShell，NSIS、WebView2 与文件属性也都只有在 Windows 上才有意义，在 Linux runner 上“通过”不构成证据。</li>
+            <li><strong><code>permissions: contents: read</code>：</strong>显式收窄 <code>GITHUB_TOKEN</code>。构建与测试不需要写仓库，最小权限让被攻破的依赖也无法推送提交。</li>
+            <li><strong><code>concurrency</code> + <code>cancel-in-progress</code>：</strong>同一分支的新推送取消旧运行，既省算力也避免用过期结果判断当前代码。</li>
+            <li><strong><code>node-version-file: .nvmrc</code>：</strong>Node 版本从仓库文件读取，而不是写死在工作流里，本机与 CI 只有一个真相源。</li>
+            <li><strong><code>pnpm/action-setup</code>：</strong>不指定版本，改为读取 <code>package.json</code> 的 <code>packageManager</code> 字段，因此 CI 用的就是本地那一版 pnpm。</li>
+            <li><strong><code>--frozen-lockfile</code>：</strong>锁文件与清单不一致时安装必须失败。CI 的职责是复现既定依赖树，不是替开发者解析新版本。</li>
+            <li><strong><code>if-no-files-found: error</code>：</strong>产物目录为空时上传步骤失败。否则一次“成功但没有产物”的运行会被误当成发布成功。</li>
+          </ul>
+          <div class="callout callout--violet">
+            <strong>两个 job 为什么不合并：</strong>前端与 Rust 没有先后依赖，拆开可以并行，
+            并且失败时一眼看出是哪一侧回归。Rust job 不安装 Node，前端 job 不安装 Rust 组件，
+            各自的环境也因此更小、更快、更少偶发失败。
+          </div>
+          <h3>CI 通过之后仍然没有被证明的事</h3>
+          <ul>
+            <li>CI 不启动 WebView2 原生外壳，不能替代 <code>pnpm tauri dev</code> 与安装版冒烟。</li>
+            <li>CI 产出的候选包是未签名的；受信任代码签名依赖当前用户证书库，无法也不应放进公共 runner。</li>
+            <li>CI 不做干净账户的安装—升级—卸载生命周期验证，也没有实体手柄和音频输出设备。</li>
+            <li>CI 永远不能替代五名首次接触玩家的无提示观察。</li>
+          </ul>
+          <p>
+            换句话说，绿色 CI 是“候选包可以进入人工验收”的前提，而不是“可以发布”的结论。
+            人工门槛的当前状态见 <a href="./game/README.md">docs/game/README.md</a>。
+          </p>
+        </section>
+
         <section id="release">
-          <p class="section-kicker">16 · Windows release</p>
+          <p class="section-kicker">19 · Windows release</p>
           <h2>从源码到可安装候选包的证据链</h2>
           <p class="section-lead">
             Tauri 构建会先产出 Rust/前端组合的 <code>dream-builder.exe</code>，再由 NSIS 生成当前用户安装包。
@@ -1564,12 +1783,12 @@ cargo check --workspace --all-targets --locked</code></pre>
             <a href="../scripts/release-install-state.ps1">release-install-state.ps1</a> 在安装后检查唯一卸载项、
             两段式版本 1.0、安装目录、主 EXE 和快捷方式；卸载后要求卸载项、程序目录、快捷方式和进程全部消失。
             玩家数据可按升级/诊断政策保留，脚本只报告其存在，不读取或删除。完整手册见
-            <a href="../docs/game/release-runbook.md">release-runbook.md</a>。
+            <a href="./game/release-runbook.md">release-runbook.md</a>。
           </p>
         </section>
 
         <section id="code-map">
-          <p class="section-kicker">17 · Source map</p>
+          <p class="section-kicker">20 · Source map</p>
           <h2>按问题寻找源码，而不是按文件名猜</h2>
           <ul class="path-list">
             <li><a href="../apps/desktop/src/App.tsx"><code>App.tsx</code></a><span>设置/场景水合、订阅、跨系统编排、导出与会话入口</span></li>
@@ -1578,28 +1797,34 @@ cargo check --workspace --all-targets --locked</code></pre>
             <li><a href="../apps/desktop/src/game/playerMotion.ts"><code>game/playerMotion.ts</code></a><span>相机相对移动、加减速、分步推进与静态碰撞</span></li>
             <li><a href="../apps/desktop/src/scene/SceneCanvas.tsx"><code>scene/SceneCanvas.tsx</code></a><span>R3F Canvas、相机、灯光、Bloom、截图与 glTF API</span></li>
             <li><a href="../apps/desktop/src/scene/GameplayController.tsx"><code>scene/GameplayController.tsx</code></a><span>接近判定、互动输入与领域动作的适配器</span></li>
+            <li><a href="../apps/desktop/src/interaction/useModalFocus.ts"><code>interaction/useModalFocus.ts</code></a><span>模态焦点陷阱、焦点归还与关闭键路由</span></li>
             <li><a href="../apps/desktop/src/ipc/treeApi.ts"><code>ipc/treeApi.ts</code></a><span>唯一 Rust IPC 客户端、Zod 验证、事件订阅和浏览器回退</span></li>
             <li><a href="../packages/ipc-contracts/src/index.ts"><code>ipc-contracts/index.ts</code></a><span>跨边界 schema、类型推导、设置默认值与解析结果</span></li>
+            <li><a href="../apps/desktop/viteChunks.ts"><code>viteChunks.ts</code></a><span>Three 引擎、R3F 运行时与后处理的手动分块规则</span></li>
+            <li><a href="../crates/dream-builder/build.rs"><code>Rust build.rs</code></a><span>Tauri 构建脚本与 Windows 版本资源改写</span></li>
             <li><a href="../crates/dream-builder/src/lib.rs"><code>Rust lib.rs</code></a><span>Tauri Builder、插件、setup、命令注册与进程生命周期</span></li>
             <li><a href="../crates/dream-builder/src/commands.rs"><code>Rust commands.rs</code></a><span>命令边界、托管状态、设置验证和异步导出</span></li>
             <li><a href="../crates/dream-builder/src/generation/fantasy_tree.rs"><code>generation/fantasy_tree.rs</code></a><span>确定性树干、树冠、符文、水晶和细节元数据</span></li>
             <li><a href="../crates/dream-builder/src/state.rs"><code>Rust state.rs</code></a><span>设置不变量、Arc/Mutex、seed 历史与场景缓存</span></li>
             <li><a href="../crates/dream-builder/tauri.conf.json"><code>tauri.conf.json</code></a><span>窗口、CSP、NSIS、Mica、WebView2 Evergreen 与产品元数据</span></li>
             <li><a href="../scripts/release-build.ps1"><code>release-build.ps1</code></a><span>完整门禁、Tauri 构建、签名、交付组装和清单</span></li>
-            <li><a href="../scripts/verify-version-contract.ps1"><code>verify-version-contract.ps1</code></a><span>产品/技术版本映射与 WebView2 策略防漂移</span></li>
+            <li><a href="../scripts/verify-version-contract.ps1"><code>verify-version-contract.ps1</code></a><span>产品/兼容版本映射与 WebView2 策略防漂移</span></li>
+            <li><a href="../scripts/verify-docs.ps1"><code>verify-docs.ps1</code></a><span>本档案的结构、覆盖、锚点与同级文档入口检查</span></li>
+            <li><a href="../.github/workflows/ci.yml"><code>.github/workflows/ci.yml</code></a><span>Windows runner 上的前端与 Rust 双 job 门禁</span></li>
           </ul>
         </section>
 
         <section id="learning-path">
-          <p class="section-kicker">18 · Guided learning</p>
-          <h2>建议的六段学习路线</h2>
+          <p class="section-kicker">21 · Guided learning</p>
+          <h2>建议的七段学习路线</h2>
           <ol>
             <li><strong>先运行浏览器版：</strong><code>pnpm dev</code>，完成标题到净化，观察没有 Rust 时的回退警告。</li>
             <li><strong>读纯规则：</strong>从 gameProgress、purificationPuzzle、playerInput、playerMotion 的测试开始，理解确定状态转换。</li>
             <li><strong>接上 React：</strong>追踪 store → GameplayController → UI/Scene，观察组件怎样消费同一快照。</li>
             <li><strong>进入 3D：</strong>从 SceneCanvas 到 GameplayWorld，再拆解 TreeContent、CartoonForest、实例化、shader 和性能探针。</li>
+            <li><strong>练习无障碍：</strong>只用键盘走一遍标题—设置—帮助—净化，再打开系统“减少动态”对比表现差异。</li>
             <li><strong>跨过 IPC：</strong>比较 Zod schema 与 Rust serde struct，跟踪 <code>generate_tree</code> 请求和 <code>magic-field</code> 事件。</li>
-            <li><strong>运行原生与发布：</strong><code>pnpm tauri dev</code> 验证 WebView2/IPC，再阅读 capability、CSP、发布清单和安装状态脚本。</li>
+            <li><strong>运行原生与发布：</strong><code>pnpm tauri dev</code> 验证 WebView2/IPC，再阅读 capability、CSP、构建分块、CI 工作流、发布清单和安装状态脚本。</li>
           </ol>
           <div class="callout callout--violet">
             <strong>一次安全练习：</strong>给 IPC 场景增加一个可选、向后兼容字段。先写 Rust/TS 两侧失败测试，
@@ -1608,7 +1833,7 @@ cargo check --workspace --all-targets --locked</code></pre>
         </section>
 
         <section id="glossary">
-          <p class="section-kicker">19 · Glossary</p>
+          <p class="section-kicker">22 · Glossary</p>
           <h2>术语速查</h2>
           <div class="table-wrap">
             <table>
@@ -1622,6 +1847,17 @@ cargo check --workspace --all-targets --locked</code></pre>
                 <tr><th>R3F</th><td>react-three-fiber，Three.js 的 React renderer，用 JSX 声明场景图。</td></tr>
                 <tr><th>Draw call</th><td>CPU 向 GPU 提交一次绘制；大量小 mesh 会使其升高，实例化可合并重复绘制。</td></tr>
                 <tr><th>Fresnel</th><td>视线接近表面掠射角时反射更强的现象，常用于水晶、玻璃和边缘光。</td></tr>
+                <tr><th>InstancedMesh</th><td>共享几何与材质、只为每个实例提供变换矩阵的 Three 对象，用于压缩重复物体的 draw call。</td></tr>
+                <tr><th>Vite</th><td>前端构建工具：开发期用 esbuild 按需转换并提供原生 ESM，发布期交给 Rollup 打包。</td></tr>
+                <tr><th>esbuild</th><td>Go 编写的极快转换器；本项目用它把 TypeScript 与标准装饰器降级到 ES2022。</td></tr>
+                <tr><th>Rollup</th><td>Vite 生产构建使用的打包器；<code>manualChunks</code> 在这里把 Three 引擎切成独立可缓存块。</td></tr>
+                <tr><th>代码分割</th><td>把产物拆成按需加载的块。只有在入口不提前引用这些块时，它才真正减少首屏成本。</td></tr>
+                <tr><th><code>build.rs</code></th><td>Cargo 在编译 crate 前运行的构建脚本；这里用于嵌入 Tauri 配置并改写 Windows 版本资源。</td></tr>
+                <tr><th>GitHub Actions</th><td>仓库内声明的 CI 服务；本项目在 Windows runner 上运行与本机相同的门禁命令。</td></tr>
+                <tr><th>Frozen lockfile</th><td>锁文件与清单不一致时直接失败的安装模式，保证 CI 复现既定依赖树而不是解析新版本。</td></tr>
+                <tr><th>焦点陷阱</th><td>让 <kbd>Tab</kbd> 在模态对话框内循环并在关闭时归还焦点的可访问性模式。</td></tr>
+                <tr><th>边沿检测</th><td>比较相邻两次采样只在状态跳变时触发动作；轮询式 Gamepad API 必须这样处理长按。</td></tr>
+                <tr><th><code>prefers-reduced-motion</code></th><td>操作系统级“减少动态”偏好的 CSS 媒体查询；与游戏内开关是“或”的关系。</td></tr>
                 <tr><th>Zustand</th><td>轻量 React 状态库；本项目用选择器订阅切片，核心转换仍由纯 reducer 决定。</td></tr>
                 <tr><th>Zod</th><td>运行时 schema 库，可在解析成功后推导 TypeScript 类型。</td></tr>
                 <tr><th>Newtype</th><td>用单字段 Rust 类型给裸值增加领域语义与构造不变量。</td></tr>
@@ -1635,9 +1871,9 @@ cargo check --workspace --all-targets --locked</code></pre>
           </div>
           <p>
             进一步阅读项目入口：<a href="../README.md">README</a>、
-            <a href="../docs/game/README.md">游戏愿景与路线</a>、
-            <a href="../docs/game/vertical-slice.md">垂直切片合同</a>、
-            <a href="../docs/game/release-runbook.md">Windows 交付手册</a>。
+            <a href="./game/README.md">游戏愿景与路线</a>、
+            <a href="./game/vertical-slice.md">垂直切片合同</a>、
+            <a href="./game/release-runbook.md">Windows 交付手册</a>。
           </p>
         </section>
       </main>

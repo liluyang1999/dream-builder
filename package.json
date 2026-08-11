@@ -9,7 +9,7 @@
   "scripts": {
     "version:verify": "powershell -NoLogo -NoProfile -File scripts/verify-version-contract.ps1",
     "desktop:verify-security": "powershell -NoLogo -NoProfile -File scripts/verify-desktop-security.ps1",
-    "knowledge:verify": "powershell -NoLogo -NoProfile -File scripts/verify-knowledge.ps1",
+    "docs:verify": "powershell -NoLogo -NoProfile -File scripts/verify-docs.ps1",
     "pnpm:verify-layout": "powershell -NoLogo -NoProfile -File scripts/verify-pnpm-layout.ps1",
     "dev": "pnpm --filter @dream-builder/desktop dev",
     "build": "pnpm --filter @dream-builder/desktop build",
@@ -27,7 +27,7 @@
     "release:verify:production": "powershell -NoLogo -NoProfile -File scripts/release-verify.ps1 -RequireCleanSource -RequireSigned",
     "release:verify:installed": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Installed",
     "release:verify:uninstalled": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Absent",
-    "check": "pnpm version:verify && pnpm desktop:verify-security && pnpm knowledge:verify && pnpm pnpm:verify-layout && pnpm m2:verify && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm version:verify && pnpm desktop:verify-security && pnpm docs:verify && pnpm pnpm:verify-layout && pnpm m2:verify && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

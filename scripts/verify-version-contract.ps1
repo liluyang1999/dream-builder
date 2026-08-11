@@ -22,8 +22,6 @@ $publicDisplayFiles = @(
     Get-Item -LiteralPath (Join-Path $repositoryRoot "crates\dream-builder\installer\LICENSE.txt")
     Get-ChildItem -LiteralPath (Join-Path $repositoryRoot "docs") -Recurse -File |
         Where-Object { $_.Extension -in @(".md", ".html", ".txt") }
-    Get-ChildItem -LiteralPath (Join-Path $repositoryRoot "knowledge") -Recurse -File |
-        Where-Object { $_.Extension -in @(".md", ".html", ".txt") }
 )
 $forbiddenPublicVersion = [regex]::Escape($versionContract.ToolingVersion)
 $forbiddenPublicPatterns = @(

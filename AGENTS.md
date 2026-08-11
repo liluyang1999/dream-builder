@@ -6,7 +6,7 @@ This file provides guidance to coding agents (Claude Code, Codex, Cursor, etc.) 
 
 Dream Builder Fantasy Tree — a Tauri 2 desktop app evolving from an interactive procedural tree into a third-person cartoon forest game. The frontend is React 19 + react-three-fiber; the Rust backend deterministically generates scenes and owns native state, persistence, events, menus, and exports.
 
-The active product direction and milestone acceptance criteria live under `docs/game/`. The single current teaching source is the self-contained Chinese archive at `knowledge/index.html`; obsolete teaching-refactor plans have been migrated into it and removed.
+All documentation lives under `docs/`. The single current teaching source is the self-contained Chinese archive at `docs/index.html`, which is also the entry point for the directory; the active product direction and milestone acceptance criteria live under `docs/game/`; `docs/design/` is historical only. Obsolete teaching-refactor plans have been migrated into the archive and removed.
 
 ## Layout
 
@@ -26,11 +26,10 @@ dream-builder/
 │   └── dream-builder/  # Rust + Tauri 2 (crate `dream-builder`)
 │       ├── Cargo.toml · build.rs · tauri.conf.json · icons/ · src/
 ├── docs/
-│   ├── design/         # legacy design notes
-│   └── game/           # active product vision, evidence, and delivery roadmap
-├── knowledge/
-│   └── index.html      # current self-contained Chinese architecture archive
-├── scripts/            # contract, dependency-layout, knowledge, and release checks
+│   ├── index.html      # current self-contained Chinese teaching archive (docs entry point)
+│   ├── game/           # active product vision, evidence, and delivery roadmap
+│   └── design/         # legacy design notes
+├── scripts/            # contract, security, docs, dependency-layout, and release checks
 ├── version.json        # sole player-visible two-component product version
 ├── README.md
 ├── CLAUDE.md → @AGENTS.md
@@ -47,7 +46,7 @@ This project is developed on Windows with **pnpm** (Node 24, pnpm 11). From Powe
 pnpm install                  # installs all workspace packages
 pnpm version:verify           # public version display + tooling/WebView2 contracts
 pnpm desktop:verify-security  # CSP + least-privilege Tauri capability contract
-pnpm knowledge:verify         # teaching HTML structure, anchors, coverage, and local links
+pnpm docs:verify              # teaching HTML structure, anchors, coverage, and local links
 pnpm pnpm:verify-layout       # all pnpm stores/caches remain below the repository root
 pnpm dev                      # Vite dev server on http://127.0.0.1:1420 (strict port)
 pnpm test                     # Vitest across the workspace (single run)
@@ -125,4 +124,4 @@ When changing the wire format, update the Rust domain/serde shape, the Zod contr
 - **WebView2 is Evergreen and unpinned.** Windows bundles use the silent `downloadBootstrapper` mode. Do not add a fixed WebView2 runtime path or version without an explicit product decision and size/security review. Browser `pnpm dev` is not proof of the Tauri/WebView2 path.
 - **Single-instance lock**: `tauri-plugin-single-instance` is wired in `crates/dream-builder/src/lib.rs`; double-clicking the exe focuses the existing window instead of opening a second one.
 - **Win11 Mica window effect** is declared in `tauri.conf.json::app.windows[0].windowEffects.effects`; gracefully ignored on other OSes.
-- **Documentation boundaries.** `docs/game/` is the current product source of truth, `knowledge/index.html` is the current teaching source, and `docs/design/` contains legacy product notes only. Do not recreate teaching material under unrelated directories.
+- **Documentation boundaries.** Everything documentation-related lives under `docs/`. `docs/index.html` is the current teaching source and the directory entry point, `docs/game/` is the current product source of truth, and `docs/design/` contains legacy product notes only. Do not recreate teaching material under unrelated directories. `pnpm docs:verify` enforces the archive's structure, section reachability, anchors, local links, and the cross-links between these three areas — when you add a section, add it to the sidebar table of contents too or the gate fails.
