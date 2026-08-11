@@ -29,6 +29,21 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 - Archive verification now requires every `<section>` to be reachable from the
   sidebar table of contents and requires the sibling `docs/game/` and
   `docs/design/` entry points to stay linked from the archive.
+- `docs/README.md` indexes the documentation directory. GitHub does not render
+  `index.html`, so browsing the repository previously showed a bare file
+  listing; the index routes readers to the archive, the product docs, and the
+  historical notes without duplicating any of their content.
+- A complete module inventory in the archive covering all 95 source files in
+  `apps/desktop/src`, `packages/*/src`, and `crates/dream-builder/src`, grouped
+  from pure logic through to presentation and side effects, plus the root
+  configuration, scripts, and workflows.
+- Teaching coverage for the remaining undocumented subsystems: the Worker
+  request/response protocol and its id-correlated client, Rust settings
+  persistence through the Store plugin extension trait, and the liquid-glass
+  component API with its capability-based quality degradation.
+- Archive verification now enumerates the real source tree and fails when a
+  module is missing from the inventory, and validates the relative links in
+  every Markdown file under `docs/`.
 
 ### Fixed
 

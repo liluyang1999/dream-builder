@@ -120,6 +120,7 @@ if ($unreachableSections.Count -gt 0) {
 # Sibling documentation under docs/ must stay discoverable from the archive so the
 # directory keeps a single entry point.
 $siblingDocuments = @(
+    "README.md"
     "game/README.md"
     "game/vertical-slice.md"
     "game/release-runbook.md"
@@ -134,17 +135,92 @@ foreach ($document in $siblingDocuments) {
     }
 }
 
+# The archive claims to map every module. Enumerate the real source tree and
+# require each file's repository-relative path to appear, so a new module cannot
+# be added without a line explaining what it does.
+$sourceRoots = @(
+    "apps\desktop\src"
+    "packages\ipc-contracts\src"
+    "packages\liquid-glass\src"
+    "crates\dream-builder\src"
+)
+$undocumentedModules = [System.Collections.Generic.List[string]]::new()
+$documentedModuleCount = 0
+foreach ($sourceRoot in $sourceRoots) {
+    $absoluteRoot = Join-Path $repositoryRoot $sourceRoot
+    if (-not (Test-Path -LiteralPath $absoluteRoot -PathType Container)) {
+        throw "Expected source root is missing: $sourceRoot"
+    }
+    $sourceFiles = @(
+        Get-ChildItem -LiteralPath $absoluteRoot -Recurse -File |
+            Where-Object {
+                $_.Extension -in @(".ts", ".tsx", ".rs") -and
+                $_.Name -notlike "*.test.*" -and
+                $_.Name -notlike "*.d.ts" -and
+                $_.FullName -notmatch '\\tests\\'
+            }
+    )
+    foreach ($sourceFile in $sourceFiles) {
+        $relativePath = $sourceFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
+        if ($html.Contains($relativePath)) {
+            $documentedModuleCount++
+        }
+        else {
+            $undocumentedModules.Add($relativePath)
+        }
+    }
+}
+if ($undocumentedModules.Count -gt 0) {
+    throw "Teaching archive does not document these source modules: $($undocumentedModules -join ', ')"
+}
+
+# Every Markdown file under docs/ is part of the same directory contract, so its
+# relative links must resolve too — a broken product-doc link is just as bad as a
+# broken archive link.
+$markdownFiles = @(Get-ChildItem -LiteralPath $docsDirectory -Recurse -File -Filter "*.md")
+$markdownLinkCount = 0
+foreach ($markdownFile in $markdownFiles) {
+    $markdown = Get-Content -LiteralPath $markdownFile.FullName -Raw -Encoding UTF8
+    $targets = @(
+        [regex]::Matches($markdown, '\]\(([^)\s]+)(?:\s+"[^"]*")?\)') |
+            ForEach-Object { $_.Groups[1].Value }
+    )
+    foreach ($target in $targets) {
+        if ($target.StartsWith("#") -or $target -match '^(?i)(https?://|mailto:)') {
+            continue
+        }
+        $markdownLinkCount++
+        $localPath = ($target -split '#', 2)[0]
+        if ([string]::IsNullOrWhiteSpace($localPath)) {
+            continue
+        }
+        $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
+        $resolvedPath = [IO.Path]::GetFullPath((Join-Path $markdownFile.DirectoryName $decodedPath))
+        if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
+            throw "Documentation link escapes the repository: $relativeSource -> $target"
+        }
+        if (-not (Test-Path -LiteralPath $resolvedPath)) {
+            $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
+            throw "Documentation links to a missing local path: $relativeSource -> $target"
+        }
+    }
+}
+
 $topicCount = $sectionIds.Count
 $textLength = (($html -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim().Length
 if ($topicCount -lt 20 -or $textLength -lt 26000) {
     throw "Teaching archive is not comprehensive enough (sections=$topicCount, characters=$textLength)."
 }
 
-Write-Host "Teaching archive verified:" -ForegroundColor Green
+Write-Host "Documentation verified:" -ForegroundColor Green
 [pscustomobject]@{
     File = $archivePath
     Sections = $topicCount
     TextCharacters = $textLength
     Anchors = $ids.Count
     Links = $hrefs.Count
+    DocumentedModules = $documentedModuleCount
+    MarkdownFiles = $markdownFiles.Count
+    MarkdownLinks = $markdownLinkCount
 } | Format-List
