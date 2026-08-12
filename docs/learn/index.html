@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="《智慧树之森》涉及的全部技术框架与概念的教学档案总入口。" />
+    <title>《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="hero">
+      <p class="hero__eyebrow">Dream Builder · docs/learn</p>
+      <h1>《智慧树之森》<span>全栈教学档案</span></h1>
+      <p class="hero__lead">
+        一份从产品体验出发，贯穿 Tauri 2、Windows WebView2、TypeScript、React 19、
+        react-three-fiber、Three.js、Zustand、Rust、IPC、无障碍、构建工具链、安全、测试、
+        持续集成与 Windows 发布的源码导读。它描述的是当前仓库实际实现，而不是理想化示例。
+      </p>
+      <div class="badges" aria-label="档案摘要">
+        <span class="badge badge--gold">产品版本 1.0</span>
+        <span class="badge">Tauri 2 + WebView2 Evergreen</span>
+        <span class="badge">React 19 + R3F</span>
+        <span class="badge">Rust 2024</span>
+        <span class="badge">单人离线 · Windows x64</span>
+      </div>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html" class="is-current" aria-current="page">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="pages">
+          <p class="section-kicker">Contents</p>
+          <h2>十四个专题</h2>
+          <p class="section-lead">
+            每一页都可以独立打开、搜索和打印。不确定从哪开始时，按下面的顺序读；
+            要查某个具体问题时，直接跳到对应专题或
+            <a href="./code-map.html">源码索引</a>。
+          </p>
+          <div class="grid grid--3">
+            <article class="card">
+              <h3><a href="./overview.html">01 · 项目与架构</a></h3>
+              <p>这个项目到底是什么、由哪两个运行环境组成、一条真实请求怎样穿过整个系统。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./frontend.html">02 · 前端与状态</a></h3>
+              <p>严格类型如何把框架留在边缘，以及输入、运动、进度与设置为何要分成不同寿命的状态。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./graphics.html">03 · 3D 与音频</a></h3>
+              <p>R3F 如何用 JSX 声明场景图，实例化、材质、Bloom、Fresnel 着色与液态玻璃 UI 的取舍。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./accessibility.html">04 · 无障碍与输入</a></h3>
+              <p>无障碍设置契约、系统偏好与游戏开关的关系，以及键盘、指针、手柄三种事件模型。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./performance.html">05 · 性能与证据</a></h3>
+              <p>有界直方图记录器、分位数、阶段标记，以及自动化无法替代的人工门槛。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./ipc.html">06 · IPC 与边界</a></h3>
+              <p>跨语言边界为何需要静态类型加运行时证据，命令与事件的区别，以及第二条消息边界。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./rust.html">07 · Rust 后端</a></h3>
+              <p>所有权、newtype、trait 接缝、错误处理、共享状态纪律、持久化与确定性生成。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./tauri.html">08 · Tauri 与 WebView2</a></h3>
+              <p>Builder 启动顺序、托管状态、插件与路径基准，以及为什么不固定 WebView2 运行时版本。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./security.html">09 · 安全边界</a></h3>
+              <p>Capability/ACL、CSP、边界校验、隐私最小化、导出信任边界与依赖供应链。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./build.html">10 · 构建与版本</a></h3>
+              <p>Vite 开发服务器、ES2022 降级、Rollup 分块预算、build.rs 版本资源与两段式产品版本。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./quality.html">11 · 质量与 CI</a></h3>
+              <p>把编辑器诊断固化为可重复命令，以及 CI 能证明什么、不能证明什么。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./release.html">12 · Windows 发布</a></h3>
+              <p>NSIS 打包、源码树指纹、候选与生产的区别，以及安装与卸载合同。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./code-map.html">13 · 源码索引</a></h3>
+              <p>常用入口加上覆盖每一个源码模块的完整清单，由门禁保证不遗漏。</p>
+            </article>
+            <article class="card">
+              <h3><a href="./glossary.html">14 · 术语表</a></h3>
+              <p>本档案出现的跨栈术语与它们在本项目中的具体含义。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="how-to-read">
+
+  <p class="section-kicker">Reading guide</p>
+  <h2>怎样使用这份档案</h2>
+  <p class="section-lead">
+    先建立“谁负责什么”的心智模型，再沿一条真实请求进入代码。每个概念都按
+    “是什么、为什么在这里使用、代码在哪里、容易犯什么错”来解释。路径链接指向仓库内真实文件；
+    版本、性能与发布结论都区分自动化证据和仍需人工完成的外部门槛。
+  </p>
+  <div class="grid grid--3">
+    <article class="card">
+      <h3>第一次阅读</h3>
+      <p>依次读“项目现状 → 总体架构 → 运行全链路”，先理解双运行时、数据边界和游戏循环。</p>
+    </article>
+    <article class="card">
+      <h3>前端学习</h3>
+      <p>从 TypeScript/React、状态机、第三人称运动到 R3F 场景，边读边运行 <code>pnpm dev</code>。</p>
+    </article>
+    <article class="card">
+      <h3>桌面与 Rust 学习</h3>
+      <p>从 IPC 契约进入 Rust 命令，再看 Tauri Builder、权限、WebView2 与 NSIS 发布。</p>
+    </article>
+  </div>
+  <div class="callout callout--gold">
+    <strong>事实边界：</strong>当前代码已经形成完整的短篇单章游戏和 Windows 候选包工程，
+    但五名首次接触玩家观察、实体手柄完整听测、干净账户覆盖升级以及受信任代码签名仍是外部证据。
+    自动化全部通过也不能替代这些发布门槛。最新产品口径见
+    <a href="../game/README.md">docs/game/README.md</a>。
+  </div>
+        </section>
+
+        <section id="learning-path">
+
+  <p class="section-kicker">Guided learning</p>
+  <h2>建议的七段学习路线</h2>
+  <ol>
+    <li><strong>先运行浏览器版：</strong><code>pnpm dev</code>，完成标题到净化，观察没有 Rust 时的回退警告。</li>
+    <li><strong>读纯规则：</strong>从 gameProgress、purificationPuzzle、playerInput、playerMotion 的测试开始，理解确定状态转换。</li>
+    <li><strong>接上 React：</strong>追踪 store → GameplayController → UI/Scene，观察组件怎样消费同一快照。</li>
+    <li><strong>进入 3D：</strong>从 SceneCanvas 到 GameplayWorld，再拆解 TreeContent、CartoonForest、实例化、shader 和性能探针。</li>
+    <li><strong>练习无障碍：</strong>只用键盘走一遍标题—设置—帮助—净化，再打开系统“减少动态”对比表现差异。</li>
+    <li><strong>跨过 IPC：</strong>比较 Zod schema 与 Rust serde struct，跟踪 <code>generate_tree</code> 请求和 <code>magic-field</code> 事件。</li>
+    <li><strong>运行原生与发布：</strong><code>pnpm tauri dev</code> 验证 WebView2/IPC，再阅读 capability、CSP、构建分块、CI 工作流、发布清单和安装状态脚本。</li>
+  </ol>
+  <div class="callout callout--violet">
+    <strong>一次安全练习：</strong>给 IPC 场景增加一个可选、向后兼容字段。先写 Rust/TS 两侧失败测试，
+    再同步 domain、serde、Zod、Worker 和消费者，最后运行全部门禁。这个练习会触及本项目最重要的架构边界。
+  </div>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <span></span>
+          <a class="pager__link pager__link--next" href="./overview.html"><span>下一页</span><strong>01 · 项目与架构</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

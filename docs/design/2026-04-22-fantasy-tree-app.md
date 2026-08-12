@@ -1,7 +1,7 @@
 # Fantasy Tree Desktop App Implementation Plan
 
 > **Historical archive:** this implementation plan describes the pre-React prototype and is not an active
-> instruction set. Use `docs/game/` for current product decisions and `docs/index.html` for the current
+> instruction set. Use `docs/game/` for current product decisions and `docs/learn/` for the current
 > architecture; the unchecked boxes below are preserved only as design history.
 
 **Goal:** Build a complete Tauri desktop application that renders an interactive procedural 3D fantasy tree with a Rust backend and a Three.js frontend.

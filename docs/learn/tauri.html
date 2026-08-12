@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Builder 启动顺序、托管状态、插件与路径基准，以及为什么不固定 WebView2 运行时版本。" />
+    <title>Tauri 外壳与 Windows WebView2 策略 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 08 · Tauri 与 WebView2</p>
+      <h1>Tauri 外壳与 Windows WebView2 策略</h1>
+      <p class="pagehead__lead">Builder 启动顺序、托管状态、插件与路径基准，以及为什么不固定 WebView2 运行时版本。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html" aria-current="page">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html" class="is-current" aria-current="page">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="tauri">
+
+  <p class="section-kicker">Tauri 2</p>
+  <h2>Tauri：原生外壳不是一个打包按钮</h2>
+  <p class="section-lead">
+    Tauri 把系统 WebView、Rust 进程、窗口、菜单、托盘、插件和权限系统装配成一个桌面应用。
+    它的核心价值不是“把网站变 EXE”，而是以明确授权的 IPC 把 Web UI 与原生能力连接起来。
+  </p>
+  <h3>Builder 启动顺序</h3>
+  <ol>
+    <li>安装 panic logger，使未捕获 Rust panic 进入诊断日志；</li>
+    <li>安装 single-instance，第二次启动时聚焦主窗口；</li>
+    <li>安装 log、store、dialog 和 opener 四个插件——注意这里没有文件系统插件，导出写盘由 Rust 命令自己完成；</li>
+    <li>构建原生菜单并把点击转发为前端事件；</li>
+    <li>在 setup 中载入设置、创建 AppState、注册托盘并启动魔法场任务；</li>
+    <li>通过 <code>generate_handler!</code> 注册命令；</li>
+    <li><code>generate_context!()</code> 嵌入编译期配置并进入事件循环。</li>
+  </ol>
+  <h3>托管状态 <code>State&lt;'_, AppState&gt;</code></h3>
+  <p>
+    <code>app.manage(state)</code> 把一个线程安全值交给 Tauri 容器。命令形参中的 <code>State</code>
+    是带生命周期的借用句柄，命令不能把它任意保存到全局。AppState 内部再用 Arc/Mutex 管理共享所有权与可变性。
+  </p>
+  <h3>插件与动态导入</h3>
+  <p>
+    Rust 插件提供原生实现，前端对应 JS 包提供类型安全调用。保存对话框、路径和 opener 只在 Tauri 分支动态导入，
+    既避免浏览器开发模式执行原生 API，也把可选代码移出首屏 bundle。插件装上并不等于前端自动有权限，仍需 capability 授权。
+  </p>
+  <h3>窗口、菜单与单实例</h3>
+  <p>
+    <a href="../../crates/dream-builder/tauri.conf.json">tauri.conf.json</a> 定义主窗口尺寸、最小尺寸、背景色、居中和 Win11 Mica；
+    不支持 Mica 的系统会优雅忽略。原生菜单和托盘使用稳定 id，前端统一处理动作。二次启动不会创建第二个世界实例，
+    而是显示、取消最小化并聚焦现有窗口，避免并发写存档。
+  </p>
+  <h3>Tauri 路径基准的容易混淆点</h3>
+  <div class="grid">
+    <article class="card">
+      <h3><code>before*Command</code></h3>
+      <p>运行 cwd 是包含 Tauri 配置目录的父目录，即 <code>crates/</code>，所以使用 <code>pnpm -C .. dev/build</code> 才回到仓库根。</p>
+    </article>
+    <article class="card">
+      <h3><code>frontendDist</code></h3>
+      <p>它相对配置文件 <code>crates/dream-builder/tauri.conf.json</code>，所以是 <code>../../apps/desktop/dist</code>。两者不是同一个基准。</p>
+    </article>
+  </div>
+        </section>
+
+        <section id="webview2">
+
+  <p class="section-kicker">Windows WebView runtime</p>
+  <h2>WebView2：使用 Evergreen，不固定运行时版本</h2>
+  <p class="section-lead">
+    Windows 打包版的前端确实运行在 Microsoft Edge WebView2 Runtime 中，但 React 代码没有直接创建或调用
+    CoreWebView2。调用链由 Tauri → tauri-runtime-wry → Wry → WebView2 COM 完成；前端面对的是标准 Web API
+    和 Tauri API，而不是某个特定版本的 WebView2 SDK 对象。
+  </p>
+  <div class="callout">
+    <strong>结论：</strong>不锁定 WebView2 Runtime 版本是本项目正确的默认策略。Evergreen Runtime 由 Windows/
+    Microsoft Edge Update 维护，各用户在某一时刻的补丁版本可能不同，因此无法也不应要求“所有机器严格同一 WebView2 版本”。
+    应统一的是受支持行为、Web 标准与回归测试，不是运行时补丁号。
+  </div>
+  <h3>当前配置到底做了什么</h3>
+  <pre><code>"webviewInstallMode": {
+    "type": "downloadBootstrapper",
+    "silent": true
+  }</code></pre>
+  <p>
+    这是 Tauri 的 Evergreen 引导安装模式：安装器检查运行时，缺失时由 Microsoft bootstrapper 获取合适的 Evergreen Runtime；
+    已安装时应用直接使用系统运行时。配置没有 <code>fixedRuntime</code> 路径，也没有版本字段。
+    <a href="../../scripts/verify-version-contract.ps1">verify-version-contract.ps1</a> 会阻止误改成固定运行时。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>方案</th><th>优点</th><th>代价</th><th>本项目</th></tr></thead>
+      <tbody>
+        <tr><th>Evergreen bootstrapper</th><td>体积小、持续安全更新、Windows 10/11 普遍可用</td><td>用户补丁版本不同；首次缺失时需要获取运行时</td><td><strong>采用</strong></td></tr>
+        <tr><th>Offline installer</th><td>安装时不依赖网络，仍安装 Evergreen</td><td>安装包更大；需要随包维护引导文件</td><td>仅离线部署需求明确时评估</td></tr>
+        <tr><th>Fixed Version</th><td>每台机器使用完全相同引擎</td><td>约增加约 180MB、应用自行承担安全更新与兼容维护</td><td>不采用</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>开发浏览器与发布 WebView 的差异</h3>
+  <ul>
+    <li><code>pnpm dev</code> 只是 Vite 服务器；你用 Chrome 打开就是 Chrome，用 Edge 打开就是 Edge，不自动变成 WebView2。</li>
+    <li><code>pnpm tauri dev</code> 和安装后的 EXE 才由 Tauri 创建 WebView2 原生窗口，并启用 IPC、菜单和插件。</li>
+    <li>因此必须同时做浏览器快速测试和真实 Tauri 冒烟；只在 Chrome 通过不能证明 WebView2 原生集成通过。</li>
+    <li>WebView2 与 Edge 共用 Chromium/平台技术，但 Runtime 是面向嵌入式应用的独立安装与更新通道。</li>
+  </ul>
+  <h3>怎样验证而不错误锁版本</h3>
+  <ol>
+    <li>静态验证配置是 <code>downloadBootstrapper</code> 且不存在 fixed path；</li>
+    <li>在支持的最低/当前 Windows 环境安装并首次启动；</li>
+    <li>确认 <code>msedgewebview2.exe</code> 子进程、原生 IPC、WebGL、音频与导出工作；</li>
+    <li>记录测试时的 Windows 与 Runtime 版本用于复现，但不要把该值写成应用启动的硬性等号；</li>
+    <li>WebView2 大版本变化后用 CI、目标机和干净账户回归关键流程。</li>
+  </ol>
+  <p>
+    延伸阅读：
+    <a href="https://v2.tauri.app/distribute/windows-installer/">Tauri Windows installer</a>、
+    <a href="https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/evergreen-vs-fixed-version">Microsoft Evergreen 与 Fixed Version</a>。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./rust.html"><span>上一页</span><strong>07 · Rust 后端</strong></a>
+          <a class="pager__link pager__link--next" href="./security.html"><span>下一页</span><strong>09 · 安全边界</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

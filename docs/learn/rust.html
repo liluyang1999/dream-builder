@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="所有权、newtype、trait 接缝、错误处理、共享状态纪律、持久化与确定性生成。" />
+    <title>Rust 领域模型、确定性生成与原生副作用 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 07 · Rust 后端</p>
+      <h1>Rust 领域模型、确定性生成与原生副作用</h1>
+      <p class="pagehead__lead">所有权、newtype、trait 接缝、错误处理、共享状态纪律、持久化与确定性生成。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html" aria-current="page">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html" class="is-current" aria-current="page">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="rust">
+
+  <p class="section-kicker">Rust backend</p>
+  <h2>Rust 后端：领域模型、确定性生成与原生副作用</h2>
+  <p class="section-lead">
+    Rust 部分同时是库和可执行程序。<code>main.rs</code> 保持极薄，只调用库的 <code>run()</code>；
+    可测试逻辑放在 domain、generation、magic 和 state 中，Tauri 命令只做边界适配。
+  </p>
+  <div class="layer-stack">
+    <div class="layer"><strong>domain/</strong><span><code>Vec3</code>、<code>Seed</code>、<code>Energy</code>、树场景、细节、魔法场和 builder；只表达数据与不变量。</span></div>
+    <div class="layer"><strong>generation/</strong><span>RNG trait、SeededRng、SceneGenerator trait 与 FantasyTreeGenerator；给定 seed 可重放。</span></div>
+    <div class="layer"><strong>state.rs</strong><span>设置、seed 历史、活动 seed 与场景缓存，封装在 <code>Arc&lt;Mutex&lt;Inner&gt;&gt;</code>。</span></div>
+    <div class="layer"><strong>commands.rs</strong><span>七个薄 IPC 命令；输入校验、状态访问、异步导出与结构化错误。</span></div>
+    <div class="layer"><strong>lib.rs</strong><span>插件、菜单、setup、托管状态、后台事件、命令注册和进程生命周期。</span></div>
+  </div>
+  <div class="grid">
+    <article class="card">
+      <h3>所有权与借用</h3>
+      <p>
+        只读取 id 的函数接收 <code>&amp;str</code>，生成器借用 <code>&amp;mut impl Rng</code>；
+        只有返回或跨线程/状态边界时才拥有并克隆数据。克隆不是“让借用检查器安静”的默认工具。
+      </p>
+    </article>
+    <article class="card">
+      <h3>Newtype 与不变量</h3>
+      <p>
+        <code>Seed(u64)</code> 防止任意数字混用；<code>Energy(f32)</code> 只能通过夹紧构造，
+        因而任何已存在的 Energy 都落在 0..1。serde transparent 保持 wire 仍是数字。
+      </p>
+    </article>
+    <article class="card">
+      <h3>Trait 与泛型接缝</h3>
+      <p>
+        <code>Rng</code> 只要求实现 <code>next_u32</code>，默认方法派生浮点与范围；
+        <code>SceneGenerator</code> 定义生成与细节查询，使调用方依赖能力而不是具体算法。
+      </p>
+    </article>
+    <article class="card">
+      <h3>Builder 与枚举</h3>
+      <p>
+        <code>TreeSceneBuilder</code> 用移动 self 的链式 API 组装结果；<code>DetailKind</code> 与
+        <code>AppError</code> 用穷尽 match，让新增变体在遗漏处理处产生编译错误。
+      </p>
+    </article>
+  </div>
+  <h3>错误处理</h3>
+  <p>
+    <a href="../../crates/dream-builder/src/errors.rs">AppError</a> 由 <code>thiserror</code> 派生错误文本，
+    并手写 Serialize 稳定输出 <code>{ code, message }</code>。可预期失败返回 <code>Result</code> 并用
+    <code>?</code> 传播；panic 只代表不变量或启动级错误。panic hook 会把崩溃写入日志，
+    但绝不能把秘密或用户数据塞进错误文本。
+  </p>
+  <h3>共享状态与异步纪律</h3>
+  <p>
+    <a href="../../crates/dream-builder/src/state.rs">AppState</a> 克隆的是 <code>Arc</code>，不是复制状态。
+    每个方法内部短暂加锁，复制所需值后立即释放。<a href="../../crates/dream-builder/src/events.rs">事件任务</a>
+    在 <code>interval.tick().await</code> 之后才读取设置，绝不让同步 Mutex guard 跨越 await。
+    文件导出使用 <code>tokio::fs::write</code>，避免阻塞异步执行器线程。
+  </p>
+  <h3>持久化：读尽力而为，写必须报告失败</h3>
+  <p>
+    <a href="../../crates/dream-builder/src/persistence.rs">persistence.rs</a> 通过 Store 插件的扩展 trait
+    <code>StoreExt</code> 使用插件能力——这是 Tauri 插件在 Rust 侧的惯用形态：插件为
+    <code>AppHandle</code> 增加方法，而不是要求你自己持有一个全局对象。设置落在
+    <code>settings.json</code> 的 <code>settings</code> 键下。
+  </p>
+  <div class="grid">
+    <article class="card">
+      <h3>读：三层回退</h3>
+      <p>
+        打不开 store、反序列化失败、或反序列化成功但
+        <code>validate()</code> 不通过，三种情况都返回默认设置。
+        玩家宁可看到默认主题，也不能因为一个坏文件启动不了游戏。
+      </p>
+    </article>
+    <article class="card">
+      <h3>写：结构化错误</h3>
+      <p>
+        每一步都用 <code>map_err</code> 转成 <code>AppError::Persistence</code> 并带上原因，
+        再由 <code>?</code> 传播。写失败必须让前端知道，不能返回 <code>Ok</code> 假装保存成功。
+      </p>
+    </article>
+  </div>
+  <p>
+    注意这里的非对称：<strong>读可以静默降级，写不可以。</strong>
+    读失败的后果是“设置回到默认”，玩家立刻看得见也能改回来；
+    写失败的后果是“玩家以为改好了，下次启动全部丢失”，只有报告出来才能补救。
+    同一条原则也出现在前端存档层——加载可以回退到备份，保存失败必须提示。
+  </p>
+  <h3>确定性生成</h3>
+  <p>
+    SeededRng 的输出只由 seed 与调用序列决定；FantasyTreeGenerator 依序生成树干、树冠、符文和水晶，
+    细节 id 也稳定。确定性让缓存、导出、故障复现、测试和跨会话重建成立。任何“为了视觉随机”而读取系统时间或
+    平台随机源都会破坏这条合同；需要会话变化时，应显式引入独立 seed 并把它纳入存档。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./ipc.html"><span>上一页</span><strong>06 · IPC 与边界</strong></a>
+          <a class="pager__link pager__link--next" href="./tauri.html"><span>下一页</span><strong>08 · Tauri 与 WebView2</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

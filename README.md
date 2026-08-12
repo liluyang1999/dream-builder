@@ -8,7 +8,8 @@
 性能报告和当前用户安装—首次启动—卸载闭环已有归档；五名首次接触玩家观察、实体手柄完整听测、
 干净账户覆盖升级和受信任代码签名仍是正式发布前的外部门槛。
 
-- [完整中文全栈教学档案](docs/index.html)
+- [完整中文全栈教学档案](docs/learn/index.html)（十五页专题 HTML，克隆后用浏览器打开）
+- [文档目录索引](docs/README.md)
 - [游戏愿景、当前状态与里程碑](docs/game/README.md)
 - [Windows 交付与恢复手册](docs/game/release-runbook.md)
 
@@ -40,7 +41,8 @@ dream-builder/
 │   └── liquid-glass/      # 可复用玻璃主题组件
 ├── crates/dream-builder/  # Rust 领域、生成、状态、事件与 Tauri 外壳
 ├── docs/
-│   ├── index.html         # 唯一的综合中文教学档案，也是 docs/ 的入口
+│   ├── README.md          # 文档目录索引
+│   ├── learn/             # 唯一的中文教学档案：十五页专题 HTML
 │   ├── game/              # 当前产品方向、验收证据与交付手册
 │   └── design/            # 历史设计札记，仅供追溯
 ├── scripts/               # 版本、安全、教学档案、依赖布局与发布验证

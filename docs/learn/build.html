@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Vite 开发服务器、ES2022 降级、Rollup 分块预算、build.rs 版本资源与两段式产品版本。" />
+    <title>构建工具链、版本与依赖 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 10 · 构建与版本</p>
+      <h1>构建工具链、版本与依赖</h1>
+      <p class="pagehead__lead">Vite 开发服务器、ES2022 降级、Rollup 分块预算、build.rs 版本资源与两段式产品版本。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html" aria-current="page">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html" class="is-current" aria-current="page">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="build-toolchain">
+
+  <p class="section-kicker">Build toolchain</p>
+  <h2>两套构建系统：Vite 负责网页产物，Cargo 负责原生产物</h2>
+  <p class="section-lead">
+    “能跑起来”和“能交付”之间隔着构建配置。前端由 Vite 在开发期用 esbuild 转换、在发布期用 Rollup 分块；
+    Rust 侧由 Cargo 与 <code>build.rs</code> 生成可执行文件并改写 Windows 版本资源。
+    两条链路都必须可重复、可验证，并且不能悄悄改变玩家看到的版本。
+  </p>
+  <h3>开发期：Vite dev server</h3>
+  <ul>
+    <li>源码以原生 ES module 直接提供，只按需转换，因此冷启动与热更新不随项目规模线性变差。</li>
+    <li><code>server.strictPort</code> 固定 <code>127.0.0.1:1420</code>：Tauri 配置按此端口连接，端口被占用时应当失败而不是悄悄换端口。</li>
+    <li><code>clearScreen: false</code> 保留 Tauri CLI 的原生日志，否则 Rust 编译输出会被前端刷屏覆盖。</li>
+    <li><code>envPrefix: ['VITE_', 'TAURI_']</code> 让 Tauri 注入的环境变量可以进入前端，同时仍然拒绝暴露任意进程变量。</li>
+  </ul>
+  <div class="callout callout--gold">
+    <strong>为什么显式设置 <code>esbuild.target: 'es2022'</code>：</strong>
+    Vite 开发期默认按接近 <code>esnext</code> 提供源码，而 Chromium 尚不能解析 TC39 标准装饰器语法。
+    <a href="../../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的 <code>@logged</code> / <code>@measure</code>
+    因此会在浏览器开发模式直接语法报错。把 target 对齐到 TypeScript 的 ES2022，
+    使开发与生产使用同一套降级规则；<a href="../../apps/desktop/src/tests/viteDevTransform.test.ts">viteDevTransform.test.ts</a>
+    把这条结论固化成回归测试，避免配置被“顺手清理”掉。
+  </div>
+  <h3>发布期：Rollup 分块与预算</h3>
+  <p>
+    R3F 的 <code>Canvas</code> 会注册完整 Three 命名空间，如果和应用代码打进同一个文件，
+    每次业务改动都会让用户重新下载整个 3D 引擎。
+    <a href="../../apps/desktop/viteChunks.ts">viteChunks.ts</a> 因此把依赖按稳定度切成三块：
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>chunk</th><th>内容</th><th>字节预算</th></tr></thead>
+      <tbody>
+        <tr><th><code>three-engine</code></th><td>Three 引擎本体，变化最少</td><td>700,000</td></tr>
+        <tr><th><code>react-three-runtime</code></th><td>fiber、drei、three-stdlib、maath</td><td>250,000</td></tr>
+        <tr><th><code>three-effects</code></th><td>postprocessing 与 Bloom 通道</td><td>120,000</td></tr>
+        <tr><th><code>SceneCanvas</code></th><td>按需加载的场景入口</td><td>100,000</td></tr>
+        <tr><th><code>GLTFExporter</code></th><td>只有导出时才需要的序列化器</td><td>80,000</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li><code>onlyExplicitManualChunks</code> 阻止 Rollup 把共享的 React 依赖卷进延迟加载的场景块。</li>
+    <li><a href="../../scripts/verify-desktop-bundle.ps1">verify-desktop-bundle.ps1</a> 在每次 <code>pnpm build</code> 后运行：每个前缀必须恰好一个 chunk、逐块不超预算、除引擎外没有超过 500,000 字节的块。</li>
+    <li>它还检查 <code>index.html</code> 不能直接引用这些延迟 chunk——否则“代码分割”只是把一个大文件拆成几个同时下载的文件。</li>
+    <li>预算是硬失败而不是警告：<code>chunkSizeWarningLimit</code> 只影响提示，真正的门禁在脚本里。</li>
+  </ul>
+  <h3>原生期：<code>build.rs</code> 与 Windows 版本资源</h3>
+  <p>
+    <a href="../../crates/dream-builder/build.rs">build.rs</a> 是 Cargo 在编译 crate 之前运行的构建脚本。它做两件事：
+    先由 <code>tauri_build</code> 嵌入配置并生成 Windows 资源文件，再在 Windows 目标上把资源里的
+    <code>FileVersion</code> 与 <code>ProductVersion</code> 改写成 <a href="../../version.json">version.json</a>
+    中的两段式公开版本，最后用 <code>embed_resource</code> 重新编译资源。
+  </p>
+  <ul>
+    <li><code>cargo:rerun-if-changed</code> 指向 <code>version.json</code>，改版本号会触发重新构建而不是复用旧资源。</li>
+    <li>脚本先校验 <code>productVersion</code> 恰好两段、全为数字、无前导零，非法值直接让构建失败。</li>
+    <li>替换时统计命中次数，不等于一次就 panic。宁可构建失败，也不要产出“版本字符串只改了一半”的 EXE。</li>
+    <li>这解释了为什么 Cargo 清单里的三段式兼容值不会出现在文件属性里：它在链接前就被替换掉了。</li>
+  </ul>
+  <p>
+    release profile 统一在根 <a href="../../Cargo.toml">Cargo.toml</a>：<code>lto</code> 做跨 crate 内联，
+    <code>codegen-units = 1</code> 牺牲编译并行度换取更好的优化，<code>strip</code> 去掉符号表以缩小体积。
+    这些只应用于发布构建，调试构建保持快速与可调试。
+  </p>
+  <div class="callout">
+    <strong>统一入口：</strong><a href="../../justfile">justfile</a> 是跨语言任务入口，
+    <code>just check</code> / <code>just bundle</code> 包住 pnpm 与 cargo 两侧命令；
+    根 <code>package.json</code> 的脚本与之一一对应，因此本机、CI 和发布使用的是同一组命令，
+    而不是三份互相漂移的说明。
+  </div>
+        </section>
+
+        <section id="version-dependencies">
+
+  <p class="section-kicker">Versioning and dependencies</p>
+  <h2>用一个两段式产品版本控制全部展示</h2>
+  <p class="section-lead">
+    用户要求的版本语义由两段数字表达，底层工具的格式要求则由机械兼容层承担。两者必须从一个文件派生并自动对照，
+    不能靠开发者手工记忆在多个清单中同步。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>位置</th><th>当前值</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><th>游戏 UI / 文档 / Changelog</th><td><code>1.0</code></td><td>唯一的产品版本</td></tr>
+        <tr><th>发布目录与交付文件名</th><td><code>output/release/1.0</code></td><td>面向玩家和发布人员</td></tr>
+        <tr><th>release manifest</th><td><code>version: 1.0</code></td><td>不再暴露第二个版本字段</td></tr>
+        <tr><th>package.json / Cargo / Tauri</th><td>构建兼容值（不展示）</td><td>只满足工具解析要求</td></tr>
+        <tr><th>Windows EXE / 已安装的应用</th><td><code>1.0</code></td><td>安装器、主程序、卸载器与 DisplayVersion 一致</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>升级规则</h3>
+  <ul>
+    <li><strong>小的新功能：</strong>只增加第二段，不对玩家暴露额外补丁位。</li>
+    <li><strong>非常大的功能模块：</strong>增加第一段并把第二段归零。</li>
+    <li><strong>修复与内部重构：</strong>在同一候选内重新构建时用来源提交与哈希区分，不制造第二套产品版本。</li>
+    <li><strong>历史证据：</strong>原始测量 JSON 保持不可改写；当前产品资料只引用两段式版本。</li>
+  </ul>
+  <h3>依赖版本与产品版本不是一回事</h3>
+  <p>
+    React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；产品版本 1.0 不要求依赖采用相同数字。
+    依赖升级必须看 API、锁文件、公告、目标平台与实际回归。当前依赖解析还通过 override 固定
+    <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.17</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./security.html"><span>上一页</span><strong>09 · 安全边界</strong></a>
+          <a class="pager__link pager__link--next" href="./quality.html"><span>下一页</span><strong>11 · 质量与 CI</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

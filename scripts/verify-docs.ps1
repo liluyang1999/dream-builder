@@ -3,20 +3,190 @@ Set-StrictMode -Version Latest
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $docsDirectory = Join-Path $repositoryRoot "docs"
-$archivePath = Join-Path $docsDirectory "index.html"
+$learnDirectory = Join-Path $docsDirectory "learn"
+$hubPath = Join-Path $learnDirectory "index.html"
+$stylesheetPath = Join-Path $learnDirectory "assets\learn.css"
 
-if (-not (Test-Path -LiteralPath $archivePath -PathType Leaf)) {
-    throw "Teaching archive is missing: $archivePath"
+foreach ($required in @($docsDirectory, $learnDirectory)) {
+    if (-not (Test-Path -LiteralPath $required -PathType Container)) {
+        throw "Required documentation directory is missing: $required"
+    }
+}
+foreach ($required in @($hubPath, $stylesheetPath, (Join-Path $docsDirectory "README.md"))) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+        throw "Required documentation file is missing: $required"
+    }
 }
 
 $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
-$html = $utf8.GetString([IO.File]::ReadAllBytes($archivePath))
+function Read-Utf8Text {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    return $utf8.GetString([IO.File]::ReadAllBytes($Path))
+}
 
-$requiredPatterns = [ordered]@{
+# ---------------------------------------------------------------------------
+# Every topic the archive must keep teaching. Deleting a page is a deliberate
+# product decision, not something a refactor should be able to do silently.
+# ---------------------------------------------------------------------------
+$requiredPages = [ordered]@{
+    "index.html" = "Hub and learning path"
+    "overview.html" = "Product snapshot, architecture, monorepo, runtime flow"
+    "frontend.html" = "TypeScript, React, state and persistence"
+    "graphics.html" = "Three.js, react-three-fiber, audio"
+    "accessibility.html" = "Accessibility and input devices"
+    "performance.html" = "Performance evidence"
+    "ipc.html" = "IPC contract and Worker boundary"
+    "rust.html" = "Rust backend"
+    "tauri.html" = "Tauri and WebView2"
+    "security.html" = "Security boundaries"
+    "build.html" = "Build toolchain and versioning"
+    "quality.html" = "Quality gates and continuous integration"
+    "release.html" = "Windows release"
+    "code-map.html" = "Complete source module index"
+    "glossary.html" = "Glossary"
+}
+foreach ($entry in $requiredPages.GetEnumerator()) {
+    if (-not (Test-Path -LiteralPath (Join-Path $learnDirectory $entry.Key) -PathType Leaf)) {
+        throw "Teaching archive is missing a required page: docs/learn/$($entry.Key) ($($entry.Value))"
+    }
+}
+
+$pageFiles = @(Get-ChildItem -LiteralPath $learnDirectory -File -Filter "*.html" | Sort-Object Name)
+$pages = @{}
+foreach ($pageFile in $pageFiles) {
+    $pages[$pageFile.Name] = Read-Utf8Text $pageFile.FullName
+}
+
+# ---------------------------------------------------------------------------
+# Per-page structure, offline self-containment, and honesty checks.
+# ---------------------------------------------------------------------------
+$structurePatterns = [ordered]@{
     "HTML5 doctype" = '(?i)^\s*<!doctype html>'
     "Chinese document language" = '(?i)<html\s+lang="zh-CN"'
     "UTF-8 declaration" = '(?i)<meta\s+charset="utf-8"'
     "Responsive viewport" = '(?i)<meta\s+name="viewport"'
+    "Page description" = '(?i)<meta\s+name="description"\s+content="[^"]{10,}"'
+    "Document title" = '(?i)<title>[^<]{6,}</title>'
+    "Shared stylesheet" = '(?i)<link\s+rel="stylesheet"\s+href="\./assets/learn\.css"'
+    "Skip link" = '(?i)<a\s+class="skip-link"\s+href="#main-content"'
+    "Main landmark" = '(?i)<main\s+id="main-content">'
+    "Sidebar navigation" = '(?i)<aside\s+class="toc"'
+}
+foreach ($pageName in $pages.Keys) {
+    $pageHtml = $pages[$pageName]
+    foreach ($entry in $structurePatterns.GetEnumerator()) {
+        if ($pageHtml -notmatch $entry.Value) {
+            throw "docs/learn/${pageName}: missing required structure ($($entry.Key))."
+        }
+    }
+    if ($pageHtml -match '(?i)\b(TODO|TBD|FIXME)\b') {
+        throw "docs/learn/${pageName}: contains an unfinished placeholder."
+    }
+    if ($pageHtml -match '(?i)technicalVersion' -or $pageHtml -match '(?<![0-9.])1\.0\.0(?![0-9.])') {
+        throw "docs/learn/${pageName}: must expose only the two-component product version."
+    }
+    if ($pageHtml -match '(?i)<(?:script|link|img)\b[^>]*(?:src|href)="https?://') {
+        throw "docs/learn/${pageName}: must not depend on remote scripts, stylesheets, or images."
+    }
+    if ($pageHtml -match '(?i)<style\b') {
+        throw "docs/learn/${pageName}: styles belong in the shared assets/learn.css, not inline."
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Anchors and links, per page. Fragments resolve against the page that owns
+# them; relative paths resolve against docs/learn/.
+# ---------------------------------------------------------------------------
+$totalAnchors = 0
+$totalLinks = 0
+$allSectionIds = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($pageName in $pages.Keys) {
+    $pageHtml = $pages[$pageName]
+
+    $ids = @(
+        [regex]::Matches($pageHtml, '\sid="([^"]+)"') |
+            ForEach-Object { $_.Groups[1].Value }
+    )
+    $duplicateIds = @($ids | Group-Object | Where-Object Count -gt 1)
+    if ($duplicateIds.Count -gt 0) {
+        throw "docs/learn/${pageName}: duplicate ids: $($duplicateIds.Name -join ', ')"
+    }
+    $idSet = @{}
+    foreach ($id in $ids) { $idSet[$id] = $true }
+    $totalAnchors += $ids.Count
+
+    foreach ($sectionId in [regex]::Matches($pageHtml, '(?i)<section\s+id="([^"]+)"')) {
+        [void]$allSectionIds.Add($sectionId.Groups[1].Value)
+    }
+
+    $hrefs = @(
+        [regex]::Matches($pageHtml, '(?i)<a\b[^>]*\shref="([^"]+)"') |
+            ForEach-Object { $_.Groups[1].Value }
+    )
+    $totalLinks += $hrefs.Count
+    foreach ($href in $hrefs) {
+        if ($href.StartsWith("#")) {
+            $fragment = $href.Substring(1)
+            if (-not [string]::IsNullOrWhiteSpace($fragment) -and -not $idSet.ContainsKey($fragment)) {
+                throw "docs/learn/${pageName}: links to a missing anchor: $href"
+            }
+            continue
+        }
+        if ($href -match '^(?i)(https?://|mailto:)') { continue }
+
+        $localPath = ($href -split '[?#]', 2)[0]
+        if ([string]::IsNullOrWhiteSpace($localPath)) { continue }
+        $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
+        $resolvedPath = [IO.Path]::GetFullPath((Join-Path $learnDirectory $decodedPath))
+        if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "docs/learn/${pageName}: link escapes the repository: $href"
+        }
+        if (-not (Test-Path -LiteralPath $resolvedPath)) {
+            throw "docs/learn/${pageName}: links to a missing local path: $href"
+        }
+
+        # A cross-page fragment must exist on the page it points at.
+        $anchorPart = if ($href.Contains('#')) { ($href -split '#', 2)[1] } else { '' }
+        if (-not [string]::IsNullOrWhiteSpace($anchorPart)) {
+            $targetName = [IO.Path]::GetFileName($resolvedPath)
+            if ($pages.ContainsKey($targetName) -and $pages[$targetName] -notmatch [regex]::Escape(" id=""$anchorPart""")) {
+                throw "docs/learn/${pageName}: links to a missing anchor on another page: $href"
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Navigation: every page reachable from the hub, and every page carries the
+# shared sidebar so a reader is never stranded.
+# ---------------------------------------------------------------------------
+$hubHtml = $pages["index.html"]
+foreach ($pageName in $pages.Keys) {
+    if ($pageName -eq "index.html") { continue }
+    if ($hubHtml -notmatch [regex]::Escape("href=""./$pageName""")) {
+        throw "docs/learn/${pageName} is not reachable from the hub (docs/learn/index.html)."
+    }
+    if ($pages[$pageName] -notmatch [regex]::Escape('href="./index.html"')) {
+        throw "docs/learn/${pageName}: does not link back to the hub."
+    }
+}
+foreach ($pageName in $pages.Keys) {
+    $sidebarPages = @(
+        [regex]::Matches($pages[$pageName], '(?is)<aside class="toc".*?</aside>') |
+            ForEach-Object { [regex]::Matches($_.Value, 'href="\./([^"]+)"') } |
+            ForEach-Object { $_.Groups[1].Value }
+    )
+    $missingFromSidebar = @($requiredPages.Keys | Where-Object { $sidebarPages -notcontains $_ })
+    if ($missingFromSidebar.Count -gt 0) {
+        throw "docs/learn/${pageName}: sidebar omits $($missingFromSidebar -join ', ')"
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Topic coverage across the whole site.
+# ---------------------------------------------------------------------------
+$combinedHtml = ($pages.Values -join "`n")
+$requiredTopics = [ordered]@{
     "Product architecture" = 'id="architecture"'
     "Monorepo layout" = 'id="repository"'
     "End-to-end runtime flow" = 'id="runtime-flow"'
@@ -44,100 +214,25 @@ $requiredPatterns = [ordered]@{
     "Project-local pnpm store" = '\.pnpm-store/'
     "Project-local pnpm cache" = '\.pnpm-cache/'
 }
-foreach ($entry in $requiredPatterns.GetEnumerator()) {
-    if ($html -notmatch $entry.Value) {
+foreach ($entry in $requiredTopics.GetEnumerator()) {
+    if ($combinedHtml -notmatch $entry.Value) {
         throw "Teaching archive is missing required coverage: $($entry.Key)."
     }
 }
 
-if ($html -match '(?i)\b(TODO|TBD|FIXME)\b') {
-    throw "Teaching archive contains an unfinished placeholder."
-}
-if ($html -match '(?i)technicalVersion' -or $html -match '(?<![0-9.])1\.0\.0(?![0-9.])') {
-    throw "Teaching archive must expose only the two-component product version."
-}
-if ($html -match '(?i)<(?:script|link)\b[^>]*(?:src|href)="https?://') {
-    throw "Teaching archive must not depend on remote scripts or stylesheets."
-}
-
-$ids = @(
-    [regex]::Matches($html, '\sid="([^"]+)"') |
-        ForEach-Object { $_.Groups[1].Value }
-)
-$duplicateIds = @($ids | Group-Object | Where-Object Count -gt 1)
-if ($duplicateIds.Count -gt 0) {
-    throw "Teaching archive contains duplicate ids: $($duplicateIds.Name -join ', ')"
-}
-$idSet = @{}
-foreach ($id in $ids) {
-    $idSet[$id] = $true
-}
-
-$hrefs = @(
-    [regex]::Matches($html, '(?i)<a\b[^>]*\shref="([^"]+)"') |
-        ForEach-Object { $_.Groups[1].Value }
-)
-foreach ($href in $hrefs) {
-    if ($href.StartsWith("#")) {
-        $fragment = $href.Substring(1)
-        if (-not [string]::IsNullOrWhiteSpace($fragment) -and -not $idSet.ContainsKey($fragment)) {
-            throw "Teaching archive links to a missing anchor: $href"
-        }
-        continue
-    }
-    if ($href -match '^(?i)(https?://|mailto:)') {
-        continue
-    }
-
-    $localPath = ($href -split '[?#]', 2)[0]
-    $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
-    $resolvedPath = [IO.Path]::GetFullPath((Join-Path $docsDirectory $decodedPath))
-    if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Teaching archive link escapes the repository: $href"
-    }
-    if (-not (Test-Path -LiteralPath $resolvedPath)) {
-        throw "Teaching archive links to a missing local path: $href"
-    }
-}
-
-# Every section must be reachable from the sidebar table of contents, otherwise a
-# newly added topic silently drops out of the reading order.
-$sectionIds = @(
-    [regex]::Matches($html, '(?i)<section\s+id="([^"]+)"') |
-        ForEach-Object { $_.Groups[1].Value }
-)
-$fragmentTargets = @{}
-foreach ($href in $hrefs) {
-    if ($href.StartsWith("#")) {
-        $fragmentTargets[$href.Substring(1)] = $true
-    }
-}
-$unreachableSections = @($sectionIds | Where-Object { -not $fragmentTargets.ContainsKey($_) })
-if ($unreachableSections.Count -gt 0) {
-    throw "Teaching archive sections are not linked from any navigation: $($unreachableSections -join ', ')"
-}
-
-# Sibling documentation under docs/ must stay discoverable from the archive so the
-# directory keeps a single entry point.
-$siblingDocuments = @(
-    "README.md"
-    "game/README.md"
-    "game/vertical-slice.md"
-    "game/release-runbook.md"
-    "design/README.md"
-)
+# Sibling documentation must stay discoverable so docs/ keeps one entry point.
+$siblingDocuments = @("../README.md", "../game/README.md", "../design/README.md")
 foreach ($document in $siblingDocuments) {
-    if (-not (Test-Path -LiteralPath (Join-Path $docsDirectory $document.Replace('/', [IO.Path]::DirectorySeparatorChar)))) {
-        throw "Expected sibling documentation is missing: docs/$document"
-    }
-    if ($html -notmatch [regex]::Escape("href=""./$document""")) {
-        throw "Teaching archive must link to sibling documentation: docs/$document"
+    if ($combinedHtml -notmatch [regex]::Escape("href=""$document""")) {
+        throw "Teaching archive must link to sibling documentation: docs/learn/$document"
     }
 }
 
+# ---------------------------------------------------------------------------
 # The archive claims to map every module. Enumerate the real source tree and
-# require each file's repository-relative path to appear, so a new module cannot
-# be added without a line explaining what it does.
+# require each file's repository-relative path to appear, so a new module
+# cannot be added without a line explaining what it does.
+# ---------------------------------------------------------------------------
 $sourceRoots = @(
     "apps\desktop\src"
     "packages\ipc-contracts\src"
@@ -162,7 +257,7 @@ foreach ($sourceRoot in $sourceRoots) {
     )
     foreach ($sourceFile in $sourceFiles) {
         $relativePath = $sourceFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
-        if ($html.Contains($relativePath)) {
+        if ($combinedHtml.Contains($relativePath)) {
             $documentedModuleCount++
         }
         else {
@@ -174,52 +269,58 @@ if ($undocumentedModules.Count -gt 0) {
     throw "Teaching archive does not document these source modules: $($undocumentedModules -join ', ')"
 }
 
-# Every Markdown file under docs/ is part of the same directory contract, so its
-# relative links must resolve too — a broken product-doc link is just as bad as a
-# broken archive link.
+# ---------------------------------------------------------------------------
+# Markdown under docs/ is part of the same directory contract.
+# ---------------------------------------------------------------------------
 $markdownFiles = @(Get-ChildItem -LiteralPath $docsDirectory -Recurse -File -Filter "*.md")
 $markdownLinkCount = 0
 foreach ($markdownFile in $markdownFiles) {
-    $markdown = Get-Content -LiteralPath $markdownFile.FullName -Raw -Encoding UTF8
+    $markdown = Read-Utf8Text $markdownFile.FullName
+    $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
     $targets = @(
         [regex]::Matches($markdown, '\]\(([^)\s]+)(?:\s+"[^"]*")?\)') |
             ForEach-Object { $_.Groups[1].Value }
     )
     foreach ($target in $targets) {
-        if ($target.StartsWith("#") -or $target -match '^(?i)(https?://|mailto:)') {
-            continue
-        }
+        if ($target.StartsWith("#") -or $target -match '^(?i)(https?://|mailto:)') { continue }
         $markdownLinkCount++
         $localPath = ($target -split '#', 2)[0]
-        if ([string]::IsNullOrWhiteSpace($localPath)) {
-            continue
-        }
+        if ([string]::IsNullOrWhiteSpace($localPath)) { continue }
         $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
         $resolvedPath = [IO.Path]::GetFullPath((Join-Path $markdownFile.DirectoryName $decodedPath))
         if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
             throw "Documentation link escapes the repository: $relativeSource -> $target"
         }
         if (-not (Test-Path -LiteralPath $resolvedPath)) {
-            $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
             throw "Documentation links to a missing local path: $relativeSource -> $target"
         }
     }
 }
 
-$topicCount = $sectionIds.Count
-$textLength = (($html -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim().Length
-if ($topicCount -lt 20 -or $textLength -lt 26000) {
-    throw "Teaching archive is not comprehensive enough (sections=$topicCount, characters=$textLength)."
+# docs/ must stay teaching-plus-product only: no stray binaries or loose files
+# at the documentation root beyond the index.
+$strayRootFiles = @(
+    Get-ChildItem -LiteralPath $docsDirectory -File |
+        Where-Object { $_.Name -ne "README.md" } |
+        ForEach-Object { $_.Name }
+)
+if ($strayRootFiles.Count -gt 0) {
+    throw "docs/ root must contain only README.md; found: $($strayRootFiles -join ', ')"
+}
+
+$textLength = (($combinedHtml -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim().Length
+if ($pages.Count -lt 15 -or $allSectionIds.Count -lt 20 -or $textLength -lt 30000) {
+    throw "Teaching archive is not comprehensive enough (pages=$($pages.Count), sections=$($allSectionIds.Count), characters=$textLength)."
 }
 
 Write-Host "Documentation verified:" -ForegroundColor Green
 [pscustomobject]@{
-    File = $archivePath
-    Sections = $topicCount
+    LearnDirectory = $learnDirectory
+    Pages = $pages.Count
+    Sections = $allSectionIds.Count
     TextCharacters = $textLength
-    Anchors = $ids.Count
-    Links = $hrefs.Count
+    Anchors = $totalAnchors
+    Links = $totalLinks
     DocumentedModules = $documentedModuleCount
     MarkdownFiles = $markdownFiles.Count
     MarkdownLinks = $markdownLinkCount

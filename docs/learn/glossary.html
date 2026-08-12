@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="本档案出现的跨栈术语与它们在本项目中的具体含义。" />
+    <title>术语速查 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 14 · 术语表</p>
+      <h1>术语速查</h1>
+      <p class="pagehead__lead">本档案出现的跨栈术语与它们在本项目中的具体含义。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html" aria-current="page">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html" class="is-current" aria-current="page">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="glossary">
+
+  <p class="section-kicker">Glossary</p>
+  <h2>术语速查</h2>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><th>Tauri</th><td>以系统 WebView 呈现前端、以 Rust 提供原生能力和安全 IPC 的桌面框架。</td></tr>
+        <tr><th>WebView2</th><td>Microsoft Edge Chromium 的 Windows 嵌入式运行时；本项目采用 Evergreen 自动维护模式。</td></tr>
+        <tr><th>Wry</th><td>Tauri 运行时使用的跨平台 WebView 抽象，在 Windows 下连接 WebView2。</td></tr>
+        <tr><th>IPC</th><td>进程/运行时边界通信；这里包括前端 invoke Rust 命令和 Rust emit 前端事件。</td></tr>
+        <tr><th>Capability</th><td>Tauri 2 的窗口级权限清单，决定前端可调用哪些 core/plugin 能力。</td></tr>
+        <tr><th>CSP</th><td>内容安全策略，限制 WebView 可加载和连接的资源来源。</td></tr>
+        <tr><th>R3F</th><td>react-three-fiber，Three.js 的 React renderer，用 JSX 声明场景图。</td></tr>
+        <tr><th>Draw call</th><td>CPU 向 GPU 提交一次绘制；大量小 mesh 会使其升高，实例化可合并重复绘制。</td></tr>
+        <tr><th>Fresnel</th><td>视线接近表面掠射角时反射更强的现象，常用于水晶、玻璃和边缘光。</td></tr>
+        <tr><th>InstancedMesh</th><td>共享几何与材质、只为每个实例提供变换矩阵的 Three 对象，用于压缩重复物体的 draw call。</td></tr>
+        <tr><th>Vite</th><td>前端构建工具：开发期用 esbuild 按需转换并提供原生 ESM，发布期交给 Rollup 打包。</td></tr>
+        <tr><th>esbuild</th><td>Go 编写的极快转换器；本项目用它把 TypeScript 与标准装饰器降级到 ES2022。</td></tr>
+        <tr><th>Rollup</th><td>Vite 生产构建使用的打包器；<code>manualChunks</code> 在这里把 Three 引擎切成独立可缓存块。</td></tr>
+        <tr><th>代码分割</th><td>把产物拆成按需加载的块。只有在入口不提前引用这些块时，它才真正减少首屏成本。</td></tr>
+        <tr><th><code>build.rs</code></th><td>Cargo 在编译 crate 前运行的构建脚本；这里用于嵌入 Tauri 配置并改写 Windows 版本资源。</td></tr>
+        <tr><th>GitHub Actions</th><td>仓库内声明的 CI 服务；本项目在 Windows runner 上运行与本机相同的门禁命令。</td></tr>
+        <tr><th>Frozen lockfile</th><td>锁文件与清单不一致时直接失败的安装模式，保证 CI 复现既定依赖树而不是解析新版本。</td></tr>
+        <tr><th>焦点陷阱</th><td>让 <kbd>Tab</kbd> 在模态对话框内循环并在关闭时归还焦点的可访问性模式。</td></tr>
+        <tr><th>边沿检测</th><td>比较相邻两次采样只在状态跳变时触发动作；轮询式 Gamepad API 必须这样处理长按。</td></tr>
+        <tr><th><code>prefers-reduced-motion</code></th><td>操作系统级“减少动态”偏好的 CSS 媒体查询；与游戏内开关是“或”的关系。</td></tr>
+        <tr><th>Zustand</th><td>轻量 React 状态库；本项目用选择器订阅切片，核心转换仍由纯 reducer 决定。</td></tr>
+        <tr><th>Zod</th><td>运行时 schema 库，可在解析成功后推导 TypeScript 类型。</td></tr>
+        <tr><th>Newtype</th><td>用单字段 Rust 类型给裸值增加领域语义与构造不变量。</td></tr>
+        <tr><th><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></th><td>原子引用计数提供跨所有者共享，Mutex 提供互斥可变访问；不能跨 await 持有同步锁。</td></tr>
+        <tr><th>确定性</th><td>相同输入始终得到相同输出，是缓存、复现、测试和程序化存档重建的基础。</td></tr>
+        <tr><th>NSIS</th><td>Windows 安装器系统；本项目只生成一个当前用户、简中/英文安装包目标。</td></tr>
+        <tr><th>Authenticode</th><td>Windows 可执行文件代码签名体系；有效受信任签名是生产分发门槛。</td></tr>
+        <tr><th>1% Low</th><td>最慢约 1% 帧的等效 FPS，用于暴露平均 FPS 隐藏的卡顿。</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    进一步阅读项目入口：<a href="../../README.md">README</a>、
+    <a href="../game/README.md">游戏愿景与路线</a>、
+    <a href="../game/vertical-slice.md">垂直切片合同</a>、
+    <a href="../game/release-runbook.md">Windows 交付手册</a>。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./code-map.html"><span>上一页</span><strong>13 · 源码索引</strong></a>
+          <span></span>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

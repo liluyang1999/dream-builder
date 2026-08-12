@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="无障碍设置契约、系统偏好与游戏开关的关系，以及键盘、指针、手柄三种事件模型。" />
+    <title>无障碍与输入设备 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 04 · 无障碍与输入</p>
+      <h1>无障碍与输入设备</h1>
+      <p class="pagehead__lead">无障碍设置契约、系统偏好与游戏开关的关系，以及键盘、指针、手柄三种事件模型。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html" aria-current="page">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html" class="is-current" aria-current="page">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="accessibility-input">
+
+  <p class="section-kicker">Accessibility and input devices</p>
+  <h2>无障碍不是附加皮肤，输入设备也不只有键盘</h2>
+  <p class="section-lead">
+    单机离线游戏同样要面对“看不清、不能久盯动画、只用键盘、只用手柄”的玩家。
+    本项目把无障碍表达成受校验的设置项、根节点状态类和可测试的输入适配层，
+    而不是散落在各个组件里的临时判断。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>设置</th><th>类型与范围</th><th>它真正改变什么</th></tr></thead>
+      <tbody>
+        <tr><th><code>reducedMotion</code></th><td>布尔</td><td>降低相机滞后、粒子幅度与强闪反馈，但保留状态可读性</td></tr>
+        <tr><th><code>highContrast</code></th><td>布尔</td><td>根节点加 <code>app-root--high-contrast</code>，提高玻璃面板与次要文本对比</td></tr>
+        <tr><th><code>textScale</code></th><td><code>normal</code> / <code>large</code></td><td>根节点加 <code>app-root--large-text</code>，放大 HUD 与覆盖层字号</td></tr>
+        <tr><th><code>showHints</code></th><td>布尔</td><td>控制新手提示是否出现，让熟练玩家清空界面</td></tr>
+        <tr><th><code>cameraSensitivity</code></th><td>整数 50–150</td><td>缩放相机响应，照顾晕动敏感与精细操作</td></tr>
+        <tr><th><code>masterVolume</code> 等</th><td>整数 0–100</td><td>主/环境/效果三条独立音量，可完全静音仍可通关</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    这些字段和 <code>seed</code>、<code>theme</code> 在
+    <a href="../../packages/ipc-contracts/src/index.ts">同一个 <code>settingsSchema</code></a> 中定义并带默认值，
+    因此“无障碍设置”与其他设置走完全相同的校验、IPC 与持久化路径：Rust 侧先验证范围，
+    再写入 Tauri Store；前端 <a href="../../apps/desktop/src/App.tsx">App.tsx</a> 只把已提交的切片映射为根节点类名。
+    旧存档缺字段时由 schema 默认值补齐，不会让界面进入半初始化状态。
+  </p>
+  <div class="callout callout--gold">
+    <strong>系统偏好与游戏内设置并存：</strong>
+    <a href="../../apps/desktop/src/styles.css">styles.css</a> 同时响应
+    <code>@media (prefers-reduced-motion: reduce)</code>。操作系统已经声明“减少动态”时不需要玩家再找一次开关，
+    而游戏内开关又允许在系统未声明时单独降低动效。两者是“或”的关系，不是互相覆盖。
+  </div>
+  <h3>三种输入设备，两种事件模型</h3>
+  <div class="grid grid--3">
+    <article class="card">
+      <h3>键盘：事件驱动</h3>
+      <p>
+        <a href="../../apps/desktop/src/interaction/useKeyboardShortcuts.ts">useKeyboardShortcuts</a>
+        只在 window 上绑定一次监听，处理函数存在 ref 中，因此既没有陈旧闭包，也不会每次渲染都重新订阅。
+      </p>
+    </article>
+    <article class="card">
+      <h3>指针：事件驱动</h3>
+      <p>
+        <a href="../../apps/desktop/src/interaction/useInteractive.ts">useInteractive</a>
+        把 R3F 的 pointer 事件转成选择 reducer 的动作，悬停与选中仍是纯状态转换。
+      </p>
+    </article>
+    <article class="card">
+      <h3>手柄：轮询驱动</h3>
+      <p>
+        Gamepad API 不提供按钮/摇杆事件，只能读取快照。
+        <a href="../../apps/desktop/src/interaction/GamepadNavigator.tsx">GamepadNavigator</a>
+        在 <code>requestAnimationFrame</code> 中采样，并与上一帧比较做边沿检测。
+      </p>
+    </article>
+  </div>
+  <p>
+    差异被限制在适配层：三类设备最终都产生同一套意图（移动向量、互动、冲刺、暂停、方向），
+    由 <a href="../../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 归一化后交给纯逻辑。
+    边沿检测尤其重要——长按手柄按键在每一帧都是“按下”，若不比较上一帧状态，一次按压会被当成上百次暂停切换。
+  </p>
+  <h3>模态焦点：Tab 不能逃出对话框</h3>
+  <ul>
+    <li><a href="../../apps/desktop/src/interaction/useModalFocus.ts">useModalFocus</a> 打开时聚焦首个控件，关闭时把焦点还给触发它的控件。</li>
+    <li><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> 在对话框内循环，键盘用户不会“掉”到被遮挡的 HUD 上。</li>
+    <li><kbd>Esc</kbd> 与 <kbd>?</kbd> 优先交给当前对话框，而不是全局游戏快捷键。</li>
+    <li>全局快捷键遇到 <code>[aria-modal="true"]</code>、输入框或可编辑元素时主动让路，避免“打字触发截图”。</li>
+    <li>手柄在净化谜题里被映射为方向键，在其他对话框里被映射为焦点漫游，两种含义不会互相污染。</li>
+  </ul>
+  <div class="callout callout--warning">
+    <strong>自动化能证明什么：</strong>组件测试用角色、可访问名称和焦点顺序断言标题、设置、帮助与覆盖层，
+    <a href="../../apps/desktop/src/tests/keyboardShortcuts.test.tsx">快捷键</a>与
+    <a href="../../apps/desktop/src/tests/gamepadInput.test.ts">手柄采样</a>也有确定性测试。
+    但屏幕阅读器实机朗读、实体手柄完整听测与真人操作舒适度仍是外部门槛，不能由 jsdom 断言代替。
+  </div>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./graphics.html"><span>上一页</span><strong>03 · 3D 与音频</strong></a>
+          <a class="pager__link pager__link--next" href="./performance.html"><span>下一页</span><strong>05 · 性能与证据</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

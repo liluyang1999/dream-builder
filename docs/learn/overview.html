@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="这个项目到底是什么、由哪两个运行环境组成、一条真实请求怎样穿过整个系统。" />
+    <title>项目现状、总体架构与运行全链路 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 01 · 项目与架构</p>
+      <h1>项目现状、总体架构与运行全链路</h1>
+      <p class="pagehead__lead">这个项目到底是什么、由哪两个运行环境组成、一条真实请求怎样穿过整个系统。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html" aria-current="page">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html" class="is-current" aria-current="page">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="overview">
+
+  <p class="section-kicker">Product snapshot</p>
+  <h2>当前项目究竟是什么</h2>
+  <p class="section-lead">
+    Dream Builder Fantasy Tree 的玩家名称是《智慧树之森》。它已从“可旋转观察的程序化智慧树”
+    演进为一个单人、离线、第三人称卡通森林盒庭：玩家探索三条支路，收集三枚光种，阅读森林记忆，
+    完成四拍方向净化，并看到中央智慧树、光照、地表、音景和章节门一起复苏。
+  </p>
+  <ul class="status-list">
+    <li><strong>体验闭环</strong>标题、继续/新游戏、暂停、设置、章节结尾、继续漫游和安全退出。</li>
+    <li><strong>世界系统</strong>中央林地、蘑菇坡、溪流、遗迹门、碰撞、检查点和可重建装饰。</li>
+    <li><strong>玩家系统</strong>键鼠与标准手柄、相机相对移动、冲刺、重置、互动和方向谜题。</li>
+    <li><strong>反馈系统</strong>卡通光照、Bloom、粒子、程序化音景、进度声效、减少动态和高对比。</li>
+    <li><strong>可靠性</strong>v2 进度快照、v1 迁移、最近有效备份、损坏隔离、恢复提示和单实例。</li>
+    <li><strong>交付工程</strong>Windows EXE、双语 NSIS、哈希清单、来源指纹、签名门禁和卸载验收。</li>
+  </ul>
+  <div class="grid">
+    <article class="card card--accent">
+      <h3>产品版本 1.0</h3>
+      <p>
+        玩家看到的版本采用两段式 <code>主版本.功能版本</code>，当前正式从 1.0 开始。版本契约、
+        本地 pnpm 存储约束、WebView2 策略、依赖安全修复与统一教学档案都归入这一个 1.0 产品版本。
+      </p>
+    </article>
+    <article class="card">
+      <h3>单一显示口径</h3>
+      <p>
+        Cargo、npm 与 Tauri 的机器清单必须满足各自的 SemVer 语法，构建脚本会机械补足所需格式，
+        但不会把它当成第二套产品版本。游戏、资料、发布清单、Windows 文件属性与“已安装的应用”
+        都只显示 <a href="../../version.json">version.json</a> 中的 1.0。
+      </p>
+    </article>
+  </div>
+        </section>
+
+        <section id="architecture">
+
+  <p class="section-kicker">Architecture</p>
+  <h2>总体架构：两个运行环境、三层规则</h2>
+  <p class="section-lead">
+    项目不是“Rust 把每一帧算好再交给网页”。正确分工是：Rust/Tauri 负责原生生命周期、持久状态、
+    确定性场景与低频边界；React/R3F 负责逐帧输入、运动、相机、呈现和界面。浏览器开发模式没有 Rust，
+    因而用 Web Worker 生成兼容场景，保持前端可以单独开发和测试。
+  </p>
+  <div class="diagram" role="img" aria-label="从玩家输入到原生后端和三维呈现的数据流">
+    <div class="diagram__node"><strong>玩家</strong><span>键鼠 / 手柄 / 指针</span></div>
+    <div class="diagram__node"><strong>React</strong><span>界面、会话、状态编排</span></div>
+    <div class="diagram__node"><strong>R3F / Three</strong><span>逐帧运动、相机、WebGL</span></div>
+    <div class="diagram__node"><strong>Tauri IPC</strong><span>命令、事件、ACL</span></div>
+    <div class="diagram__node"><strong>Rust</strong><span>生成、原生状态、存储</span></div>
+  </div>
+  <div class="layer-stack">
+    <div class="layer"><strong>纯规则层</strong><span>游戏进度、方向谜题、输入归一化、运动与碰撞、选择 reducer。无 React、无 Three、无磁盘副作用。</span></div>
+    <div class="layer"><strong>适配层</strong><span>React hooks、GameplayController、PlayerController、treeApi、Worker client，把平台输入转换为纯规则动作。</span></div>
+    <div class="layer"><strong>呈现与副作用层</strong><span>R3F 场景、HUD、音频、Tauri 命令、持久化、文件导出、菜单、事件和安装器。</span></div>
+  </div>
+  <div class="grid">
+    <article class="card">
+      <h3>Tauri 桌面运行</h3>
+      <p>
+        <code>pnpm tauri dev/build</code> 创建原生窗口。Windows 内部由 Wry 驱动 WebView2；
+        <a href="../../apps/desktop/src/ipc/treeApi.ts">treeApi.ts</a> 调用 Rust 命令并订阅事件。
+        场景数据由 Rust 生成，原生设置通过 Tauri Store 保存。
+      </p>
+    </article>
+    <article class="card">
+      <h3>浏览器开发运行</h3>
+      <p>
+        <code>pnpm dev</code> 只启动 Vite。<a href="../../apps/desktop/src/ipc/runtime.ts">runtime.ts</a>
+        判断没有 Tauri 后，让 <a href="../../apps/desktop/src/workers/fallback.worker.ts">fallback.worker.ts</a>
+        在 Worker 中生成场景。它是开发容错路径，不是原生发布架构的替代。
+      </p>
+    </article>
+  </div>
+  <div class="callout">
+    <strong>核心不变量：</strong>相同 seed 的 Rust 生成必须确定；任何跨 IPC 的载荷必须经 Zod 校验；
+    渲染只能消费已提交的进度，不能自行发明“已经收集”或“已经净化”的状态；逐帧运动不经过 IPC。
+  </div>
+        </section>
+
+        <section id="repository">
+
+  <p class="section-kicker">Monorepo</p>
+  <h2>pnpm workspace 与 Cargo workspace 为什么共处一仓</h2>
+  <p class="section-lead">
+    这是一个双工作区单仓：JavaScript/TypeScript 由 pnpm 管理，Rust 由 Cargo 管理。根目录提供统一版本、
+    锁文件、质量命令和发布入口，使一次跨边界改动可以在同一个提交里验证全部消费者。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>位置</th><th>职责</th><th>关键约束</th></tr></thead>
+      <tbody>
+        <tr><th><a href="../../apps/desktop/src/App.tsx">apps/desktop</a></th><td>Vite + React 19 + R3F 桌面前端与浏览器回退</td><td>严格 TypeScript、中文 UI、组件测试、按需分块</td></tr>
+        <tr><th><a href="../../packages/ipc-contracts/src/index.ts">packages/ipc-contracts</a></th><td>Zod 运行时 schema 与推导出的 TS 类型</td><td>所有不可信边界先按 <code>unknown</code> 解析</td></tr>
+        <tr><th><a href="../../packages/liquid-glass/src/index.ts">packages/liquid-glass</a></th><td>可复用玻璃主题 React 组件</td><td>主题、画质、减少动态与焦点可访问性</td></tr>
+        <tr><th><a href="../../crates/dream-builder/src/lib.rs">crates/dream-builder</a></th><td>Rust 领域、生成、状态、事件、Tauri 外壳</td><td>确定性、薄命令、最小权限、零 Clippy 告警</td></tr>
+        <tr><th><a href="../README.md">docs/README.md</a></th><td>文档目录索引；GitHub 上浏览仓库时先看到它</td><td>只做路由，不重复教学或产品内容</td></tr>
+        <tr><th><a href="./index.html">docs/learn</a></th><td>唯一的教学来源：十五页专题 HTML 加共享样式</td><td>自包含、链接可验证、每页可独立打开与打印</td></tr>
+        <tr><th><a href="../game/README.md">docs/game</a></th><td>当前产品方向、验收矩阵、运行证据与交付手册</td><td>未通过的人工门槛必须保持可见</td></tr>
+        <tr><th><a href="../design/README.md">docs/design</a></th><td>2026-04 的历史设计札记</td><td>只作历史参考，不再表达当前产品口径</td></tr>
+        <tr><th><a href="../../scripts/release-build.ps1">scripts</a></th><td>版本、安全、教学档案、pnpm 布局、证据与发布验证</td><td>PowerShell，全部可在 CI 与本机重复执行</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <strong><code>docs/</code> 的目录合同：</strong>教学内容、当前产品口径与历史札记各占一个子目录，
+    职责互不重叠。<code>docs/learn/</code> 解释“技术为什么这样组织”，
+    <code>docs/game/</code> 记录“产品要做什么、验收到了哪一步”，<code>docs/design/</code> 只保留历史，
+    <a href="../README.md">docs/README.md</a> 只是把人送到正确的位置——因为 GitHub 不渲染
+    HTML，浏览仓库时需要一页可读的索引。
+    <code>pnpm docs:verify</code> 会检查每一页的结构、页面可达性、锚点、本地链接、源码模块覆盖，
+    以及目录内每个 Markdown 文件的相对链接是否仍然有效。
+  </div>
+  <h3>配置的单一真相源</h3>
+  <ul>
+    <li><a href="../../tsconfig.base.json">tsconfig.base.json</a> 集中严格类型选项，各 TS 包只补充自身环境。</li>
+    <li><a href="../../biome.json">biome.json</a> 同时承担格式化和静态检查，避免 ESLint/Prettier 规则漂移。</li>
+    <li><a href="../../vitest.config.ts">vitest.config.ts</a> 用 projects 模型发现应用与共享包测试。</li>
+    <li><a href="../../Cargo.toml">Cargo.toml</a> 统一 edition、技术版本、lints 与 release profile。</li>
+    <li><a href="../../version.json">version.json</a> 是产品版本与技术兼容版本的唯一映射。</li>
+    <li><a href="../../pnpm-workspace.yaml">pnpm-workspace.yaml</a> 同时约束成员、依赖覆盖和本地缓存位置。</li>
+  </ul>
+  <h3>pnpm 数据绝不写到磁盘根目录</h3>
+  <pre><code>storeDir: .pnpm-store
+  cacheDir: .pnpm-cache
+  virtualStoreDir: node_modules/.pnpm
+  enableGlobalVirtualStore: false</code></pre>
+  <p>
+    内容寻址仓库位于 <code>&lt;repo&gt;/.pnpm-store/</code>，元数据缓存位于
+    <code>&lt;repo&gt;/.pnpm-cache/</code>，虚拟依赖树位于
+    <code>&lt;repo&gt;/node_modules/.pnpm/</code>。三者均被 Git 忽略，
+    <a href="../../scripts/verify-pnpm-layout.ps1">verify-pnpm-layout.ps1</a> 会解析真实绝对路径，
+    拒绝盘符根目录、用户级全局虚拟仓库或越出项目的配置。
+  </p>
+        </section>
+
+        <section id="runtime-flow">
+
+  <p class="section-kicker">End-to-end flow</p>
+  <h2>沿一条真实请求读完整系统</h2>
+  <p class="section-lead">
+    下面以“玩家进入世界并接近一枚光种”为主线，把启动、设置、场景、逐帧运动、状态提交、保存和反馈串起来。
+  </p>
+  <ol>
+    <li><strong>启动：</strong><a href="../../apps/desktop/src/main.tsx">main.tsx</a> 创建 React 根节点，错误边界包围应用；特殊查询参数可进入本地 M2 证据工具。</li>
+    <li><strong>水合：</strong><a href="../../apps/desktop/src/App.tsx">App.tsx</a> 先读取本地进度，再向 Rust 请求设置；设置确认前不抢先加载错误 seed。</li>
+    <li><strong>场景：</strong><code>treeApi.loadScene(seed)</code> 在 Tauri 中 <code>invoke('generate_tree')</code>，在浏览器中调用 Worker。返回值先经 <code>treeSceneSchema</code> 验证。</li>
+    <li><strong>呈现：</strong><a href="../../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas.tsx</a> 把场景、世界、光照、粒子和后处理挂入 R3F Canvas。</li>
+    <li><strong>输入：</strong>键盘、手柄被归一化为移动与动作意图；<a href="../../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 根据相机水平前向、时间步和碰撞布局算新位置。</li>
+    <li><strong>接近：</strong><a href="../../apps/desktop/src/scene/GameplayController.tsx">GameplayController.tsx</a> 只负责距离检测与输入适配，触发 <code>reveal-seed</code> 或 <code>collect-seed</code> 动作。</li>
+    <li><strong>提交：</strong><a href="../../apps/desktop/src/game/gameProgress.ts">reduceGameProgress</a> 检查合法转换，返回不可变新快照；非法跳转直接保持原状态。</li>
+    <li><strong>持久化：</strong>Zustand store 只在真实进度改变后写 v2 快照，写入前保留上一份有效快照作为备份。</li>
+    <li><strong>反馈：</strong>R3F 根据已提交快照播放光种消散和树木复苏；AudioDirector 根据进度差异播放声效；QuestPanel 更新目标。</li>
+    <li><strong>原生事件：</strong>Rust 周期性发出 <code>magic-field</code>，前端放进 ref，粒子在 <code>useFrame</code> 内读取，不让 React 每帧重渲染。</li>
+  </ol>
+  <div class="callout callout--violet">
+    <strong>为什么强调“提交”：</strong>视觉动画可能被跳帧、卸载或减少动态设置缩短；如果动画本身决定进度，
+    存档与 UI 会失真。这里先由纯状态机完成原子转换，再让所有视觉与声音成为该事实的消费者。
+  </div>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./index.html"><span>上一页</span><strong>总览与导航</strong></a>
+          <a class="pager__link pager__link--next" href="./frontend.html"><span>下一页</span><strong>02 · 前端与状态</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

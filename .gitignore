@@ -18,6 +18,11 @@ crates/*/gen/
 Thumbs.db
 *.log
 .vite-dev.*.log
+.idea/
+.vscode/
+
+# Agent tooling local state
+.claude/settings.local.json
 
 # Env
 .env

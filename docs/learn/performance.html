@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="有界直方图记录器、分位数、阶段标记，以及自动化无法替代的人工门槛。" />
+    <title>性能不是一个数字，而是一条证据链 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 05 · 性能与证据</p>
+      <h1>性能不是一个数字，而是一条证据链</h1>
+      <p class="pagehead__lead">有界直方图记录器、分位数、阶段标记，以及自动化无法替代的人工门槛。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html" class="is-current" aria-current="page">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="performance">
+
+  <p class="section-kicker">Performance evidence</p>
+  <h2>性能不是一个 FPS 数字，而是一条可复核证据链</h2>
+  <p class="section-lead">
+    场景必须在真实 Tauri/WebView2 目标设备上持续运行，才能代表交付体验。项目内置记录器只保存有界聚合，
+    同时避免收集玩家路径或逐帧行为数据。
+  </p>
+  <ul>
+    <li><a href="../../apps/desktop/src/scene/PerformanceProbe.tsx">PerformanceProbe</a> 在帧循环读取帧间隔与 Three renderer 统计。</li>
+    <li><a href="../../apps/desktop/src/performance/performanceMetrics.ts">PerformanceMetricsRecorder</a> 用固定 0.5ms 直方图估计分位数，不保留无限增长的原始帧数组。</li>
+    <li>状态 marker 最多 128 个、phase 最多 32 个；名称与环境字符串有长度上限，导入报告也重新校验。</li>
+    <li>报告给出平均 FPS、1% low 等价值、P50/P95/P99、最长帧、慢帧比例、draw calls、三角形和可用堆峰值。</li>
+    <li><code>scene-load</code> 与 <code>cleansing</code> 单独分段，不能用稳态平均值掩盖加载或净化尖峰。</li>
+    <li>浏览器主循环只能观察 CPU/呈现间隔，不能直接得到 GPU frame time；需要 GPU 指标时另用目标设备分析器。</li>
+  </ul>
+  <div class="grid">
+    <article class="card card--accent"><h3>已归档事实</h3><p>目标 Windows 设备已有十分钟原生性能报告，覆盖场景加载与净化，并通过当前 M2 帧率预算。</p></article>
+    <article class="card card--warning"><h3>仍未替代的事实</h3><p>真实性能通过不代表五位新玩家能理解目标；自动化和证据工作台都不能代替真人无提示观察。</p></article>
+  </div>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./accessibility.html"><span>上一页</span><strong>04 · 无障碍与输入</strong></a>
+          <a class="pager__link pager__link--next" href="./ipc.html"><span>下一页</span><strong>06 · IPC 与边界</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

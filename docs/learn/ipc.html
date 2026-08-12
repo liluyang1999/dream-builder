@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="跨语言边界为何需要静态类型加运行时证据，命令与事件的区别，以及第二条消息边界。" />
+    <title>IPC 契约与 Worker 边界 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 06 · IPC 与边界</p>
+      <h1>IPC 契约与 Worker 边界</h1>
+      <p class="pagehead__lead">跨语言边界为何需要静态类型加运行时证据，命令与事件的区别，以及第二条消息边界。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html" aria-current="page">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html" class="is-current" aria-current="page">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="ipc">
+
+  <p class="section-kicker">IPC contract</p>
+  <h2>IPC：跨语言边界必须同时有静态类型和运行时证据</h2>
+  <p class="section-lead">
+    TypeScript 类型在运行时会被擦除，Rust 类型也不会自动保护已经变成 JSON 的数据。
+    因此 IPC 的正确模型是：Rust 按 serde 合约序列化，前端先把载荷视为 <code>unknown</code>，
+    经 Zod 成功解析后才进入应用核心。
+  </p>
+  <div class="diagram" role="img" aria-label="IPC 请求响应验证流程">
+    <div class="diagram__node"><strong>React 调用</strong><span>treeApi 方法</span></div>
+    <div class="diagram__node"><strong>Tauri invoke</strong><span>命令名 + 参数</span></div>
+    <div class="diagram__node"><strong>Rust command</strong><span>State / Result</span></div>
+    <div class="diagram__node"><strong>serde JSON</strong><span>camelCase wire</span></div>
+    <div class="diagram__node"><strong>Zod parse</strong><span>成功后才有 TS 类型</span></div>
+  </div>
+  <h3>当前命令面</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>命令</th><th>责任</th><th>失败语义</th></tr></thead>
+      <tbody>
+        <tr><th><code>generate_tree</code></th><td>设置活动 seed、记录历史、命中缓存或确定性生成场景</td><td><code>Result&lt;TreeScene, AppError&gt;</code></td></tr>
+        <tr><th><code>detail_info</code></th><td>按场景对象 id 返回符文/水晶/叶簇说明</td><td>未知 id 是结构化错误</td></tr>
+        <tr><th><code>magic_field</code></th><td>按 seed 与 tick 计算一次魔法脉冲</td><td>纯确定性返回</td></tr>
+        <tr><th><code>get_settings</code></th><td>读取 Rust 管理的当前设置</td><td>前端无法读取时保留安全默认</td></tr>
+        <tr><th><code>save_settings</code></th><td>先校验范围，再更新内存并写 Tauri Store</td><td>持久化失败返回 AppError</td></tr>
+        <tr><th><code>seed_history</code></th><td>返回有界、去重、最近优先的 seed</td><td>无副作用读取</td></tr>
+        <tr><th><code>export_scene</code></th><td>异步序列化并写入用户选择的 JSON 路径</td><td>序列化/文件错误结构化返回</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>事件与请求的区别</h3>
+  <p>
+    命令是请求/响应，适合“给我一个场景”“保存这份设置”；事件是后端主动推送，适合周期魔法场和原生菜单。
+    <a href="../../crates/dream-builder/src/events.rs">events.rs</a> 发出 <code>magic-field</code>，
+    <a href="../../crates/dream-builder/src/menu.rs">menu.rs</a> 把菜单 id 转成 <code>menu:&lt;id&gt;</code>。
+    每个前端事件 payload 仍要校验；事件并不因为来自本进程就自动可信。
+  </p>
+  <h3>修改 wire 格式时的四方同步</h3>
+  <ol>
+    <li>Rust domain struct 与 serde rename/enum 表示；</li>
+    <li><code>packages/ipc-contracts</code> 的 Zod schema 和推导类型；</li>
+    <li>浏览器 Worker 回退生成器与协议；</li>
+    <li>Rust 序列化集成测试、Zod 契约测试和前端消费者测试。</li>
+  </ol>
+  <div class="callout callout--gold">
+    <strong>常见错误：</strong>只改 TS interface 不会改变运行时校验；只改 Rust 字段会让旧前端回退；
+    用 <code>as TreeScene</code> 会把协议错误推迟到渲染深处，变成更难诊断的 WebGL 故障。
+  </div>
+  <h3>第二条边界：主线程与 Web Worker</h3>
+  <p>
+    浏览器开发模式没有 Rust，场景改由 Worker 生成。这是本项目的第二个消息边界，
+    它和 IPC 面对同一个问题：<strong>异步、无共享内存、只能传结构化克隆的数据</strong>。
+    解决方式也同构——先定义协议，再让客户端把消息还原成 Promise。
+  </p>
+  <div class="grid">
+    <article class="card">
+      <h3><a href="../../apps/desktop/src/workers/protocol.ts">protocol.ts</a></h3>
+      <p>
+        请求 <code>{ id, seed }</code>、响应 <code>{ id, scene }</code>。
+        <code>id</code> 是关联键：<code>postMessage</code> 没有返回值，多个并发请求的响应
+        只能靠回声 id 找到自己的 resolver。
+      </p>
+    </article>
+    <article class="card">
+      <h3><a href="../../apps/desktop/src/workers/fallbackClient.ts">fallbackClient.ts</a></h3>
+      <p>
+        主线程客户端：懒创建 Worker、用 <code>Map&lt;id, resolve&gt;</code> 登记在途请求，
+        收到消息后取出并兑现对应 Promise，对调用方只暴露
+        <code>createFallbackScene(seed): Promise&lt;TreeScene&gt;</code>。
+      </p>
+    </article>
+  </div>
+  <ul>
+    <li>Worker 不可用时（jsdom 单测或任何非 DOM 环境）直接同步调用 <a href="../../apps/desktop/src/data/fallbackTree.ts">fallbackTree.ts</a>，返回同样的 Promise，因此调用方不需要分支。</li>
+    <li>把生成放进 Worker 的收益是不阻塞主线程：几千个分段的几何计算发生在另一个线程，UI 仍然响应。</li>
+    <li>代价是数据要跨线程克隆，所以 Worker 只用于低频的整场景生成，逐帧数据绝不走这条路。</li>
+    <li>Worker 返回的场景同样要过 <code>treeSceneSchema</code>。同进程不等于可信——回退生成器一样会写错。</li>
+  </ul>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./performance.html"><span>上一页</span><strong>05 · 性能与证据</strong></a>
+          <a class="pager__link pager__link--next" href="./rust.html"><span>下一页</span><strong>07 · Rust 后端</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Capability/ACL、CSP、边界校验、隐私最小化、导出信任边界与依赖供应链。" />
+    <title>桌面应用仍然有浏览器、文件与供应链边界 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 09 · 安全边界</p>
+      <h1>桌面应用仍然有浏览器、文件与供应链边界</h1>
+      <p class="pagehead__lead">Capability/ACL、CSP、边界校验、隐私最小化、导出信任边界与依赖供应链。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html" class="is-current" aria-current="page">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="security">
+
+  <p class="section-kicker">Security boundaries</p>
+  <h2>桌面应用仍然有浏览器边界、文件边界与供应链边界</h2>
+  <p class="section-lead">
+    “离线单机”不等于没有攻击面。WebView 内容、IPC 参数、本地 JSON、文件路径、插件权限、依赖安装和发布产物都需要明确边界。
+  </p>
+  <div class="grid">
+    <article class="card">
+      <h3>Capability / ACL</h3>
+      <p>
+        <a href="../../crates/dream-builder/capabilities/default.json">default.json</a> 只授权 main 窗口需要的
+        core 关闭窗口、保存对话框、导出文件定位，以及限定在 <code>$APPLOG</code> 下的日志目录打开能力。
+        存档与日志插件只由 Rust 后端使用，不向 WebView 暴露；未使用的直接文件系统插件已经移除。
+      </p>
+    </article>
+    <article class="card">
+      <h3>CSP</h3>
+      <p>
+        配置限制默认资源、图片、样式、字体和连接来源，只开放 Tauri IPC 所需 scheme。
+        <code>unsafe-inline</code> 目前只用于样式；脚本没有放开远程源或 inline 执行。
+      </p>
+    </article>
+    <article class="card">
+      <h3>边界校验</h3>
+      <p>Rust 设置先验证范围；前端 IPC 与证据导入按 schema；存档验证跨字段一致性；性能文本有长度上限。</p>
+    </article>
+    <article class="card">
+      <h3>隐私最小化</h3>
+      <p>性能记录不保留逐帧路径，M2 工具只用 P01–P05 匿名编号，不联网、不自动上传、不采姓名账号。</p>
+    </article>
+  </div>
+  <p>
+    <code>pnpm desktop:verify-security</code> 会拒绝远程开发源、CSP 通配符或
+    <code>unsafe-eval</code>、多余 capability、越界路径以及重新注册直接文件系统插件；它也是
+    <code>pnpm check</code> 的固定阶段。
+  </p>
+  <h3>文件导出的信任边界</h3>
+  <p>
+    路径来自用户主动保存对话框，Rust 负责实际写入。错误需要带操作上下文，但不能回显秘密内容。
+    应用不递归扫描用户磁盘，也不在后台删除目录。发布脚本只操作经过解析、位于项目 output 或系统临时根下的明确路径。
+  </p>
+  <h3>依赖与构建供应链</h3>
+  <ul>
+    <li>pnpm 与 Cargo 锁文件提交入库，CI 使用 frozen/locked 模式。</li>
+    <li><code>pnpm audit</code> 检查 JavaScript 公告；高风险传递依赖通过精确 override 修补，并重新生成锁文件。</li>
+    <li>只允许必要的包安装脚本（Biome 与 esbuild），减少任意生命周期脚本执行面。</li>
+    <li>代码签名证书只从当前用户证书库按指纹读取；PFX、密码和私钥绝不进入仓库或日志。</li>
+    <li>候选包与生产包在清单中明确区分；未签名文件不能因为哈希正确就宣称生产发布。</li>
+  </ul>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./tauri.html"><span>上一页</span><strong>08 · Tauri 与 WebView2</strong></a>
+          <a class="pager__link pager__link--next" href="./build.html"><span>下一页</span><strong>10 · 构建与版本</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

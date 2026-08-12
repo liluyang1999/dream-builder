@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="NSIS 打包、源码树指纹、候选与生产的区别，以及安装与卸载合同。" />
+    <title>从源码到可安装候选包的证据链 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 12 · Windows 发布</p>
+      <h1>从源码到可安装候选包的证据链</h1>
+      <p class="pagehead__lead">NSIS 打包、源码树指纹、候选与生产的区别，以及安装与卸载合同。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html" aria-current="page">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html" class="is-current" aria-current="page">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="release">
+
+  <p class="section-kicker">Windows release</p>
+  <h2>从源码到可安装候选包的证据链</h2>
+  <p class="section-lead">
+    Tauri 构建会先产出 Rust/前端组合的 <code>dream-builder.exe</code>，再由 NSIS 生成当前用户安装包。
+    项目发布脚本在其上增加版本、源码状态、哈希、签名和文件集检查，防止拿错旧产物。
+  </p>
+  <div class="diagram" role="img" aria-label="Windows 发布流程">
+    <div class="diagram__node"><strong>质量门禁</strong><span>TS + Rust + HTML</span></div>
+    <div class="diagram__node"><strong>Tauri build</strong><span>前端 dist + Rust EXE</span></div>
+    <div class="diagram__node"><strong>NSIS</strong><span>双语当前用户安装器</span></div>
+    <div class="diagram__node"><strong>组装</strong><span>1.0 文件名、许可、手册</span></div>
+    <div class="diagram__node"><strong>独立验证</strong><span>来源、哈希、签名、精确文件集</span></div>
+  </div>
+  <h3>候选包的六个文件</h3>
+  <ul>
+    <li><code>Dream-Builder-Fantasy-Tree_1.0_x64.exe</code>：便携入口；</li>
+    <li><code>Dream-Builder-Fantasy-Tree_1.0_x64-setup.exe</code>：推荐 NSIS 安装器；</li>
+    <li><code>LICENSE.txt</code> 与 <code>README-zh-CN.md</code>；</li>
+    <li><code>SHA256SUMS.txt</code>：四个交付载荷的摘要；</li>
+    <li><code>release-manifest.json</code>：schema 5、唯一产品版本、来源提交、源码树指纹、文件和签名状态。</li>
+  </ul>
+  <h3>源码指纹为何不只看 Git commit</h3>
+  <p>
+    本地候选可能在 dirty worktree 构建；只记 HEAD 会把多个不同源码状态写成同一身份。脚本枚举受 Git 管理和未忽略文件，
+    对路径、大小与 SHA-256 形成排序索引，再计算整棵源码树指纹。产物生成后任何源文件变化都会让独立验证拒绝旧清单。
+  </p>
+  <h3>候选、生产和签名</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>类型</th><th>允许状态</th><th>可以怎样称呼</th></tr></thead>
+      <tbody>
+        <tr><th>本地候选</th><td>显式允许 dirty；EXE 必须明确 NotSigned；清单记录 sourceDirty</td><td>开发候选，不得公开宣称正式版</td></tr>
+        <tr><th>干净候选</th><td>干净提交、全部门禁、未签名</td><td>可复核发行候选，仍非生产分发</td></tr>
+        <tr><th>生产包</th><td>干净源码、证书库有效代码签名、时间戳、两份 EXE 均 Valid</td><td>满足其余人工门槛后才可正式发布</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>安装与卸载合同</h3>
+  <p>
+    <a href="../../scripts/release-install-state.ps1">release-install-state.ps1</a> 在安装后检查唯一卸载项、
+    两段式版本 1.0、安装目录、主 EXE 和快捷方式；卸载后要求卸载项、程序目录、快捷方式和进程全部消失。
+    玩家数据可按升级/诊断政策保留，脚本只报告其存在，不读取或删除。完整手册见
+    <a href="../game/release-runbook.md">release-runbook.md</a>。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./quality.html"><span>上一页</span><strong>11 · 质量与 CI</strong></a>
+          <a class="pager__link pager__link--next" href="./code-map.html"><span>下一页</span><strong>13 · 源码索引</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

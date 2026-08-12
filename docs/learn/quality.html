@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="把编辑器诊断固化为可重复命令，以及 CI 能证明什么、不能证明什么。" />
+    <title>质量门禁与持续集成 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 11 · 质量与 CI</p>
+      <h1>质量门禁与持续集成</h1>
+      <p class="pagehead__lead">把编辑器诊断固化为可重复命令，以及 CI 能证明什么、不能证明什么。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html" aria-current="page">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html" class="is-current" aria-current="page">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="quality">
+
+  <p class="section-kicker">Quality gates</p>
+  <h2>“没有 LSP 告警”要落到可重复的编译与静态门禁</h2>
+  <p class="section-lead">
+    编辑器的 LSP 诊断依赖本机插件与当前打开文件，不能作为唯一交付证据。项目把同类检查固化为命令：
+    TypeScript 编译器、Biome、Vitest、Vite、Rustfmt、Clippy、Cargo tests 与原生打包共同构成新鲜证据。
+  </p>
+  <pre><code>pnpm check
+  cargo fmt --check
+  cargo test --workspace --locked
+  cargo clippy --workspace --all-targets --locked -- -D warnings
+  cargo check --workspace --all-targets --locked</code></pre>
+  <h3><code>pnpm check</code> 内部顺序</h3>
+  <p>
+    九个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
+    最慢的生产构建放在最后。任何一步非零退出都会中断整条链。
+  </p>
+  <ol>
+    <li><code>version:verify</code>：两段式产品版本与各机器清单的兼容值映射、NSIS 显示版本、WebView2 Evergreen 配置，并扫描公开资料是否泄漏了第二套版本；</li>
+    <li><code>desktop:verify-security</code>：CSP 不含通配符或 <code>unsafe-eval</code>、capability 保持最小、路径不越界、未重新引入直接文件系统插件；</li>
+    <li><code>docs:verify</code>：教学档案的 HTML 结构、必需主题、章节可达性、重复 id、锚点、本地链接与同级文档入口；</li>
+    <li><code>pnpm:verify-layout</code>：store/cache/virtual store 解析后的绝对路径都在项目根内；</li>
+    <li><code>m2:verify</code>：归档的原生性能报告哈希、来源与帧率预算未被改写；</li>
+    <li><code>biome check</code>：格式、可疑代码和导入组织；</li>
+    <li><code>tsc --noEmit</code>：所有工作区包严格类型检查；</li>
+    <li><code>vitest run</code>：纯规则、契约、组件、存档、性能与开发变换测试；</li>
+    <li><code>vite build</code>：TypeScript 编译、生产分块，以及 <code>verify-desktop-bundle.ps1</code> 的 chunk 预算。</li>
+  </ol>
+  <div class="grid">
+    <article class="card">
+      <h3>纯单元测试</h3>
+      <p>状态机、碰撞、方向谜题、输入、音频差异、统计直方图和 schema 可在 Node/jsdom 中快速确定地运行。</p>
+    </article>
+    <article class="card">
+      <h3>组件测试</h3>
+      <p>Testing Library 从角色、标签和用户行为断言标题、设置、帮助、覆盖层与证据工具，不依赖私有实现。</p>
+    </article>
+    <article class="card">
+      <h3>跨边界测试</h3>
+      <p>Rust 集成测试验证 camelCase 序列化和引用完整性；Vite transform 测试防止浏览器开发模式装饰器语法回归。</p>
+    </article>
+    <article class="card">
+      <h3>真实运行</h3>
+      <p>浏览器冒烟验证 WebGL/UI，Tauri 冒烟验证 WebView2、IPC、菜单、单实例、日志和退出，安装生命周期验证 Windows 集成。</p>
+    </article>
+  </div>
+  <h3>测试设计纪律</h3>
+  <ul>
+    <li>测试外部行为和不变量，不锁死组件内部变量或随机实现细节。</li>
+    <li>用注入时钟、确定 seed 和显式事件代替不受控等待；性能记录器的自动停止也要可控测试。</li>
+    <li>不通过删除断言、跳过测试或扩大阈值来“修复”失败；先确定产品合同是否真的改变。</li>
+    <li>打包成功不等于安装成功，安装成功不等于首次启动成功，首次启动成功不等于真人可玩性通过。</li>
+  </ul>
+        </section>
+
+        <section id="continuous-integration">
+
+  <p class="section-kicker">Continuous integration</p>
+  <h2>CI 的价值在于“别人的机器也能重现”，不在于绿色徽章</h2>
+  <p class="section-lead">
+    本机门禁证明的是“在我的机器上、用我此刻的缓存通过了”。持续集成把同一组命令搬到一台干净的
+    Windows runner 上执行，用来暴露未提交文件、锁文件漂移、平台假设和只在本地存在的工具。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>工作流</th><th>触发</th><th>做什么</th></tr></thead>
+      <tbody>
+        <tr><th><a href="../../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test 与 Clippy</td></tr>
+        <tr><th><a href="../../.github/workflows/release.yml">release.yml</a></th><td>手动触发或 <code>v*</code> 标签</td><td>跑完整发布门禁并上传带校验和的未签名 Windows 候选包</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>几个配置为什么是这样写的</h3>
+  <ul>
+    <li><strong><code>runs-on: windows-latest</code>：</strong>Windows 是唯一受支持的目标。门禁脚本是 PowerShell，NSIS、WebView2 与文件属性也都只有在 Windows 上才有意义，在 Linux runner 上“通过”不构成证据。</li>
+    <li><strong><code>permissions: contents: read</code>：</strong>显式收窄 <code>GITHUB_TOKEN</code>。构建与测试不需要写仓库，最小权限让被攻破的依赖也无法推送提交。</li>
+    <li><strong><code>concurrency</code> + <code>cancel-in-progress</code>：</strong>同一分支的新推送取消旧运行，既省算力也避免用过期结果判断当前代码。</li>
+    <li><strong><code>node-version-file: .nvmrc</code>：</strong>Node 版本从仓库文件读取，而不是写死在工作流里，本机与 CI 只有一个真相源。</li>
+    <li><strong><code>pnpm/action-setup</code>：</strong>不指定版本，改为读取 <code>package.json</code> 的 <code>packageManager</code> 字段，因此 CI 用的就是本地那一版 pnpm。</li>
+    <li><strong><code>--frozen-lockfile</code>：</strong>锁文件与清单不一致时安装必须失败。CI 的职责是复现既定依赖树，不是替开发者解析新版本。</li>
+    <li><strong><code>if-no-files-found: error</code>：</strong>产物目录为空时上传步骤失败。否则一次“成功但没有产物”的运行会被误当成发布成功。</li>
+  </ul>
+  <div class="callout callout--violet">
+    <strong>两个 job 为什么不合并：</strong>前端与 Rust 没有先后依赖，拆开可以并行，
+    并且失败时一眼看出是哪一侧回归。Rust job 不安装 Node，前端 job 不安装 Rust 组件，
+    各自的环境也因此更小、更快、更少偶发失败。
+  </div>
+  <h3>CI 通过之后仍然没有被证明的事</h3>
+  <ul>
+    <li>CI 不启动 WebView2 原生外壳，不能替代 <code>pnpm tauri dev</code> 与安装版冒烟。</li>
+    <li>CI 产出的候选包是未签名的；受信任代码签名依赖当前用户证书库，无法也不应放进公共 runner。</li>
+    <li>CI 不做干净账户的安装—升级—卸载生命周期验证，也没有实体手柄和音频输出设备。</li>
+    <li>CI 永远不能替代五名首次接触玩家的无提示观察。</li>
+  </ul>
+  <p>
+    换句话说，绿色 CI 是“候选包可以进入人工验收”的前提，而不是“可以发布”的结论。
+    人工门槛的当前状态见 <a href="../game/README.md">docs/game/README.md</a>。
+  </p>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./build.html"><span>上一页</span><strong>10 · 构建与版本</strong></a>
+          <a class="pager__link pager__link--next" href="./release.html"><span>下一页</span><strong>12 · Windows 发布</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>

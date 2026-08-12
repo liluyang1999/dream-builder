@@ -3,25 +3,37 @@
 《智慧树之森》的全部文档都在这里。本文件只是索引：它负责把你送到正确的位置，
 不重复任何教学或产品内容。
 
-> GitHub 不会渲染 `index.html`，因此浏览仓库时先看到的是这一页。
-> 教学档案需要下载后用浏览器打开，或在本地直接打开 `docs/index.html`。
-
-## 三个入口，各自负责一件事
+## 三个子目录，各自负责一件事
 
 | 位置 | 回答什么问题 | 什么时候看 |
 |---|---|---|
-| [`index.html`](index.html) | 技术为什么这样组织？某个概念的代码在哪里？ | 学习这个项目、或改动前想弄清边界 |
+| [`learn/`](learn/index.html) | 技术为什么这样组织？某个概念的代码在哪里？ | 学习这个项目、或改动前想弄清边界 |
 | [`game/`](game/README.md) | 产品要做什么？验收到了哪一步？ | 决定做什么、判断能不能宣称完成 |
 | [`design/`](design/README.md) | 早期是怎么设想的？ | 只在追溯历史演进时 |
 
-## 全栈教学档案 · [`index.html`](index.html)
+## 教学档案 · [`learn/`](learn/index.html)
 
-一份自包含的中文 HTML 档案，覆盖本项目实际用到的全部技术框架与概念：
-Tauri 2、WebView2、TypeScript、React 19、react-three-fiber、Three.js、Zustand、Zod、
-Rust、IPC、无障碍与输入设备、性能证据、安全边界、构建工具链、质量门禁、持续集成、
-Windows 发布，以及一份覆盖每个源码模块的索引。
+本项目涉及的全部技术框架与概念，按专题拆成十五页 HTML。
+GitHub 不渲染 HTML，因此需要克隆仓库后在浏览器中打开 `docs/learn/index.html`，
+或用 `file://` 直接打开任意一页——每一页都能独立打开、搜索和打印。
 
-无远程脚本、字体或样式依赖，可离线打开、搜索和打印。共 23 个章节，含术语表与学习路线。
+| 页面 | 内容 |
+|---|---|
+| [`index.html`](learn/index.html) | 总入口：阅读方式、专题导航与七段学习路线 |
+| [`overview.html`](learn/overview.html) | 项目现状、总体架构、单仓工程与运行全链路 |
+| [`frontend.html`](learn/frontend.html) | 严格 TypeScript、React 19 分层、状态与存档 |
+| [`graphics.html`](learn/graphics.html) | Three.js、react-three-fiber、着色器与程序化音频 |
+| [`accessibility.html`](learn/accessibility.html) | 无障碍设置契约、键鼠/手柄事件模型与焦点管理 |
+| [`performance.html`](learn/performance.html) | 有界指标记录器与可复核的性能证据链 |
+| [`ipc.html`](learn/ipc.html) | Rust ⇄ 前端 IPC 契约与 Web Worker 边界 |
+| [`rust.html`](learn/rust.html) | 领域模型、trait 接缝、错误处理、持久化与确定性生成 |
+| [`tauri.html`](learn/tauri.html) | Tauri 2 外壳、插件、路径基准与 WebView2 Evergreen 策略 |
+| [`security.html`](learn/security.html) | Capability/ACL、CSP、边界校验与依赖供应链 |
+| [`build.html`](learn/build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源与两段式版本 |
+| [`quality.html`](learn/quality.html) | 九阶段质量门禁与持续集成 |
+| [`release.html`](learn/release.html) | Windows 打包、源码指纹、签名与安装卸载合同 |
+| [`code-map.html`](learn/code-map.html) | 覆盖每一个源码模块的完整索引 |
+| [`glossary.html`](learn/glossary.html) | 跨栈术语速查 |
 
 ## 产品真相源 · [`game/`](game/README.md)
 
@@ -36,14 +48,14 @@ Windows 发布，以及一份覆盖每个源码模块的索引。
 
 ## 历史资料 · [`design/`](design/README.md)
 
-2026-04 的早期设计札记与技术演示海报，只用于追溯视觉与产品演进，不表达当前口径。
+2026-04 的早期设计札记，只用于追溯产品演进，不表达当前口径。
 
 ## 目录合同
 
-- 教学内容只放在 `index.html`，不在别处另起一份说明。
+- 教学内容只放在 `learn/`，其他位置不另起一份说明。
 - `game/` 描述产品意图与验收状态；未通过的人工门槛必须保持可见，不能被自动化结果掩盖。
 - `evidence/` 只追加，不改写；旧证据中的历史数值保持原样。
 - `design/` 只读。
 
-`pnpm docs:verify` 会检查教学档案的结构、章节可达性、锚点、本地链接、源码模块覆盖，
+`pnpm docs:verify` 会检查教学档案每一页的结构、页面可达性、锚点、本地链接、源码模块覆盖，
 以及本目录中每个 Markdown 文件的相对链接是否仍然有效。

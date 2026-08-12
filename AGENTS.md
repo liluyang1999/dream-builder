@@ -6,7 +6,7 @@ This file provides guidance to coding agents (Claude Code, Codex, Cursor, etc.) 
 
 Dream Builder Fantasy Tree — a Tauri 2 desktop app evolving from an interactive procedural tree into a third-person cartoon forest game. The frontend is React 19 + react-three-fiber; the Rust backend deterministically generates scenes and owns native state, persistence, events, menus, and exports.
 
-All documentation lives under `docs/`. The single current teaching source is the self-contained Chinese archive at `docs/index.html`, which is also the entry point for the directory; the active product direction and milestone acceptance criteria live under `docs/game/`; `docs/design/` is historical only. Obsolete teaching-refactor plans have been migrated into the archive and removed.
+All documentation lives under `docs/`, indexed by `docs/README.md`. The single current teaching source is the self-contained Chinese HTML archive under `docs/learn/` (fifteen topic pages sharing `docs/learn/assets/learn.css`); the active product direction and milestone acceptance criteria live under `docs/game/`; `docs/design/` is historical only. Obsolete teaching-refactor plans have been migrated into the archive and removed.
 
 ## Layout
 
@@ -26,7 +26,8 @@ dream-builder/
 │   └── dream-builder/  # Rust + Tauri 2 (crate `dream-builder`)
 │       ├── Cargo.toml · build.rs · tauri.conf.json · icons/ · src/
 ├── docs/
-│   ├── index.html      # current self-contained Chinese teaching archive (docs entry point)
+│   ├── README.md       # documentation directory index (GitHub-facing entry point)
+│   ├── learn/          # current teaching archive: 15 topic HTML pages + assets/learn.css
 │   ├── game/           # active product vision, evidence, and delivery roadmap
 │   └── design/         # legacy design notes
 ├── scripts/            # contract, security, docs, dependency-layout, and release checks
@@ -124,4 +125,4 @@ When changing the wire format, update the Rust domain/serde shape, the Zod contr
 - **WebView2 is Evergreen and unpinned.** Windows bundles use the silent `downloadBootstrapper` mode. Do not add a fixed WebView2 runtime path or version without an explicit product decision and size/security review. Browser `pnpm dev` is not proof of the Tauri/WebView2 path.
 - **Single-instance lock**: `tauri-plugin-single-instance` is wired in `crates/dream-builder/src/lib.rs`; double-clicking the exe focuses the existing window instead of opening a second one.
 - **Win11 Mica window effect** is declared in `tauri.conf.json::app.windows[0].windowEffects.effects`; gracefully ignored on other OSes.
-- **Documentation boundaries.** Everything documentation-related lives under `docs/`. `docs/index.html` is the current teaching source and the directory entry point, `docs/game/` is the current product source of truth, and `docs/design/` contains legacy product notes only. Do not recreate teaching material under unrelated directories. `pnpm docs:verify` enforces the archive's structure, section reachability, anchors, local links, and the cross-links between these three areas — when you add a section, add it to the sidebar table of contents too or the gate fails.
+- **Documentation boundaries.** Everything documentation-related lives under `docs/`, indexed by `docs/README.md`. `docs/learn/` is the only teaching source, `docs/game/` is the current product source of truth, and `docs/design/` contains legacy product notes only. Do not recreate teaching material under unrelated directories. `pnpm docs:verify` enforces every page's structure, reachability from the hub, anchors, local links, the cross-links between these three areas, and that every source module appears in `docs/learn/code-map.html` — adding a page means adding it to the shared sidebar, and adding a source file means adding a line to the module inventory, or the gate fails.

@@ -9,10 +9,17 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
-- All documentation now lives under a single `docs/` tree. The teaching archive
-  moved from `knowledge/index.html` to `docs/index.html` and is the directory's
-  entry point, alongside the existing `docs/game/` product source of truth and
-  the historical `docs/design/` notes.
+- All documentation now lives under a single `docs/` tree with three
+  single-purpose subdirectories: `docs/learn/` is the only teaching source,
+  `docs/game/` remains the product source of truth, and `docs/design/` stays
+  historical. `docs/README.md` indexes them and is the only file at the
+  documentation root.
+- The teaching archive moved out of `knowledge/index.html` and is now fifteen
+  topic HTML pages under `docs/learn/`, sharing one `assets/learn.css`. Each
+  page carries the same sidebar, quick navigation, and previous/next links, and
+  can be opened, searched, and printed on its own. Splitting the former
+  single 45,000-character page makes a topic reachable without scrolling
+  through unrelated material.
 - `pnpm knowledge:verify` became `pnpm docs:verify`
   (`scripts/verify-knowledge.ps1` → `scripts/verify-docs.ps1`), and the public
   version contract check no longer scans a separate `knowledge/` directory.
@@ -44,6 +51,22 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 - Archive verification now enumerates the real source tree and fails when a
   module is missing from the inventory, and validates the relative links in
   every Markdown file under `docs/`.
+- Archive verification was rebuilt for the multi-page site: it requires all
+  fifteen topic pages to exist, checks each page's structure and offline
+  self-containment, rejects inline `<style>` blocks and remote assets, resolves
+  same-page and cross-page anchors, requires every page to be reachable from
+  the hub and present in every sidebar, and keeps the documentation root free
+  of stray files.
+
+### Removed
+
+- `docs/design/dream-builder-legacy-poster.png`. The 2.9 MB demo poster was 96%
+  of the documentation directory and its copy no longer described the shipped
+  game; it remains available in Git history.
+- The tracked `.claude/settings.local.json`, which contained only `{}`.
+  Editor and agent-local state (`.idea/`, `.vscode/`, that settings file) is now
+  ignored instead of committed.
+- Empty leftover `.agents/` and `tmp/docx_render_check/` working directories.
 
 ### Fixed
 

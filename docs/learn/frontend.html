@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="严格类型如何把框架留在边缘，以及输入、运动、进度与设置为何要分成不同寿命的状态。" />
+    <title>TypeScript、React 19、状态与存档 · 《智慧树之森》全栈教学档案</title>
+    <link rel="stylesheet" href="./assets/learn.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="pagehead">
+      <p class="pagehead__eyebrow"><a href="./index.html">全栈教学档案</a> · 02 · 前端与状态</p>
+      <h1>TypeScript、React 19、状态与存档</h1>
+      <p class="pagehead__lead">严格类型如何把框架留在边缘，以及输入、运动、进度与设置为何要分成不同寿命的状态。</p>
+    </header>
+
+    <div class="topbar">
+      <div class="topbar__inner">
+        <strong><a href="./index.html">教学档案</a></strong>
+        <nav aria-label="快速导航">
+          <a href="./overview.html">架构</a>
+          <a href="./frontend.html" aria-current="page">前端</a>
+          <a href="./graphics.html">3D</a>
+          <a href="./accessibility.html">无障碍</a>
+          <a href="./ipc.html">IPC</a>
+          <a href="./rust.html">Rust</a>
+          <a href="./tauri.html">Tauri</a>
+          <a href="./build.html">构建</a>
+          <a href="./quality.html">质量</a>
+          <a href="./release.html">发布</a>
+          <a href="./code-map.html">源码</a>
+          <a href="./glossary.html">术语</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="toc" aria-label="教学档案目录">
+        <p>从这里开始</p>
+        <a href="./index.html">总览与导航</a>
+        <a href="./overview.html">01 · 项目与架构</a>
+        <p>前端与游戏</p>
+        <a href="./frontend.html" class="is-current" aria-current="page">02 · 前端与状态</a>
+        <a href="./graphics.html">03 · 3D 与音频</a>
+        <a href="./accessibility.html">04 · 无障碍与输入</a>
+        <a href="./performance.html">05 · 性能与证据</a>
+        <p>原生边界</p>
+        <a href="./ipc.html">06 · IPC 与边界</a>
+        <a href="./rust.html">07 · Rust 后端</a>
+        <a href="./tauri.html">08 · Tauri 与 WebView2</a>
+        <a href="./security.html">09 · 安全边界</a>
+        <p>交付与查阅</p>
+        <a href="./build.html">10 · 构建与版本</a>
+        <a href="./quality.html">11 · 质量与 CI</a>
+        <a href="./release.html">12 · Windows 发布</a>
+        <a href="./code-map.html">13 · 源码索引</a>
+        <a href="./glossary.html">14 · 术语表</a>
+      </aside>
+
+      <main id="main-content">
+        <section id="typescript-react">
+
+  <p class="section-kicker">TypeScript + React 19</p>
+  <h2>前端：用严格类型把框架留在边缘</h2>
+  <p class="section-lead">
+    TypeScript 不是给 JavaScript 加注释，而是让边界、状态转换和组件契约在编译期可证明。
+    React 则负责把这些数据映射为界面和生命周期；高频游戏数学留在纯函数与 R3F 帧循环中。
+  </p>
+  <div class="grid">
+    <article class="card">
+      <h3>严格编译选项</h3>
+      <p>
+        <code>strict</code>、<code>noUncheckedIndexedAccess</code>、
+        <code>exactOptionalPropertyTypes</code>、<code>noImplicitOverride</code> 与
+        <code>verbatimModuleSyntax</code> 同时开启。数组索引因此是 <code>T | undefined</code>，
+        可选属性也不能用“显式 undefined”冒充缺失。
+      </p>
+    </article>
+    <article class="card">
+      <h3><code>unknown</code> 后再收窄</h3>
+      <p>
+        IPC、JSON 文件、本地存档和性能证据都是不可信数据。它们先保持 <code>unknown</code>，
+        再由 Zod 或专用解析器验证。禁止用 <code>as SomeType</code> 跳过边界检查。
+      </p>
+    </article>
+    <article class="card">
+      <h3>可辨识联合</h3>
+      <p>
+        <code>GameProgressAction</code>、<code>SelectionAction</code>、Worker 协议和
+        <code>SceneLoadResult</code> 都用字面量字段区分分支。<code>switch</code> 让新增状态暴露未处理点。
+      </p>
+    </article>
+    <article class="card">
+      <h3>标准装饰器</h3>
+      <p>
+        <a href="../../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的
+        <code>@logged</code> 和 <code>@measure</code> 使用 TC39 标准方法装饰器，为 IPC 加日志与计时，
+        不依赖旧式 <code>experimentalDecorators</code>。
+      </p>
+    </article>
+  </div>
+  <h3>React 的职责分层</h3>
+  <div class="layer-stack">
+    <div class="layer"><strong>入口</strong><span><code>main.tsx</code> 只决定挂载哪个根应用，并安装 StrictMode 与错误边界。</span></div>
+    <div class="layer"><strong>编排</strong><span><code>App.tsx</code> 管设置水合、场景加载、原生订阅、导出、菜单和跨系统回调。</span></div>
+    <div class="layer"><strong>状态</strong><span><code>state/store.ts</code> 暴露选择器和动作，委托纯 reducer；组件不直接改内部对象。</span></div>
+    <div class="layer"><strong>适配</strong><span>Controller 组件把浏览器事件、手柄轮询、接近判定和 R3F ref 转换为领域动作。</span></div>
+    <div class="layer"><strong>呈现</strong><span>UI 与 Scene 组件根据 props/store 切片渲染，避免承担持久化或业务决策。</span></div>
+  </div>
+  <h3>Hooks 在这里解决什么问题</h3>
+  <ul>
+    <li><code>useEffect</code> 管理外部系统同步：IPC 请求、事件监听、键盘监听、设置持久化，而不是计算可派生值。</li>
+    <li><code>useRef</code> 保存每帧读取的魔法场、场景命令 API、玩家位置与最新回调，更新它们不会触发 React 树重绘。</li>
+    <li><code>useMemo</code> 缓存昂贵且纯的几何/实例矩阵；依赖必须真实完整，不能拿空数组“冻结”错误值。</li>
+    <li><code>useCallback</code> 只在回调身份会影响订阅或子组件时使用；不把它当作无条件性能装饰。</li>
+    <li>StrictMode 会故意重复挂载 effect。<a href="../../apps/desktop/src/ipc/asyncSubscriptionScope.ts">asyncSubscriptionScope.ts</a> 专门处理“监听 promise 尚未返回，组件已经卸载”的竞态。</li>
+  </ul>
+  <div class="callout">
+    <strong>错误边界的边界：</strong>React Error Boundary 捕获渲染和生命周期错误，但不会自动捕获事件处理器、
+    异步 promise 或 Rust 崩溃。后者必须在调用点处理，并由日志、错误状态或原生 panic hook 提供证据。
+  </div>
+        </section>
+
+        <section id="state-persistence">
+
+  <p class="section-kicker">State, save, input</p>
+  <h2>状态、存档、输入与运动为何要分开</h2>
+  <p class="section-lead">
+    游戏最容易失控的地方，是把按键、位置、任务、动画和存档塞进同一个组件。
+    本项目把“瞬时输入”“逐帧运动”“持久进度”“界面会话”和“原生设置”拆成不同寿命的状态。
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>状态种类</th><th>拥有者</th><th>寿命与示例</th></tr></thead>
+      <tbody>
+        <tr><th>输入意图</th><td><code>playerInput.ts</code> / Gamepad</td><td>一帧或一次按下；移动向量、互动、冲刺、暂停。</td></tr>
+        <tr><th>运动状态</th><td><code>PlayerController.tsx</code></td><td>连续帧；位置、速度、朝向，由纯运动函数推进。</td></tr>
+        <tr><th>游戏进度</th><td><code>gameProgress.ts</code> + Zustand</td><td>跨会话；光种、节点、树阶段、门、检查点、记忆。</td></tr>
+        <tr><th>会话 UI</th><td>Zustand</td><td>当前运行；标题/游玩/暂停、覆盖层、选择、警告。</td></tr>
+        <tr><th>用户设置</th><td>前端 store + Rust Store</td><td>跨启动；主题、画质、音量、相机、无障碍。</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <h3>进度状态机的不变量</h3>
+  <pre><code>light seed: hidden → revealed → collected
+  three collected: node dormant → ready
+  puzzle open: ready → cleansing
+  success: cleansing → restored + treeStage 1 + gateUnlocked
+  cancel/failure: cleansing → ready（不扣光种）</code></pre>
+  <p>
+    <a href="../../apps/desktop/src/game/gameProgress.ts">gameProgress.ts</a> 用字面量联合、
+    <code>Record&lt;LightSeedId, LightSeedState&gt;</code> 和纯 reducer 表达这些规则。
+    解析旧存档时重新计算 <code>collectedCount</code>，并验证树阶段和门状态必须与净化状态一致；
+    这能拒绝“字段看似合法，但组合互相矛盾”的快照。
+  </p>
+  <h3>存档恢复策略</h3>
+  <ol>
+    <li>优先读取 <code>dream-builder.progress.v2</code>，通过完整不变量校验才接受。</li>
+    <li>主快照损坏时，把原始文本隔离到 corrupt key，再尝试最近一份有效 backup。</li>
+    <li>只有主快照不存在时才迁移 v1；迁移补上检查点与记忆字段，不迁移中途 cleansing 状态。</li>
+    <li>正常写入前先把上一份有效主快照变成 backup；“开始新旅程”则原子替换并清理旧备份。</li>
+    <li>Storage 不可用或写失败时保持当前会话可玩，并通过 UI 提示，不能静默假装已经保存。</li>
+  </ol>
+  <h3>运动与碰撞</h3>
+  <p>
+    <a href="../../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 把 WASD、方向键和手柄轴统一成
+    归一化意图；<a href="../../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 将它转换到相机水平坐标系，
+    按加速/减速和最大步长推进。世界边界、圆形障碍与矩形障碍来自
+    <a href="../../apps/desktop/src/game/forestLayout.ts">forestLayout.ts</a>，同一份布局同时被碰撞和呈现消费，
+    避免“看见的墙”和“撞到的墙”漂移。
+  </p>
+  <div class="grid">
+    <article class="card">
+      <h3>为什么不用物理引擎</h3>
+      <p>当前只有平面行走、静态障碍和显式边界。纯数学碰撞更小、更确定、更易测；出现斜坡、动态刚体或大量碰撞前，引入物理引擎只会增加同步成本。</p>
+    </article>
+    <article class="card">
+      <h3>为什么相机不进 Rust</h3>
+      <p>相机和玩家运动每帧更新，把它们经 IPC 往返会增加延迟与序列化负担。Rust 负责低频、可持久、可重放的数据，帧循环留在 WebView。</p>
+    </article>
+  </div>
+        </section>
+
+        <nav class="pager" aria-label="翻页">
+          <a class="pager__link" href="./overview.html"><span>上一页</span><strong>01 · 项目与架构</strong></a>
+          <a class="pager__link pager__link--next" href="./graphics.html"><span>下一页</span><strong>03 · 3D 与音频</strong></a>
+        </nav>
+      </main>
+    </div>
+
+    <footer class="footer">
+      <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
+      本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
+      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
+      <a href="../README.md">docs/README.md</a>。
+    </footer>
+  </body>
+</html>
