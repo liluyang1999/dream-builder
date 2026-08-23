@@ -93,8 +93,8 @@
   <h3>事件与请求的区别</h3>
   <p>
     命令是请求/响应，适合“给我一个场景”“保存这份设置”；事件是后端主动推送，适合周期魔法场和原生菜单。
-    <a href="../../crates/dream-builder/src/events.rs">events.rs</a> 发出 <code>magic-field</code>，
-    <a href="../../crates/dream-builder/src/menu.rs">menu.rs</a> 把菜单 id 转成 <code>menu:&lt;id&gt;</code>。
+    <a href="../crates/dream-builder/src/events.rs">events.rs</a> 发出 <code>magic-field</code>，
+    <a href="../crates/dream-builder/src/menu.rs">menu.rs</a> 把菜单 id 转成 <code>menu:&lt;id&gt;</code>。
     每个前端事件 payload 仍要校验；事件并不因为来自本进程就自动可信。
   </p>
   <h3>修改 wire 格式时的四方同步</h3>
@@ -116,7 +116,7 @@
   </p>
   <div class="grid">
     <article class="card">
-      <h3><a href="../../apps/desktop/src/workers/protocol.ts">protocol.ts</a></h3>
+      <h3><a href="../apps/desktop/src/workers/protocol.ts">protocol.ts</a></h3>
       <p>
         请求 <code>{ id, seed }</code>、响应 <code>{ id, scene }</code>。
         <code>id</code> 是关联键：<code>postMessage</code> 没有返回值，多个并发请求的响应
@@ -124,7 +124,7 @@
       </p>
     </article>
     <article class="card">
-      <h3><a href="../../apps/desktop/src/workers/fallbackClient.ts">fallbackClient.ts</a></h3>
+      <h3><a href="../apps/desktop/src/workers/fallbackClient.ts">fallbackClient.ts</a></h3>
       <p>
         主线程客户端：懒创建 Worker、用 <code>Map&lt;id, resolve&gt;</code> 登记在途请求，
         收到消息后取出并兑现对应 Promise，对调用方只暴露
@@ -133,7 +133,7 @@
     </article>
   </div>
   <ul>
-    <li>Worker 不可用时（jsdom 单测或任何非 DOM 环境）直接同步调用 <a href="../../apps/desktop/src/data/fallbackTree.ts">fallbackTree.ts</a>，返回同样的 Promise，因此调用方不需要分支。</li>
+    <li>Worker 不可用时（jsdom 单测或任何非 DOM 环境）直接同步调用 <a href="../apps/desktop/src/data/fallbackTree.ts">fallbackTree.ts</a>，返回同样的 Promise，因此调用方不需要分支。</li>
     <li>把生成放进 Worker 的收益是不阻塞主线程：几千个分段的几何计算发生在另一个线程，UI 仍然响应。</li>
     <li>代价是数据要跨线程克隆，所以 Worker 只用于低频的整场景生成，逐帧数据绝不走这条路。</li>
     <li>Worker 返回的场景同样要过 <code>treeSceneSchema</code>。同进程不等于可信——回退生成器一样会写错。</li>
@@ -150,8 +150,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

@@ -89,7 +89,7 @@
   </p>
   <h3>窗口、菜单与单实例</h3>
   <p>
-    <a href="../../crates/dream-builder/tauri.conf.json">tauri.conf.json</a> 定义主窗口尺寸、最小尺寸、背景色、居中和 Win11 Mica；
+    <a href="../crates/dream-builder/tauri.conf.json">tauri.conf.json</a> 定义主窗口尺寸、最小尺寸、背景色、居中和 Win11 Mica；
     不支持 Mica 的系统会优雅忽略。原生菜单和托盘使用稳定 id，前端统一处理动作。二次启动不会创建第二个世界实例，
     而是显示、取消最小化并聚焦现有窗口，避免并发写存档。
   </p>
@@ -128,7 +128,7 @@
   <p>
     这是 Tauri 的 Evergreen 引导安装模式：安装器检查运行时，缺失时由 Microsoft bootstrapper 获取合适的 Evergreen Runtime；
     已安装时应用直接使用系统运行时。配置没有 <code>fixedRuntime</code> 路径，也没有版本字段。
-    <a href="../../scripts/verify-version-contract.ps1">verify-version-contract.ps1</a> 会阻止误改成固定运行时。
+    <a href="../scripts/verify-version-contract.ps1">verify-version-contract.ps1</a> 会阻止误改成固定运行时。
   </p>
   <div class="table-wrap">
     <table>
@@ -172,8 +172,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

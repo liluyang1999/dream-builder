@@ -74,13 +74,14 @@
   cargo check --workspace --all-targets --locked</code></pre>
   <h3><code>pnpm check</code> 内部顺序</h3>
   <p>
-    九个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
+    十个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
     最慢的生产构建放在最后。任何一步非零退出都会中断整条链。
   </p>
   <ol>
     <li><code>version:verify</code>：两段式产品版本与各机器清单的兼容值映射、NSIS 显示版本、WebView2 Evergreen 配置，并扫描公开资料是否泄漏了第二套版本；</li>
     <li><code>desktop:verify-security</code>：CSP 不含通配符或 <code>unsafe-eval</code>、capability 保持最小、路径不越界、未重新引入直接文件系统插件；</li>
-    <li><code>docs:verify</code>：教学档案的 HTML 结构、必需主题、章节可达性、重复 id、锚点、本地链接与同级文档入口；</li>
+    <li><code>docs:verify</code>：教学档案每一页的 HTML 结构、必需主题、页面可达性、重复 id、锚点、本地链接、索引完整性与全部源码模块覆盖；</li>
+    <li><code>loop:verify</code>：<a href="../loop/README.md">Loop Engineering 记录</a>的必备文件、目录结构、相对链接与证据指针，并要求 <code>progress.md</code> 保持未闭合门槛可见；</li>
     <li><code>pnpm:verify-layout</code>：store/cache/virtual store 解析后的绝对路径都在项目根内；</li>
     <li><code>m2:verify</code>：归档的原生性能报告哈希、来源与帧率预算未被改写；</li>
     <li><code>biome check</code>：格式、可疑代码和导入组织；</li>
@@ -127,8 +128,8 @@
     <table>
       <thead><tr><th>工作流</th><th>触发</th><th>做什么</th></tr></thead>
       <tbody>
-        <tr><th><a href="../../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test 与 Clippy</td></tr>
-        <tr><th><a href="../../.github/workflows/release.yml">release.yml</a></th><td>手动触发或 <code>v*</code> 标签</td><td>跑完整发布门禁并上传带校验和的未签名 Windows 候选包</td></tr>
+        <tr><th><a href="../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test 与 Clippy</td></tr>
+        <tr><th><a href="../.github/workflows/release.yml">release.yml</a></th><td>手动触发或 <code>v*</code> 标签</td><td>跑完整发布门禁并上传带校验和的未签名 Windows 候选包</td></tr>
       </tbody>
     </table>
   </div>
@@ -156,7 +157,7 @@
   </ul>
   <p>
     换句话说，绿色 CI 是“候选包可以进入人工验收”的前提，而不是“可以发布”的结论。
-    人工门槛的当前状态见 <a href="../game/README.md">docs/game/README.md</a>。
+    人工门槛的当前状态见 <a href="../loop/product/README.md">loop/product/README.md</a>。
   </p>
         </section>
 
@@ -170,8 +171,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

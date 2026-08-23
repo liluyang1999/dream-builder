@@ -9,17 +9,25 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
-- All documentation now lives under a single `docs/` tree with three
-  single-purpose subdirectories: `docs/learn/` is the only teaching source,
-  `docs/game/` remains the product source of truth, and `docs/design/` stays
-  historical. `docs/README.md` indexes them and is the only file at the
-  documentation root.
+- Documentation is now split by audience rather than by topic. `docs/` holds
+  only teaching material — fifteen topic HTML pages plus `assets/learn.css` and
+  a GitHub-facing `README.md` index, all at one level with no subdirectory
+  nesting. `loop/` holds the Loop Engineering record that agents and
+  maintainers work from: `concepts.md` (working discipline), `progress.md`
+  (status ledger), `product/` (vision, scope, acceptance, playtest protocol,
+  runbook), `evidence/` (append-only measurements), and `history/` (2026-04
+  notes, read-only). The two directories change at different rates — teaching
+  conclusions are meant to be stable, engineering state changes every
+  iteration — and mixing them made it impossible to tell which was which.
 - The teaching archive moved out of `knowledge/index.html` and is now fifteen
-  topic HTML pages under `docs/learn/`, sharing one `assets/learn.css`. Each
-  page carries the same sidebar, quick navigation, and previous/next links, and
-  can be opened, searched, and printed on its own. Splitting the former
-  single 45,000-character page makes a topic reachable without scrolling
-  through unrelated material.
+  topic HTML pages under `docs/`, sharing one `assets/learn.css`. Each page
+  carries the same sidebar, quick navigation, and previous/next links, and can
+  be opened, searched, and printed on its own. Splitting the former single
+  45,000-character page makes a topic reachable without scrolling through
+  unrelated material.
+- `pnpm check` grew a tenth stage, `pnpm loop:verify`, which checks the
+  required Loop Engineering records, their relative links, the evidence
+  pointer, and that `loop/progress.md` still shows the unmet external gates.
 - `pnpm knowledge:verify` became `pnpm docs:verify`
   (`scripts/verify-knowledge.ps1` → `scripts/verify-docs.ps1`), and the public
   version contract check no longer scans a separate `knowledge/` directory.
@@ -34,12 +42,12 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
   resource rewriting, and the release profile), and continuous integration
   (both GitHub Actions workflows plus what a green run still does not prove).
 - Archive verification now requires every `<section>` to be reachable from the
-  sidebar table of contents and requires the sibling `docs/game/` and
-  `docs/design/` entry points to stay linked from the archive.
-- `docs/README.md` indexes the documentation directory. GitHub does not render
-  `index.html`, so browsing the repository previously showed a bare file
-  listing; the index routes readers to the archive, the product docs, and the
-  historical notes without duplicating any of their content.
+  sidebar table of contents and requires the teaching index and the `loop/`
+  entry points to stay linked from the archive.
+- `docs/README.md` indexes the teaching pages. GitHub does not render HTML, so
+  browsing the repository previously showed a bare file listing; the index lists
+  every page with its subject and states what the archive covers, and the gate
+  fails if a page is missing from it.
 - A complete module inventory in the archive covering all 95 source files in
   `apps/desktop/src`, `packages/*/src`, and `crates/dream-builder/src`, grouped
   from pure logic through to presentation and side effects, plus the root
@@ -55,8 +63,8 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
   fifteen topic pages to exist, checks each page's structure and offline
   self-containment, rejects inline `<style>` blocks and remote assets, resolves
   same-page and cross-page anchors, requires every page to be reachable from
-  the hub and present in every sidebar, and keeps the documentation root free
-  of stray files.
+  the hub and present in every sidebar, and keeps `docs/` free of stray files
+  and non-teaching subdirectories.
 
 ### Removed
 
@@ -70,11 +78,19 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Fixed
 
+- `scripts/verify-version-contract.ps1` silently lost half its coverage.
+  Windows PowerShell 5.1 decodes a BOM-less script as the system ANSI codepage,
+  so the Chinese alternatives in its forbidden-version regex
+  (`产品版本`, `应用版本`, `公开版本`, `技术版本`) were mangled and never
+  matched; only the ASCII alternatives worked. Both that script and the new
+  `verify-loop.ps1` now carry a UTF-8 BOM. Verified by probe: a file containing
+  a Chinese-labelled three-component version passed the gate before the fix and
+  fails after it.
 - `pnpm version:verify` failed outright after the documentation directory was
   renamed, because it still enumerated the removed `knowledge/` path.
 - The quality-gate walkthrough in the archive listed seven `pnpm check` stages
   and omitted `desktop:verify-security` and `m2:verify`; it now documents all
-  nine stages in their real execution order.
+  ten stages, including `loop:verify`, in their real execution order.
 
 ## [1.0] - 2026-08-10
 

@@ -106,21 +106,21 @@
   </div>
   <h3>错误处理</h3>
   <p>
-    <a href="../../crates/dream-builder/src/errors.rs">AppError</a> 由 <code>thiserror</code> 派生错误文本，
+    <a href="../crates/dream-builder/src/errors.rs">AppError</a> 由 <code>thiserror</code> 派生错误文本，
     并手写 Serialize 稳定输出 <code>{ code, message }</code>。可预期失败返回 <code>Result</code> 并用
     <code>?</code> 传播；panic 只代表不变量或启动级错误。panic hook 会把崩溃写入日志，
     但绝不能把秘密或用户数据塞进错误文本。
   </p>
   <h3>共享状态与异步纪律</h3>
   <p>
-    <a href="../../crates/dream-builder/src/state.rs">AppState</a> 克隆的是 <code>Arc</code>，不是复制状态。
-    每个方法内部短暂加锁，复制所需值后立即释放。<a href="../../crates/dream-builder/src/events.rs">事件任务</a>
+    <a href="../crates/dream-builder/src/state.rs">AppState</a> 克隆的是 <code>Arc</code>，不是复制状态。
+    每个方法内部短暂加锁，复制所需值后立即释放。<a href="../crates/dream-builder/src/events.rs">事件任务</a>
     在 <code>interval.tick().await</code> 之后才读取设置，绝不让同步 Mutex guard 跨越 await。
     文件导出使用 <code>tokio::fs::write</code>，避免阻塞异步执行器线程。
   </p>
   <h3>持久化：读尽力而为，写必须报告失败</h3>
   <p>
-    <a href="../../crates/dream-builder/src/persistence.rs">persistence.rs</a> 通过 Store 插件的扩展 trait
+    <a href="../crates/dream-builder/src/persistence.rs">persistence.rs</a> 通过 Store 插件的扩展 trait
     <code>StoreExt</code> 使用插件能力——这是 Tauri 插件在 Rust 侧的惯用形态：插件为
     <code>AppHandle</code> 增加方法，而不是要求你自己持有一个全局对象。设置落在
     <code>settings.json</code> 的 <code>settings</code> 键下。
@@ -166,8 +166,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

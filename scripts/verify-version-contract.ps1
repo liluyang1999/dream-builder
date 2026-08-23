@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -21,6 +21,8 @@ $publicDisplayFiles = @(
     Get-Item -LiteralPath (Join-Path $repositoryRoot "AGENTS.md")
     Get-Item -LiteralPath (Join-Path $repositoryRoot "crates\dream-builder\installer\LICENSE.txt")
     Get-ChildItem -LiteralPath (Join-Path $repositoryRoot "docs") -Recurse -File |
+        Where-Object { $_.Extension -in @(".md", ".html", ".txt") }
+    Get-ChildItem -LiteralPath (Join-Path $repositoryRoot "loop") -Recurse -File |
         Where-Object { $_.Extension -in @(".md", ".html", ".txt") }
 )
 $forbiddenPublicVersion = [regex]::Escape($versionContract.ToolingVersion)

@@ -34,6 +34,11 @@ test:
     pnpm test
     cargo test
 
+# Verify the teaching archive and the Loop Engineering records.
+docs:
+    pnpm docs:verify
+    pnpm loop:verify
+
 # Full local gate: contracts, pnpm layout, frontend, Rust, and release build prerequisites.
 check:
     pnpm check

@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $repoRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
 . (Join-Path $PSScriptRoot "lib\file-hash.ps1")
 if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
-    $ManifestPath = Join-Path $repoRoot "docs\game\evidence\m2-target-build.json"
+    $ManifestPath = Join-Path $repoRoot "loop\evidence\m2-target-build.json"
 }
 
 $resolvedManifestPath = [System.IO.Path]::GetFullPath($ManifestPath)

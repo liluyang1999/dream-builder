@@ -83,14 +83,14 @@
   </div>
   <p>
     这些字段和 <code>seed</code>、<code>theme</code> 在
-    <a href="../../packages/ipc-contracts/src/index.ts">同一个 <code>settingsSchema</code></a> 中定义并带默认值，
+    <a href="../packages/ipc-contracts/src/index.ts">同一个 <code>settingsSchema</code></a> 中定义并带默认值，
     因此“无障碍设置”与其他设置走完全相同的校验、IPC 与持久化路径：Rust 侧先验证范围，
-    再写入 Tauri Store；前端 <a href="../../apps/desktop/src/App.tsx">App.tsx</a> 只把已提交的切片映射为根节点类名。
+    再写入 Tauri Store；前端 <a href="../apps/desktop/src/App.tsx">App.tsx</a> 只把已提交的切片映射为根节点类名。
     旧存档缺字段时由 schema 默认值补齐，不会让界面进入半初始化状态。
   </p>
   <div class="callout callout--gold">
     <strong>系统偏好与游戏内设置并存：</strong>
-    <a href="../../apps/desktop/src/styles.css">styles.css</a> 同时响应
+    <a href="../apps/desktop/src/styles.css">styles.css</a> 同时响应
     <code>@media (prefers-reduced-motion: reduce)</code>。操作系统已经声明“减少动态”时不需要玩家再找一次开关，
     而游戏内开关又允许在系统未声明时单独降低动效。两者是“或”的关系，不是互相覆盖。
   </div>
@@ -99,14 +99,14 @@
     <article class="card">
       <h3>键盘：事件驱动</h3>
       <p>
-        <a href="../../apps/desktop/src/interaction/useKeyboardShortcuts.ts">useKeyboardShortcuts</a>
+        <a href="../apps/desktop/src/interaction/useKeyboardShortcuts.ts">useKeyboardShortcuts</a>
         只在 window 上绑定一次监听，处理函数存在 ref 中，因此既没有陈旧闭包，也不会每次渲染都重新订阅。
       </p>
     </article>
     <article class="card">
       <h3>指针：事件驱动</h3>
       <p>
-        <a href="../../apps/desktop/src/interaction/useInteractive.ts">useInteractive</a>
+        <a href="../apps/desktop/src/interaction/useInteractive.ts">useInteractive</a>
         把 R3F 的 pointer 事件转成选择 reducer 的动作，悬停与选中仍是纯状态转换。
       </p>
     </article>
@@ -114,19 +114,19 @@
       <h3>手柄：轮询驱动</h3>
       <p>
         Gamepad API 不提供按钮/摇杆事件，只能读取快照。
-        <a href="../../apps/desktop/src/interaction/GamepadNavigator.tsx">GamepadNavigator</a>
+        <a href="../apps/desktop/src/interaction/GamepadNavigator.tsx">GamepadNavigator</a>
         在 <code>requestAnimationFrame</code> 中采样，并与上一帧比较做边沿检测。
       </p>
     </article>
   </div>
   <p>
     差异被限制在适配层：三类设备最终都产生同一套意图（移动向量、互动、冲刺、暂停、方向），
-    由 <a href="../../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 归一化后交给纯逻辑。
+    由 <a href="../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 归一化后交给纯逻辑。
     边沿检测尤其重要——长按手柄按键在每一帧都是“按下”，若不比较上一帧状态，一次按压会被当成上百次暂停切换。
   </p>
   <h3>模态焦点：Tab 不能逃出对话框</h3>
   <ul>
-    <li><a href="../../apps/desktop/src/interaction/useModalFocus.ts">useModalFocus</a> 打开时聚焦首个控件，关闭时把焦点还给触发它的控件。</li>
+    <li><a href="../apps/desktop/src/interaction/useModalFocus.ts">useModalFocus</a> 打开时聚焦首个控件，关闭时把焦点还给触发它的控件。</li>
     <li><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> 在对话框内循环，键盘用户不会“掉”到被遮挡的 HUD 上。</li>
     <li><kbd>Esc</kbd> 与 <kbd>?</kbd> 优先交给当前对话框，而不是全局游戏快捷键。</li>
     <li>全局快捷键遇到 <code>[aria-modal="true"]</code>、输入框或可编辑元素时主动让路，避免“打字触发截图”。</li>
@@ -134,8 +134,8 @@
   </ul>
   <div class="callout callout--warning">
     <strong>自动化能证明什么：</strong>组件测试用角色、可访问名称和焦点顺序断言标题、设置、帮助与覆盖层，
-    <a href="../../apps/desktop/src/tests/keyboardShortcuts.test.tsx">快捷键</a>与
-    <a href="../../apps/desktop/src/tests/gamepadInput.test.ts">手柄采样</a>也有确定性测试。
+    <a href="../apps/desktop/src/tests/keyboardShortcuts.test.tsx">快捷键</a>与
+    <a href="../apps/desktop/src/tests/gamepadInput.test.ts">手柄采样</a>也有确定性测试。
     但屏幕阅读器实机朗读、实体手柄完整听测与真人操作舒适度仍是外部门槛，不能由 jsdom 断言代替。
   </div>
         </section>
@@ -150,8 +150,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

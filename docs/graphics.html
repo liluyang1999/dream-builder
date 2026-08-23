@@ -69,11 +69,11 @@
     最终仍由 WebGL 在 WebView2 中绘制。
   </p>
   <div class="grid grid--3">
-    <article class="card"><h3>Canvas</h3><p><a href="../../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas</a> 配置相机、DPR、色调映射、场景 API、后处理和截图所需的 drawing buffer。</p></article>
-    <article class="card"><h3>世界</h3><p><a href="../../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld</a> 组合玩家、卡通森林、光种、记忆、检查点和净化节点。</p></article>
-    <article class="card"><h3>智慧树</h3><p><a href="../../apps/desktop/src/scene/TreeContent.tsx">TreeContent</a> 把 Rust 返回的枝干、叶簇、符文、水晶与地面光环组合为场景。</p></article>
-    <article class="card"><h3>程序化森林</h3><p><a href="../../apps/desktop/src/scene/CartoonForest.tsx">CartoonForest</a> 按 seed 和质量档生成可重建装饰，但关键路径与碰撞保持稳定。</p></article>
-    <article class="card"><h3>粒子</h3><p><a href="../../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles</a> 用 BufferGeometry 和 <code>useFrame</code> 更新位置，从 ref 读取后端场。</p></article>
+    <article class="card"><h3>Canvas</h3><p><a href="../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas</a> 配置相机、DPR、色调映射、场景 API、后处理和截图所需的 drawing buffer。</p></article>
+    <article class="card"><h3>世界</h3><p><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld</a> 组合玩家、卡通森林、光种、记忆、检查点和净化节点。</p></article>
+    <article class="card"><h3>智慧树</h3><p><a href="../apps/desktop/src/scene/TreeContent.tsx">TreeContent</a> 把 Rust 返回的枝干、叶簇、符文、水晶与地面光环组合为场景。</p></article>
+    <article class="card"><h3>程序化森林</h3><p><a href="../apps/desktop/src/scene/CartoonForest.tsx">CartoonForest</a> 按 seed 和质量档生成可重建装饰，但关键路径与碰撞保持稳定。</p></article>
+    <article class="card"><h3>粒子</h3><p><a href="../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles</a> 用 BufferGeometry 和 <code>useFrame</code> 更新位置，从 ref 读取后端场。</p></article>
     <article class="card"><h3>后处理</h3><p>Bloom 只服务发光物体；画质档与减少动态控制成本和强度，不能让装饰破坏目标可读性。</p></article>
   </div>
   <h3>关键图形概念</h3>
@@ -95,7 +95,7 @@
   <details>
     <summary>GLSL 水晶与 Fresnel</summary>
     <p>
-      <a href="../../apps/desktop/src/scene/materials/crystalMaterial.ts">crystalMaterial.ts</a>
+      <a href="../apps/desktop/src/scene/materials/crystalMaterial.ts">crystalMaterial.ts</a>
       在顶点阶段传递视图法线和视线方向，在片元阶段以
       <code>pow(1 - dot(normal, viewDir), power)</code> 形成掠射角更亮的 Fresnel 边缘，
       再用时间 uniform 制作流光。hover 与选中只调 uniform，不重建材质。
@@ -111,7 +111,7 @@
   <h3>液态玻璃 UI 是一个独立的可复用包</h3>
   <p>
     <code>@dream-builder/liquid-glass</code> 不是散落在应用里的几条 CSS，而是
-    <a href="../../packages/liquid-glass/src/index.ts">有明确导出面的工作区包</a>。
+    <a href="../packages/liquid-glass/src/index.ts">有明确导出面的工作区包</a>。
     它演示了一个小型 React 组件库该有的样子：一个上下文 Provider、一个承担全部视觉的基元，
     以及几个语义化包装。
   </p>
@@ -119,12 +119,12 @@
     <table>
       <thead><tr><th>导出</th><th>角色</th></tr></thead>
       <tbody>
-        <tr><th><a href="../../packages/liquid-glass/src/GlassProvider.tsx">GlassProvider</a> / <code>useGlass</code></th><td>用 Context 向下传递主题与质量档，避免每个组件各自探测环境</td></tr>
-        <tr><th><a href="../../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface</a></th><td>唯一真正实现玻璃外观的基元，其余组件都由它组合而来</td></tr>
-        <tr><th><a href="../../packages/liquid-glass/src/GlassPanel.tsx">GlassPanel</a> · <a href="../../packages/liquid-glass/src/GlassCard.tsx">GlassCard</a> · <a href="../../packages/liquid-glass/src/GlassButton.tsx">GlassButton</a> · <a href="../../packages/liquid-glass/src/GlassBadge.tsx">GlassBadge</a></th><td>语义化包装：调用方表达“这是一个面板/卡片/按钮”，而不是拼装视觉参数</td></tr>
-        <tr><th><a href="../../packages/liquid-glass/src/theme.ts">theme.ts</a></th><td>只导出 <code>GlassTheme</code> 与 <code>GlassQuality</code> 两个字面量联合，是包的公共词汇表</td></tr>
-        <tr><th><a href="../../packages/liquid-glass/src/useGlassQuality.ts">detectGlassQuality</a></th><td>按运行环境能力选择画质档</td></tr>
-        <tr><th><a href="../../packages/liquid-glass/src/liquid-glass.css">liquid-glass.css</a></th><td>半透明 tint、<code>backdrop-filter</code>、边缘高光与阴影；由入口自动注入</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassProvider.tsx">GlassProvider</a> / <code>useGlass</code></th><td>用 Context 向下传递主题与质量档，避免每个组件各自探测环境</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface</a></th><td>唯一真正实现玻璃外观的基元，其余组件都由它组合而来</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassPanel.tsx">GlassPanel</a> · <a href="../packages/liquid-glass/src/GlassCard.tsx">GlassCard</a> · <a href="../packages/liquid-glass/src/GlassButton.tsx">GlassButton</a> · <a href="../packages/liquid-glass/src/GlassBadge.tsx">GlassBadge</a></th><td>语义化包装：调用方表达“这是一个面板/卡片/按钮”，而不是拼装视觉参数</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/theme.ts">theme.ts</a></th><td>只导出 <code>GlassTheme</code> 与 <code>GlassQuality</code> 两个字面量联合，是包的公共词汇表</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/useGlassQuality.ts">detectGlassQuality</a></th><td>按运行环境能力选择画质档</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/liquid-glass.css">liquid-glass.css</a></th><td>半透明 tint、<code>backdrop-filter</code>、边缘高光与阴影；由入口自动注入</td></tr>
       </tbody>
     </table>
   </div>
@@ -147,8 +147,8 @@
   </div>
   <h3>程序化音频</h3>
   <p>
-    <a href="../../apps/desktop/src/audio/forestAudio.ts">forestAudio.ts</a> 使用 Web Audio API 合成环境层，
-    <a href="../../apps/desktop/src/audio/progressAudio.ts">progressAudio.ts</a> 将进度差异映射为短声效。
+    <a href="../apps/desktop/src/audio/forestAudio.ts">forestAudio.ts</a> 使用 Web Audio API 合成环境层，
+    <a href="../apps/desktop/src/audio/progressAudio.ts">progressAudio.ts</a> 将进度差异映射为短声效。
     AudioDirector 在首次用户手势后安全恢复 AudioContext，分别应用主音量、环境音和效果音；静音与页面卸载必须释放节点，
     避免后台声音和资源泄漏。
   </p>
@@ -164,8 +164,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

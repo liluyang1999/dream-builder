@@ -20,7 +20,7 @@
     }
   },
   "performanceEvidence": {
-    "relativePath": "docs/game/evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json",
+    "relativePath": "loop/evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json",
     "sha256": "B0553D761C7C19E4FF300F0FCB3D1B4E6955D5182AEEDBA893511BF651D4B68E",
     "completedTargetDuration": true,
     "runtime": "tauri",

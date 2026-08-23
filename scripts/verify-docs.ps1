@@ -3,18 +3,16 @@ Set-StrictMode -Version Latest
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $docsDirectory = Join-Path $repositoryRoot "docs"
-$learnDirectory = Join-Path $docsDirectory "learn"
-$hubPath = Join-Path $learnDirectory "index.html"
-$stylesheetPath = Join-Path $learnDirectory "assets\learn.css"
+$hubPath = Join-Path $docsDirectory "index.html"
+$stylesheetPath = Join-Path $docsDirectory "assets\learn.css"
+$indexPath = Join-Path $docsDirectory "README.md"
 
-foreach ($required in @($docsDirectory, $learnDirectory)) {
-    if (-not (Test-Path -LiteralPath $required -PathType Container)) {
-        throw "Required documentation directory is missing: $required"
-    }
+if (-not (Test-Path -LiteralPath $docsDirectory -PathType Container)) {
+    throw "Teaching directory is missing: $docsDirectory"
 }
-foreach ($required in @($hubPath, $stylesheetPath, (Join-Path $docsDirectory "README.md"))) {
+foreach ($required in @($hubPath, $stylesheetPath, $indexPath)) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
-        throw "Required documentation file is missing: $required"
+        throw "Required teaching file is missing: $required"
     }
 }
 
@@ -46,12 +44,12 @@ $requiredPages = [ordered]@{
     "glossary.html" = "Glossary"
 }
 foreach ($entry in $requiredPages.GetEnumerator()) {
-    if (-not (Test-Path -LiteralPath (Join-Path $learnDirectory $entry.Key) -PathType Leaf)) {
-        throw "Teaching archive is missing a required page: docs/learn/$($entry.Key) ($($entry.Value))"
+    if (-not (Test-Path -LiteralPath (Join-Path $docsDirectory $entry.Key) -PathType Leaf)) {
+        throw "Teaching archive is missing a required page: docs/$($entry.Key) ($($entry.Value))"
     }
 }
 
-$pageFiles = @(Get-ChildItem -LiteralPath $learnDirectory -File -Filter "*.html" | Sort-Object Name)
+$pageFiles = @(Get-ChildItem -LiteralPath $docsDirectory -File -Filter "*.html" | Sort-Object Name)
 $pages = @{}
 foreach ($pageFile in $pageFiles) {
     $pages[$pageFile.Name] = Read-Utf8Text $pageFile.FullName
@@ -76,26 +74,25 @@ foreach ($pageName in $pages.Keys) {
     $pageHtml = $pages[$pageName]
     foreach ($entry in $structurePatterns.GetEnumerator()) {
         if ($pageHtml -notmatch $entry.Value) {
-            throw "docs/learn/${pageName}: missing required structure ($($entry.Key))."
+            throw "docs/${pageName}: missing required structure ($($entry.Key))."
         }
     }
     if ($pageHtml -match '(?i)\b(TODO|TBD|FIXME)\b') {
-        throw "docs/learn/${pageName}: contains an unfinished placeholder."
+        throw "docs/${pageName}: contains an unfinished placeholder."
     }
     if ($pageHtml -match '(?i)technicalVersion' -or $pageHtml -match '(?<![0-9.])1\.0\.0(?![0-9.])') {
-        throw "docs/learn/${pageName}: must expose only the two-component product version."
+        throw "docs/${pageName}: must expose only the two-component product version."
     }
     if ($pageHtml -match '(?i)<(?:script|link|img)\b[^>]*(?:src|href)="https?://') {
-        throw "docs/learn/${pageName}: must not depend on remote scripts, stylesheets, or images."
+        throw "docs/${pageName}: must not depend on remote scripts, stylesheets, or images."
     }
     if ($pageHtml -match '(?i)<style\b') {
-        throw "docs/learn/${pageName}: styles belong in the shared assets/learn.css, not inline."
+        throw "docs/${pageName}: styles belong in the shared assets/learn.css, not inline."
     }
 }
 
 # ---------------------------------------------------------------------------
-# Anchors and links, per page. Fragments resolve against the page that owns
-# them; relative paths resolve against docs/learn/.
+# Anchors and links, per page.
 # ---------------------------------------------------------------------------
 $totalAnchors = 0
 $totalLinks = 0
@@ -104,12 +101,11 @@ foreach ($pageName in $pages.Keys) {
     $pageHtml = $pages[$pageName]
 
     $ids = @(
-        [regex]::Matches($pageHtml, '\sid="([^"]+)"') |
-            ForEach-Object { $_.Groups[1].Value }
+        [regex]::Matches($pageHtml, '\sid="([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
     )
     $duplicateIds = @($ids | Group-Object | Where-Object Count -gt 1)
     if ($duplicateIds.Count -gt 0) {
-        throw "docs/learn/${pageName}: duplicate ids: $($duplicateIds.Name -join ', ')"
+        throw "docs/${pageName}: duplicate ids: $($duplicateIds.Name -join ', ')"
     }
     $idSet = @{}
     foreach ($id in $ids) { $idSet[$id] = $true }
@@ -120,15 +116,14 @@ foreach ($pageName in $pages.Keys) {
     }
 
     $hrefs = @(
-        [regex]::Matches($pageHtml, '(?i)<a\b[^>]*\shref="([^"]+)"') |
-            ForEach-Object { $_.Groups[1].Value }
+        [regex]::Matches($pageHtml, '(?i)<a\b[^>]*\shref="([^"]+)"') | ForEach-Object { $_.Groups[1].Value }
     )
     $totalLinks += $hrefs.Count
     foreach ($href in $hrefs) {
         if ($href.StartsWith("#")) {
             $fragment = $href.Substring(1)
             if (-not [string]::IsNullOrWhiteSpace($fragment) -and -not $idSet.ContainsKey($fragment)) {
-                throw "docs/learn/${pageName}: links to a missing anchor: $href"
+                throw "docs/${pageName}: links to a missing anchor: $href"
             }
             continue
         }
@@ -137,37 +132,35 @@ foreach ($pageName in $pages.Keys) {
         $localPath = ($href -split '[?#]', 2)[0]
         if ([string]::IsNullOrWhiteSpace($localPath)) { continue }
         $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
-        $resolvedPath = [IO.Path]::GetFullPath((Join-Path $learnDirectory $decodedPath))
+        $resolvedPath = [IO.Path]::GetFullPath((Join-Path $docsDirectory $decodedPath))
         if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "docs/learn/${pageName}: link escapes the repository: $href"
+            throw "docs/${pageName}: link escapes the repository: $href"
         }
         if (-not (Test-Path -LiteralPath $resolvedPath)) {
-            throw "docs/learn/${pageName}: links to a missing local path: $href"
+            throw "docs/${pageName}: links to a missing local path: $href"
         }
 
-        # A cross-page fragment must exist on the page it points at.
         $anchorPart = if ($href.Contains('#')) { ($href -split '#', 2)[1] } else { '' }
         if (-not [string]::IsNullOrWhiteSpace($anchorPart)) {
             $targetName = [IO.Path]::GetFileName($resolvedPath)
             if ($pages.ContainsKey($targetName) -and $pages[$targetName] -notmatch [regex]::Escape(" id=""$anchorPart""")) {
-                throw "docs/learn/${pageName}: links to a missing anchor on another page: $href"
+                throw "docs/${pageName}: links to a missing anchor on another page: $href"
             }
         }
     }
 }
 
 # ---------------------------------------------------------------------------
-# Navigation: every page reachable from the hub, and every page carries the
-# shared sidebar so a reader is never stranded.
+# Navigation: every page reachable from the hub and present in every sidebar.
 # ---------------------------------------------------------------------------
 $hubHtml = $pages["index.html"]
 foreach ($pageName in $pages.Keys) {
     if ($pageName -eq "index.html") { continue }
     if ($hubHtml -notmatch [regex]::Escape("href=""./$pageName""")) {
-        throw "docs/learn/${pageName} is not reachable from the hub (docs/learn/index.html)."
+        throw "docs/${pageName} is not reachable from the hub (docs/index.html)."
     }
     if ($pages[$pageName] -notmatch [regex]::Escape('href="./index.html"')) {
-        throw "docs/learn/${pageName}: does not link back to the hub."
+        throw "docs/${pageName}: does not link back to the hub."
     }
 }
 foreach ($pageName in $pages.Keys) {
@@ -178,7 +171,7 @@ foreach ($pageName in $pages.Keys) {
     )
     $missingFromSidebar = @($requiredPages.Keys | Where-Object { $sidebarPages -notcontains $_ })
     if ($missingFromSidebar.Count -gt 0) {
-        throw "docs/learn/${pageName}: sidebar omits $($missingFromSidebar -join ', ')"
+        throw "docs/${pageName}: sidebar omits $($missingFromSidebar -join ', ')"
     }
 }
 
@@ -220,18 +213,17 @@ foreach ($entry in $requiredTopics.GetEnumerator()) {
     }
 }
 
-# Sibling documentation must stay discoverable so docs/ keeps one entry point.
-$siblingDocuments = @("../README.md", "../game/README.md", "../design/README.md")
-foreach ($document in $siblingDocuments) {
-    if ($combinedHtml -notmatch [regex]::Escape("href=""$document""")) {
-        throw "Teaching archive must link to sibling documentation: docs/learn/$document"
+# The engineering loop stays reachable from the teaching archive, and the
+# teaching index stays reachable from the pages.
+$requiredOutboundLinks = @("./README.md", "../loop/README.md", "../loop/product/README.md")
+foreach ($link in $requiredOutboundLinks) {
+    if ($combinedHtml -notmatch [regex]::Escape("href=""$link""")) {
+        throw "Teaching archive must link to: $link"
     }
 }
 
 # ---------------------------------------------------------------------------
-# The archive claims to map every module. Enumerate the real source tree and
-# require each file's repository-relative path to appear, so a new module
-# cannot be added without a line explaining what it does.
+# The archive claims to map every module. Enumerate the real source tree.
 # ---------------------------------------------------------------------------
 $sourceRoots = @(
     "apps\desktop\src"
@@ -270,7 +262,8 @@ if ($undocumentedModules.Count -gt 0) {
 }
 
 # ---------------------------------------------------------------------------
-# Markdown under docs/ is part of the same directory contract.
+# The teaching index is the GitHub-facing entry point; its links must resolve
+# and it must list every page.
 # ---------------------------------------------------------------------------
 $markdownFiles = @(Get-ChildItem -LiteralPath $docsDirectory -Recurse -File -Filter "*.md")
 $markdownLinkCount = 0
@@ -278,8 +271,7 @@ foreach ($markdownFile in $markdownFiles) {
     $markdown = Read-Utf8Text $markdownFile.FullName
     $relativeSource = $markdownFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
     $targets = @(
-        [regex]::Matches($markdown, '\]\(([^)\s]+)(?:\s+"[^"]*")?\)') |
-            ForEach-Object { $_.Groups[1].Value }
+        [regex]::Matches($markdown, '\]\(([^)\s]+)(?:\s+"[^"]*")?\)') | ForEach-Object { $_.Groups[1].Value }
     )
     foreach ($target in $targets) {
         if ($target.StartsWith("#") -or $target -match '^(?i)(https?://|mailto:)') { continue }
@@ -289,23 +281,39 @@ foreach ($markdownFile in $markdownFiles) {
         $decodedPath = [Uri]::UnescapeDataString($localPath).Replace('/', [IO.Path]::DirectorySeparatorChar)
         $resolvedPath = [IO.Path]::GetFullPath((Join-Path $markdownFile.DirectoryName $decodedPath))
         if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
-            throw "Documentation link escapes the repository: $relativeSource -> $target"
+            throw "Teaching index link escapes the repository: $relativeSource -> $target"
         }
         if (-not (Test-Path -LiteralPath $resolvedPath)) {
-            throw "Documentation links to a missing local path: $relativeSource -> $target"
+            throw "Teaching index links to a missing local path: $relativeSource -> $target"
         }
     }
 }
+$indexMarkdown = Read-Utf8Text $indexPath
+foreach ($pageName in $requiredPages.Keys) {
+    if ($indexMarkdown -notmatch [regex]::Escape("($pageName)")) {
+        throw "docs/README.md does not list the page: $pageName"
+    }
+}
 
-# docs/ must stay teaching-plus-product only: no stray binaries or loose files
-# at the documentation root beyond the index.
+# ---------------------------------------------------------------------------
+# docs/ holds teaching material only: HTML pages, the index, and shared assets.
+# Engineering records belong in loop/.
+# ---------------------------------------------------------------------------
 $strayRootFiles = @(
     Get-ChildItem -LiteralPath $docsDirectory -File |
-        Where-Object { $_.Name -ne "README.md" } |
+        Where-Object { $_.Name -ne "README.md" -and $_.Extension -ne ".html" } |
         ForEach-Object { $_.Name }
 )
 if ($strayRootFiles.Count -gt 0) {
-    throw "docs/ root must contain only README.md; found: $($strayRootFiles -join ', ')"
+    throw "docs/ must contain only README.md and teaching pages; found: $($strayRootFiles -join ', ')"
+}
+$strayDirectories = @(
+    Get-ChildItem -LiteralPath $docsDirectory -Directory |
+        Where-Object { $_.Name -ne "assets" } |
+        ForEach-Object { $_.Name }
+)
+if ($strayDirectories.Count -gt 0) {
+    throw "docs/ must not hold non-teaching subdirectories (engineering records belong in loop/); found: $($strayDirectories -join ', ')"
 }
 
 $textLength = (($combinedHtml -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim().Length
@@ -313,15 +321,14 @@ if ($pages.Count -lt 15 -or $allSectionIds.Count -lt 20 -or $textLength -lt 3000
     throw "Teaching archive is not comprehensive enough (pages=$($pages.Count), sections=$($allSectionIds.Count), characters=$textLength)."
 }
 
-Write-Host "Documentation verified:" -ForegroundColor Green
+Write-Host "Teaching archive verified:" -ForegroundColor Green
 [pscustomobject]@{
-    LearnDirectory = $learnDirectory
+    Directory = $docsDirectory
     Pages = $pages.Count
     Sections = $allSectionIds.Count
     TextCharacters = $textLength
     Anchors = $totalAnchors
     Links = $totalLinks
     DocumentedModules = $documentedModuleCount
-    MarkdownFiles = $markdownFiles.Count
-    MarkdownLinks = $markdownLinkCount
+    IndexLinks = $markdownLinkCount
 } | Format-List

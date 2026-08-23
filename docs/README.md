@@ -1,61 +1,49 @@
-# Dream Builder 文档目录
+# 《智慧树之森》全栈教学档案
 
-《智慧树之森》的全部文档都在这里。本文件只是索引：它负责把你送到正确的位置，
-不重复任何教学或产品内容。
+本目录只放**教学内容**：本项目实际用到的每一项技术框架、每一个相关概念，以及它们在源码中的落点。
+全部以 HTML 呈现，共十五页，共享一份 [`assets/learn.css`](assets/learn.css)。
 
-## 三个子目录，各自负责一件事
+> GitHub 不渲染 HTML，所以在网页上浏览仓库时看到的是这一页。
+> 要真正阅读档案，克隆仓库后用浏览器打开 [`docs/index.html`](index.html)，
+> 或直接以 `file://` 打开任意一页——每一页都能独立打开、搜索和打印，且无任何远程依赖。
 
-| 位置 | 回答什么问题 | 什么时候看 |
+工程记录（产品口径、进展、验收证据、历史设计）不在本目录，在 [`loop/`](../loop/README.md)。
+
+## 阅读顺序
+
+| # | 页面 | 内容 |
 |---|---|---|
-| [`learn/`](learn/index.html) | 技术为什么这样组织？某个概念的代码在哪里？ | 学习这个项目、或改动前想弄清边界 |
-| [`game/`](game/README.md) | 产品要做什么？验收到了哪一步？ | 决定做什么、判断能不能宣称完成 |
-| [`design/`](design/README.md) | 早期是怎么设想的？ | 只在追溯历史演进时 |
+| — | [`index.html`](index.html) | 总入口：阅读方式、专题导航与七段学习路线 |
+| 01 | [`overview.html`](overview.html) | 项目现状、总体架构、单仓工程与运行全链路 |
+| 02 | [`frontend.html`](frontend.html) | 严格 TypeScript、React 19 分层、状态与存档 |
+| 03 | [`graphics.html`](graphics.html) | Three.js、react-three-fiber、着色器与程序化音频 |
+| 04 | [`accessibility.html`](accessibility.html) | 无障碍设置契约、键鼠/手柄事件模型与焦点管理 |
+| 05 | [`performance.html`](performance.html) | 有界指标记录器与可复核的性能证据链 |
+| 06 | [`ipc.html`](ipc.html) | Rust ⇄ 前端 IPC 契约与 Web Worker 边界 |
+| 07 | [`rust.html`](rust.html) | 领域模型、trait 接缝、错误处理、持久化与确定性生成 |
+| 08 | [`tauri.html`](tauri.html) | Tauri 2 外壳、插件、路径基准与 WebView2 Evergreen 策略 |
+| 09 | [`security.html`](security.html) | Capability/ACL、CSP、边界校验与依赖供应链 |
+| 10 | [`build.html`](build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源与两段式版本 |
+| 11 | [`quality.html`](quality.html) | 九阶段质量门禁与持续集成 |
+| 12 | [`release.html`](release.html) | Windows 打包、源码指纹、签名与安装卸载合同 |
+| 13 | [`code-map.html`](code-map.html) | 覆盖每一个源码模块的完整索引 |
+| 14 | [`glossary.html`](glossary.html) | 跨栈术语速查 |
 
-## 教学档案 · [`learn/`](learn/index.html)
+## 覆盖的技术与概念
 
-本项目涉及的全部技术框架与概念，按专题拆成十五页 HTML。
-GitHub 不渲染 HTML，因此需要克隆仓库后在浏览器中打开 `docs/learn/index.html`，
-或用 `file://` 直接打开任意一页——每一页都能独立打开、搜索和打印。
+- **桌面外壳**：Tauri 2、Wry、Windows WebView2 Evergreen、NSIS、单实例、Mica、托盘与菜单
+- **前端**：TypeScript 严格模式、React 19、Hooks 职责边界、错误边界、Zustand、标准装饰器
+- **3D 与音频**：Three.js、react-three-fiber、drei、postprocessing、实例化、Fresnel/GLSL、Web Audio
+- **跨边界**：Tauri IPC 命令与事件、Zod 运行时契约、serde wire 格式、Web Worker 协议
+- **Rust**：所有权与借用、newtype 不变量、trait 与泛型接缝、`thiserror`、`Arc<Mutex<T>>`、tokio、确定性 RNG
+- **无障碍**：设置契约、`prefers-reduced-motion`、焦点陷阱、Gamepad 轮询与边沿检测
+- **工程**：pnpm workspace、Cargo workspace、Vite/esbuild/Rollup、`build.rs`、Biome、Vitest、GitHub Actions
+- **交付**：两段式产品版本、源码树指纹、SHA-256 清单、Authenticode、安装与卸载合同
 
-| 页面 | 内容 |
-|---|---|
-| [`index.html`](learn/index.html) | 总入口：阅读方式、专题导航与七段学习路线 |
-| [`overview.html`](learn/overview.html) | 项目现状、总体架构、单仓工程与运行全链路 |
-| [`frontend.html`](learn/frontend.html) | 严格 TypeScript、React 19 分层、状态与存档 |
-| [`graphics.html`](learn/graphics.html) | Three.js、react-three-fiber、着色器与程序化音频 |
-| [`accessibility.html`](learn/accessibility.html) | 无障碍设置契约、键鼠/手柄事件模型与焦点管理 |
-| [`performance.html`](learn/performance.html) | 有界指标记录器与可复核的性能证据链 |
-| [`ipc.html`](learn/ipc.html) | Rust ⇄ 前端 IPC 契约与 Web Worker 边界 |
-| [`rust.html`](learn/rust.html) | 领域模型、trait 接缝、错误处理、持久化与确定性生成 |
-| [`tauri.html`](learn/tauri.html) | Tauri 2 外壳、插件、路径基准与 WebView2 Evergreen 策略 |
-| [`security.html`](learn/security.html) | Capability/ACL、CSP、边界校验与依赖供应链 |
-| [`build.html`](learn/build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源与两段式版本 |
-| [`quality.html`](learn/quality.html) | 九阶段质量门禁与持续集成 |
-| [`release.html`](learn/release.html) | Windows 打包、源码指纹、签名与安装卸载合同 |
-| [`code-map.html`](learn/code-map.html) | 覆盖每一个源码模块的完整索引 |
-| [`glossary.html`](learn/glossary.html) | 跨栈术语速查 |
+## 档案的自我约束
 
-## 产品真相源 · [`game/`](game/README.md)
-
-| 文件 | 内容 |
-|---|---|
-| [`game/README.md`](game/README.md) | 愿景、当前全貌、产品支柱、核心循环、里程碑与完成定义 |
-| [`game/release-1.0.md`](game/release-1.0.md) | 成品范围、不可妥协的发布条件与模块验收矩阵 |
-| [`game/vertical-slice.md`](game/vertical-slice.md) | 十分钟体验脚本与 M1/M2 系统合同 |
-| [`game/m2-playtest.md`](game/m2-playtest.md) | 五名首次接触玩家的无提示观察协议 |
-| [`game/release-runbook.md`](game/release-runbook.md) | Windows 构建、签名、安装、升级、卸载与回滚手册 |
-| [`game/evidence/`](game/evidence/README.md) | 归档的原始测量与生命周期证据，按记录时间不可改写 |
-
-## 历史资料 · [`design/`](design/README.md)
-
-2026-04 的早期设计札记，只用于追溯产品演进，不表达当前口径。
-
-## 目录合同
-
-- 教学内容只放在 `learn/`，其他位置不另起一份说明。
-- `game/` 描述产品意图与验收状态；未通过的人工门槛必须保持可见，不能被自动化结果掩盖。
-- `evidence/` 只追加，不改写；旧证据中的历史数值保持原样。
-- `design/` 只读。
-
-`pnpm docs:verify` 会检查教学档案每一页的结构、页面可达性、锚点、本地链接、源码模块覆盖，
-以及本目录中每个 Markdown 文件的相对链接是否仍然有效。
+- **自包含**：无远程脚本、字体或样式，离线可读、可打印、可随仓库归档。
+- **可验证**：`pnpm docs:verify` 检查每页结构、页面可达性、锚点、本地链接，
+  并枚举真实源码树，确认每一个源码模块都在 [`code-map.html`](code-map.html) 中有说明。
+- **描述现状**：所有结论描述当前仓库的实际实现，不是理想化示例；
+  未通过的人工门槛在档案中保持可见，不被自动化结果掩盖。

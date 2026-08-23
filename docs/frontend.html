@@ -94,7 +94,7 @@
     <article class="card">
       <h3>标准装饰器</h3>
       <p>
-        <a href="../../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的
+        <a href="../apps/desktop/src/ipc/instrument.ts">instrument.ts</a> 的
         <code>@logged</code> 和 <code>@measure</code> 使用 TC39 标准方法装饰器，为 IPC 加日志与计时，
         不依赖旧式 <code>experimentalDecorators</code>。
       </p>
@@ -114,7 +114,7 @@
     <li><code>useRef</code> 保存每帧读取的魔法场、场景命令 API、玩家位置与最新回调，更新它们不会触发 React 树重绘。</li>
     <li><code>useMemo</code> 缓存昂贵且纯的几何/实例矩阵；依赖必须真实完整，不能拿空数组“冻结”错误值。</li>
     <li><code>useCallback</code> 只在回调身份会影响订阅或子组件时使用；不把它当作无条件性能装饰。</li>
-    <li>StrictMode 会故意重复挂载 effect。<a href="../../apps/desktop/src/ipc/asyncSubscriptionScope.ts">asyncSubscriptionScope.ts</a> 专门处理“监听 promise 尚未返回，组件已经卸载”的竞态。</li>
+    <li>StrictMode 会故意重复挂载 effect。<a href="../apps/desktop/src/ipc/asyncSubscriptionScope.ts">asyncSubscriptionScope.ts</a> 专门处理“监听 promise 尚未返回，组件已经卸载”的竞态。</li>
   </ul>
   <div class="callout">
     <strong>错误边界的边界：</strong>React Error Boundary 捕获渲染和生命周期错误，但不会自动捕获事件处理器、
@@ -149,7 +149,7 @@
   success: cleansing → restored + treeStage 1 + gateUnlocked
   cancel/failure: cleansing → ready（不扣光种）</code></pre>
   <p>
-    <a href="../../apps/desktop/src/game/gameProgress.ts">gameProgress.ts</a> 用字面量联合、
+    <a href="../apps/desktop/src/game/gameProgress.ts">gameProgress.ts</a> 用字面量联合、
     <code>Record&lt;LightSeedId, LightSeedState&gt;</code> 和纯 reducer 表达这些规则。
     解析旧存档时重新计算 <code>collectedCount</code>，并验证树阶段和门状态必须与净化状态一致；
     这能拒绝“字段看似合法，但组合互相矛盾”的快照。
@@ -164,10 +164,10 @@
   </ol>
   <h3>运动与碰撞</h3>
   <p>
-    <a href="../../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 把 WASD、方向键和手柄轴统一成
-    归一化意图；<a href="../../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 将它转换到相机水平坐标系，
+    <a href="../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 把 WASD、方向键和手柄轴统一成
+    归一化意图；<a href="../apps/desktop/src/game/playerMotion.ts">playerMotion.ts</a> 将它转换到相机水平坐标系，
     按加速/减速和最大步长推进。世界边界、圆形障碍与矩形障碍来自
-    <a href="../../apps/desktop/src/game/forestLayout.ts">forestLayout.ts</a>，同一份布局同时被碰撞和呈现消费，
+    <a href="../apps/desktop/src/game/forestLayout.ts">forestLayout.ts</a>，同一份布局同时被碰撞和呈现消费，
     避免“看见的墙”和“撞到的墙”漂移。
   </p>
   <div class="grid">
@@ -192,8 +192,8 @@
     <footer class="footer">
       <strong>Dream Builder ·《智慧树之森》教学档案</strong><br />
       本页无远程脚本、字体或样式依赖，可离线打开、搜索、打印和随仓库归档。
-      产品口径见 <a href="../game/README.md">docs/game</a>，目录索引见
-      <a href="../README.md">docs/README.md</a>。
+      工程口径见 <a href="../loop/product/README.md">loop/product</a>，教学索引见
+      <a href="./README.md">docs/README.md</a>。
     </footer>
   </body>
 </html>

@@ -8,10 +8,11 @@
 性能报告和当前用户安装—首次启动—卸载闭环已有归档；五名首次接触玩家观察、实体手柄完整听测、
 干净账户覆盖升级和受信任代码签名仍是正式发布前的外部门槛。
 
-- [完整中文全栈教学档案](docs/learn/index.html)（十五页专题 HTML，克隆后用浏览器打开）
+- [完整中文全栈教学档案](docs/index.html)（十五页专题 HTML，克隆后用浏览器打开）
 - [文档目录索引](docs/README.md)
-- [游戏愿景、当前状态与里程碑](docs/game/README.md)
-- [Windows 交付与恢复手册](docs/game/release-runbook.md)
+- [工程循环记录与 AGENT 参考](loop/README.md)
+- [游戏愿景、当前状态与里程碑](loop/product/README.md)
+- [Windows 交付与恢复手册](loop/product/release-runbook.md)
 
 ## 技术栈
 
@@ -40,12 +41,14 @@ dream-builder/
 │   ├── ipc-contracts/     # Rust/前端边界的 Zod 运行时契约
 │   └── liquid-glass/      # 可复用玻璃主题组件
 ├── crates/dream-builder/  # Rust 领域、生成、状态、事件与 Tauri 外壳
-├── docs/
-│   ├── README.md          # 文档目录索引
-│   ├── learn/             # 唯一的中文教学档案：十五页专题 HTML
-│   ├── game/              # 当前产品方向、验收证据与交付手册
-│   └── design/            # 历史设计札记，仅供追溯
-├── scripts/               # 版本、安全、教学档案、依赖布局与发布验证
+├── docs/                  # 教学档案：十五页专题 HTML + assets/learn.css
+├── loop/                  # Loop Engineering 记录，供 AGENT 参考
+│   ├── concepts.md        # 循环纪律与硬规则
+│   ├── progress.md        # 进展记录：里程碑与未闭合门槛
+│   ├── product/           # 愿景、范围、验收矩阵、观察协议、交付手册
+│   ├── evidence/          # 不可改写的原始测量与生命周期证据
+│   └── history/           # 早期设计札记，只读
+├── scripts/               # 版本、安全、教学、工程记录、布局与发布验证
 └── version.json           # 唯一的两段式公开版本源
 ```
 
@@ -69,7 +72,7 @@ pnpm tauri dev    # 完整 Rust + Tauri + WebView2 桌面模式
 ```
 
 M2 主持人证据工作台使用 `http://127.0.0.1:1420/?tool=m2-evidence`。它不出现在玩家 HUD，
-只在本机汇总匿名五人观察与原生十分钟性能 JSON；协议见 [M2 无提示观察](docs/game/m2-playtest.md)。
+只在本机汇总匿名五人观察与原生十分钟性能 JSON；协议见 [M2 无提示观察](loop/product/m2-playtest.md)。
 
 ## 版本规则
 
@@ -91,9 +94,10 @@ cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo check --workspace --all-targets --locked
 ```
 
-`pnpm check` 依次验证版本/WebView2、桌面 CSP 与最小权限、教学 HTML、本地 pnpm 布局、
-归档 M2 性能证据、Biome、TypeScript、Vitest、Vite 生产构建和 bundle 预算。GitHub Actions
-在 Windows 上执行同一组前端与 Rust 门禁；可单独运行 `pnpm desktop:verify-security` 复核桌面边界。
+`pnpm check` 依次验证版本/WebView2、桌面 CSP 与最小权限、教学 HTML、工程循环记录、
+本地 pnpm 布局、归档 M2 性能证据、Biome、TypeScript、Vitest、Vite 生产构建和 bundle 预算。
+GitHub Actions 在 Windows 上执行同一组前端与 Rust 门禁；可单独运行
+`pnpm desktop:verify-security`、`pnpm docs:verify` 或 `pnpm loop:verify` 复核单条边界。
 
 ## Windows 构建与发布候选
 
@@ -110,4 +114,4 @@ Tauri 原始入口为 `target/release/dream-builder.exe`，NSIS 安装包位于
 
 未签名文件只能称为候选版。生产分发必须从干净提交运行 `pnpm release:build:signed`，使用
 当前用户证书库中的有效受信任代码签名证书和时间戳服务；详细回滚、升级、安装与卸载步骤见
-[交付手册](docs/game/release-runbook.md)。
+[交付手册](loop/product/release-runbook.md)。
