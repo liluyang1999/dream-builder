@@ -45,14 +45,26 @@ class ForestAudioEngine {
     if (!this.context) {
       const Context = window.AudioContext ?? (window as AudioContextWindow).webkitAudioContext;
       if (!Context) return false;
-      this.context = new Context();
-      this.createGraph(this.context);
+      try {
+        this.context = new Context();
+        this.createGraph(this.context);
+      } catch {
+        this.dispose();
+        return false;
+      }
     }
-    if (this.context.state === 'suspended') {
-      await this.context.resume();
+    const context = this.context;
+    if (context.state === 'suspended') {
+      try {
+        await context.resume();
+      } catch {
+        // Browser gesture restrictions are recoverable on the next interaction.
+        return false;
+      }
     }
+    if (context !== this.context) return false;
     this.applyMix();
-    return this.context.state === 'running';
+    return context.state === 'running';
   }
 
   setMix(mix: ForestAudioMix): void {
@@ -106,7 +118,9 @@ class ForestAudioEngine {
       }
     }
     this.ambientSources = [];
-    void this.context?.close();
+    void this.context?.close().catch(() => {
+      // The webview may already be closing its audio context during teardown.
+    });
     this.context = null;
     this.masterGain = null;
     this.musicGain = null;

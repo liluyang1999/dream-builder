@@ -17,7 +17,7 @@ interface DebugRendererInfo {
   UNMASKED_RENDERER_WEBGL: number;
 }
 
-export function PerformanceProbe() {
+export function PerformanceProbe({ renderDirectly }: { renderDirectly: boolean }) {
   const gl = useThree((state) => state.gl);
   const previousGameState = useRef<GameplayPerformanceSnapshot | null>(null);
 
@@ -38,7 +38,10 @@ export function PerformanceProbe() {
     gl.info.reset();
   }, -100);
 
-  useFrame((_state, delta) => {
+  useFrame((state, delta) => {
+    // A positive priority takes over R3F's automatic render loop. Without the
+    // quality-dependent composer, render explicitly before sampling this frame.
+    if (renderDirectly) gl.render(state.scene, state.camera);
     performanceCapture.observeFirstSceneFrame();
 
     if (performanceCapture.getSnapshot().status !== 'recording') {

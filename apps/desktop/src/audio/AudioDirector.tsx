@@ -43,6 +43,7 @@ export function AudioDirector() {
       active = false;
       window.removeEventListener('pointerdown', unlock);
       window.removeEventListener('keydown', unlock);
+      forestAudio.dispose();
     };
   }, []);
 

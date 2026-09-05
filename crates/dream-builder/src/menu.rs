@@ -14,11 +14,13 @@ use tauri::{AppHandle, Emitter, Manager, Runtime};
 /// Build the window menu bar.
 pub fn build_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     let regenerate = MenuItem::with_id(app, "regenerate", "随机重新生成", true, None::<&str>)?;
-    let reset_view = MenuItem::with_id(app, "reset_view", "重置视角", true, Some("R"))?;
-    let toggle_hud = MenuItem::with_id(app, "toggle_hud", "显示/隐藏面板", true, Some("H"))?;
-    let screenshot = MenuItem::with_id(app, "screenshot", "保存截图", true, Some("S"))?;
+    // Keyboard shortcuts belong to the webview, where focused fields and modal
+    // dialogs can suppress them. Native accelerators bypass those input guards.
+    let reset_view = MenuItem::with_id(app, "reset_view", "重置视角", true, None::<&str>)?;
+    let toggle_hud = MenuItem::with_id(app, "toggle_hud", "显示/隐藏面板", true, None::<&str>)?;
+    let screenshot = MenuItem::with_id(app, "screenshot", "保存截图", true, None::<&str>)?;
     let separator = PredefinedMenuItem::separator(app)?;
-    let quit = PredefinedMenuItem::quit(app, Some("退出"))?;
+    let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
     let file = Submenu::with_items(
         app,
         "智慧树",
@@ -39,9 +41,24 @@ pub fn build_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<Menu<R>> {
     Menu::with_items(app, &[&file, &help])
 }
 
-/// Forward a menu click to the frontend as a `menu:<id>` event.
+/// Request a guarded window close for quit; forward other frontend actions.
 pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, id: &str) {
-    // Predefined items (quit) are handled by the OS; only forward our own ids.
+    if id == "tray_show" {
+        focus_main_window(app);
+        return;
+    }
+    if id == "quit" {
+        // The same close request as the titlebar lets the frontend flush pending
+        // settings. Without a frontend close listener, Tauri closes normally.
+        if let Some(window) = app.get_webview_window("main") {
+            if let Err(error) = window.close() {
+                log::error!("无法请求关闭主窗口：{error}");
+            }
+        } else {
+            app.exit(0);
+        }
+        return;
+    }
     let forwarded = [
         "regenerate",
         "reset_view",
@@ -58,16 +75,14 @@ pub fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, id: &str) {
 pub fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "tray_show", "显示窗口", true, None::<&str>)?;
     let regenerate = MenuItem::with_id(app, "regenerate", "随机重新生成", true, None::<&str>)?;
-    let quit = PredefinedMenuItem::quit(app, Some("退出"))?;
+    let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &regenerate, &quit])?;
 
+    // Tray menu callbacks are global in Tauri, so the app-level handler owns
+    // both menus. Registering it again here would dispatch every action twice.
     let mut builder = TrayIconBuilder::new()
         .tooltip("Dream Builder Fantasy Tree")
-        .menu(&menu)
-        .on_menu_event(|app, event| match event.id.as_ref() {
-            "tray_show" => focus_main_window(app),
-            other => handle_menu_event(app, other),
-        });
+        .menu(&menu);
 
     if let Some(icon) = app.default_window_icon().cloned() {
         builder = builder.icon(icon);

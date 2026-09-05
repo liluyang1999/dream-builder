@@ -34,7 +34,6 @@ export function Hud({
   const [performanceOpen, setPerformanceOpen] = useState(false);
   const seed = useAppStore((state) => state.seed);
   const source = useAppStore((state) => state.source);
-  const warning = useAppStore((state) => state.warning);
   const selectedDetail = useAppStore((state) => state.selectedDetail);
   const helpOpen = useAppStore((state) => state.helpOpen);
   const setSeed = useAppStore((state) => state.setSeed);
@@ -66,8 +65,6 @@ export function Hud({
 
         <QuestPanel />
         <DetailsPanel detail={selectedDetail} />
-
-        {warning ? <div className="hud__error">{warning}</div> : null}
 
         <Toolbar
           onResetCamera={onResetCamera}

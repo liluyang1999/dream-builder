@@ -107,6 +107,18 @@
       <p>浏览器冒烟验证 WebGL/UI，Tauri 冒烟验证 WebView2、IPC、菜单、单实例、日志和退出，安装生命周期验证 Windows 集成。</p>
     </article>
   </div>
+  <h3>测试也要收拾自己的现场</h3>
+  <p>
+    <a href="../apps/desktop/src/tests/viteDevTransform.test.ts">开发变换测试</a>会创建一个 Vite 服务。
+    它使用独立的临时缓存，结束时先关闭服务，再在 <code>finally</code> 中删除缓存。
+    如果测试和正在运行的开发服务器共用缓存，一方更新依赖索引，另一方仍引用旧摘要，
+    浏览器就可能出现 <code>504 Outdated Optimize Dep</code>。这不是玩家存档问题，清理存档也不会解决它。
+  </p>
+  <p>
+    同样，浏览器回归使用独立会话；临时截图、下载和日志在确认结果后清理。正式测量与验收摘要归档到
+    <a href="../loop/evidence/README.md">loop/evidence</a>，保留可复核结论，而不是把调试垃圾当成证据。
+    清理只针对明确由本轮测试产生的路径，不递归清空项目依赖或玩家数据。
+  </p>
   <h3>测试设计纪律</h3>
   <ul>
     <li>测试外部行为和不变量，不锁死组件内部变量或随机实现细节。</li>

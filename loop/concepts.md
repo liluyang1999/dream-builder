@@ -98,7 +98,7 @@ AGENT 参与开发时最容易犯的错误不是写错代码，而是**把"看�
 
 | 概念 | 强制它的机制 |
 |---|---|
-| 自动化门禁 | `pnpm check` 九阶段 + `cargo fmt/test/clippy` |
+| 自动化门禁 | `pnpm check` 十阶段 + `cargo fmt/test/clippy` |
 | 版本单一真相源 | `pnpm version:verify` |
 | 最小权限与浏览器边界 | `pnpm desktop:verify-security` |
 | 教学覆盖完整性 | `pnpm docs:verify`（含全部源码模块覆盖） |

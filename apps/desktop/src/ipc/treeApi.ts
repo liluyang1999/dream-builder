@@ -23,6 +23,7 @@ import {
 import { invoke } from '@tauri-apps/api/core';
 import { type UnlistenFn, listen } from '@tauri-apps/api/event';
 import { createFallbackScene } from '../workers/fallbackClient';
+import { errorMessage } from './errorMessage';
 import { logged, measure } from './instrument';
 import { isTauriRuntime } from './runtime';
 
@@ -38,6 +39,7 @@ export interface SceneLoadResult {
 export const MAGIC_FIELD_EVENT = 'magic-field';
 
 class TreeApiClient {
+  private settingsWrite: Promise<void> = Promise.resolve();
   @measure
   @logged
   async loadScene(seed: number): Promise<SceneLoadResult> {
@@ -69,13 +71,18 @@ class TreeApiClient {
   }
 
   @logged
-  async loadDetail(id: string, scene: TreeScene): Promise<DetailInfo> {
-    if (isTauriRuntime()) {
+  async loadDetail(
+    id: string,
+    scene: TreeScene,
+    source: SceneSource = 'rust',
+  ): Promise<DetailInfo> {
+    if (source === 'rust' && isTauriRuntime()) {
       const raw = await invoke('detail_info', { seed: scene.seed, id });
       const parsed = parseWith(detailInfoSchema, raw);
       if (!parsed.ok) {
         throw new Error(`细节数据无效：${parsed.reason}`);
       }
+      if (parsed.value.id !== id) throw new Error('细节数据与当前选择不一致。');
       return parsed.value;
     }
     const detail = scene.details.find((item) => item.id === id);
@@ -97,7 +104,13 @@ class TreeApiClient {
 
   async saveSettings(settings: Settings): Promise<void> {
     if (!isTauriRuntime()) return;
-    await invoke('save_settings', { settings });
+    const write = this.settingsWrite
+      .catch(() => {})
+      .then(async () => {
+        await invoke('save_settings', { settings });
+      });
+    this.settingsWrite = write;
+    await write;
   }
 
   async exportScene(path: string, seed: number): Promise<void> {
@@ -121,7 +134,3 @@ class TreeApiClient {
 }
 
 export const treeApi = new TreeApiClient();
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}

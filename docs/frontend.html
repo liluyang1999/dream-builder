@@ -147,7 +147,8 @@
   three collected: node dormant → ready
   puzzle open: ready → cleansing
   success: cleansing → restored + treeStage 1 + gateUnlocked
-  cancel/failure: cleansing → ready（不扣光种）</code></pre>
+  wrong direction: cleansing → cleansing（本次节奏重置，不扣光种）
+  cancel: cleansing → ready（不扣光种）</code></pre>
   <p>
     <a href="../apps/desktop/src/game/gameProgress.ts">gameProgress.ts</a> 用字面量联合、
     <code>Record&lt;LightSeedId, LightSeedState&gt;</code> 和纯 reducer 表达这些规则。
@@ -159,9 +160,16 @@
     <li>优先读取 <code>dream-builder.progress.v2</code>，通过完整不变量校验才接受。</li>
     <li>主快照损坏时，把原始文本隔离到 corrupt key，再尝试最近一份有效 backup。</li>
     <li>只有主快照不存在时才迁移 v1；迁移补上检查点与记忆字段，不迁移中途 cleansing 状态。</li>
-    <li>正常写入前先把上一份有效主快照变成 backup；“开始新旅程”则原子替换并清理旧备份。</li>
+    <li>正常写入前先把上一份有效主快照变成 backup；“开始新旅程”则先写新主快照，再清理旧备份；这些 Storage 操作不是一个跨键事务。</li>
     <li>Storage 不可用或写失败时保持当前会话可玩，并通过 UI 提示，不能静默假装已经保存。</li>
   </ol>
+  <h3>保存成功也需要更新反馈</h3>
+  <p>
+    设置保存按队列执行，防止较早的写入晚于新设置完成。错误提示由 App 统一放在弹窗之上，
+    因此标题页、设置页和隐藏 HUD 时也能看到退出失败的原因。出现保存错误时显示中文提示；稍后重试成功，
+    只清除属于那次设置保存的旧提示，保留期间出现的其他错误。退出前再读取当前设置并等待保存完成，
+    避免玩家在防抖时间内关闭窗口丢失刚做的调整。截图和模型导出的 Promise 同样要在调用点处理失败。
+  </p>
   <h3>运动与碰撞</h3>
   <p>
     <a href="../apps/desktop/src/game/playerInput.ts">playerInput.ts</a> 把 WASD、方向键和手柄轴统一成

@@ -84,12 +84,18 @@
         <tr><th><code>detail_info</code></th><td>按场景对象 id 返回符文/水晶/叶簇说明</td><td>未知 id 是结构化错误</td></tr>
         <tr><th><code>magic_field</code></th><td>按 seed 与 tick 计算一次魔法脉冲</td><td>纯确定性返回</td></tr>
         <tr><th><code>get_settings</code></th><td>读取 Rust 管理的当前设置</td><td>前端无法读取时保留安全默认</td></tr>
-        <tr><th><code>save_settings</code></th><td>先校验范围，再更新内存并写 Tauri Store</td><td>持久化失败返回 AppError</td></tr>
+        <tr><th><code>save_settings</code></th><td>先校验范围，写 Tauri Store 成功后再提交内存</td><td>持久化失败返回 AppError</td></tr>
         <tr><th><code>seed_history</code></th><td>返回有界、去重、最近优先的 seed</td><td>无副作用读取</td></tr>
         <tr><th><code>export_scene</code></th><td>异步序列化并写入用户选择的 JSON 路径</td><td>序列化/文件错误结构化返回</td></tr>
       </tbody>
     </table>
   </div>
+  <h3>错误也有跨语言格式</h3>
+  <p>
+    Rust 的错误是 <code>{ code, message }</code>，不一定是 JavaScript 的 <code>Error</code>。
+    <a href="../apps/desktop/src/ipc/errorMessage.ts">errorMessage.ts</a> 提取其中的文字，避免界面只显示
+    <code>[object Object]</code>。错误代码用于稳定判断，中文消息用于帮助玩家恢复；两者各有职责。
+  </p>
   <h3>事件与请求的区别</h3>
   <p>
     命令是请求/响应，适合“给我一个场景”“保存这份设置”；事件是后端主动推送，适合周期魔法场和原生菜单。
@@ -126,7 +132,7 @@
     <article class="card">
       <h3><a href="../apps/desktop/src/workers/fallbackClient.ts">fallbackClient.ts</a></h3>
       <p>
-        主线程客户端：懒创建 Worker、用 <code>Map&lt;id, resolve&gt;</code> 登记在途请求，
+        主线程客户端：懒创建 Worker、用 Map 登记请求 id、seed、回调和超时定时器，
         收到消息后取出并兑现对应 Promise，对调用方只暴露
         <code>createFallbackScene(seed): Promise&lt;TreeScene&gt;</code>。
       </p>
@@ -136,7 +142,9 @@
     <li>Worker 不可用时（jsdom 单测或任何非 DOM 环境）直接同步调用 <a href="../apps/desktop/src/data/fallbackTree.ts">fallbackTree.ts</a>，返回同样的 Promise，因此调用方不需要分支。</li>
     <li>把生成放进 Worker 的收益是不阻塞主线程：几千个分段的几何计算发生在另一个线程，UI 仍然响应。</li>
     <li>代价是数据要跨线程克隆，所以 Worker 只用于低频的整场景生成，逐帧数据绝不走这条路。</li>
-    <li>Worker 返回的场景同样要过 <code>treeSceneSchema</code>。同进程不等于可信——回退生成器一样会写错。</li>
+    <li>Worker 返回的场景同样要过 <code>treeSceneSchema</code>，并核对 seed 属于当前请求。同进程不等于可信——回退生成器一样会写错。</li>
+    <li>创建、发送、解码或执行失败，以及超过五秒未响应时，终止这次 Worker 会话并用同一个确定性生成器完成等待中的请求；同时释放定时器和 Map 条目，避免界面一直停在加载中。</li>
+    <li>同时等待的请求最多十六个，超出时直接本地生成。这是限制资源占用，不是丢弃玩家操作；此回退场景较小，才适合故障时短暂占用主线程。</li>
   </ul>
         </section>
 

@@ -249,7 +249,7 @@ foreach ($sourceRoot in $sourceRoots) {
     )
     foreach ($sourceFile in $sourceFiles) {
         $relativePath = $sourceFile.FullName.Substring($repositoryRoot.Length + 1).Replace('\', '/')
-        if ($combinedHtml.Contains($relativePath)) {
+        if ($pages["code-map.html"].Contains($relativePath)) {
             $documentedModuleCount++
         }
         else {
@@ -258,7 +258,7 @@ foreach ($sourceRoot in $sourceRoots) {
     }
 }
 if ($undocumentedModules.Count -gt 0) {
-    throw "Teaching archive does not document these source modules: $($undocumentedModules -join ', ')"
+    throw "Source map docs/code-map.html does not document these source modules: $($undocumentedModules -join ', ')"
 }
 
 # ---------------------------------------------------------------------------

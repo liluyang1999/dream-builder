@@ -13,7 +13,7 @@ const SHORTCUTS: ReadonlyArray<[string, string]> = [
   ['F', '全屏'],
   ['P', '截图保存 PNG'],
   ['G', '随机重新生成'],
-  ['Esc', '取消选中'],
+  ['Esc', '取消选中 / 暂停旅程'],
   ['?', '显示 / 关闭本帮助'],
   ['左摇杆', '手柄移动；B / 扳机奔跑'],
   ['A', '手柄互动 / 确认'],
@@ -98,8 +98,10 @@ export function HelpOverlay({
           重新开始本章
         </GlassButton>
       )}
-      <GlassButton onClick={onOpenPerformance}>性能记录</GlassButton>
-      <GlassButton onClick={close}>关闭</GlassButton>
+      <div className="hud__help-actions">
+        <GlassButton onClick={onOpenPerformance}>性能记录</GlassButton>
+        <GlassButton onClick={close}>关闭</GlassButton>
+      </div>
     </GlassPanel>
   );
 }

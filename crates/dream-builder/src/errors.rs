@@ -15,19 +15,19 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum AppError {
     /// A detail id was requested that no interactive object owns.
-    #[error("no interactive tree detail exists for id '{0}'")]
+    #[error("找不到交互对象“{0}”的详情")]
     InvalidDetail(String),
 
     /// Settings crossed the native boundary with an unsupported value.
-    #[error("invalid settings: {0}")]
+    #[error("设置无效：{0}")]
     InvalidSettings(String),
 
     /// Reading or writing persisted settings failed.
-    #[error("settings persistence failed: {0}")]
+    #[error("无法保存设置：{0}")]
     Persistence(String),
 
     /// Writing an exported scene to disk failed.
-    #[error("scene export failed: {0}")]
+    #[error("无法导出场景：{0}")]
     Export(String),
 }
 

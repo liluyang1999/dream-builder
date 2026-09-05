@@ -21,7 +21,7 @@ body,
   overflow: hidden;
 }
 
-.app-root {
+.lg-root.app-root {
   width: 100%;
   height: 100%;
   --product-heading: #fffbed;
@@ -30,25 +30,46 @@ body,
   --product-accent-soft: #82ebbb;
   --product-purple-text: #b99cff;
   --product-success-text: #7df0bd;
+  --product-field-bg: rgba(3, 18, 14, 0.46);
+  --product-field-border: rgba(188, 240, 214, 0.2);
+  --product-warning-text: #ffd6ca;
+  --product-warning-bg: rgba(120, 30, 20, 0.4);
+  --product-warning-border: rgba(255, 120, 100, 0.35);
+  --lg-tint: rgba(8, 24, 22, 0.78);
+  --lg-tint-solid: rgba(10, 29, 24, 0.97);
 }
 
-.app-root[data-lg-theme="light"] {
+.lg-root.app-root[data-lg-theme="light"] {
   --product-heading: #17261f;
   --product-muted: rgba(18, 39, 30, 0.78);
   --product-highlight: #704900;
   --product-accent-soft: #146343;
   --product-purple-text: #5d3a91;
   --product-success-text: #176346;
+  --product-field-bg: rgba(241, 252, 245, 0.7);
+  --product-field-border: rgba(26, 69, 49, 0.25);
+  --product-warning-text: #78321f;
+  --product-warning-bg: rgba(172, 80, 40, 0.1);
+  --product-warning-border: rgba(140, 61, 29, 0.3);
+  --lg-tint: rgba(235, 247, 239, 0.9);
+  --lg-tint-solid: rgba(244, 250, 246, 0.98);
 }
 
 @media (prefers-color-scheme: light) {
-  .app-root[data-lg-theme="auto"] {
+  .lg-root.app-root[data-lg-theme="auto"] {
     --product-heading: #17261f;
     --product-muted: rgba(18, 39, 30, 0.78);
     --product-highlight: #704900;
     --product-accent-soft: #146343;
     --product-purple-text: #5d3a91;
     --product-success-text: #176346;
+    --product-field-bg: rgba(241, 252, 245, 0.7);
+    --product-field-border: rgba(26, 69, 49, 0.25);
+    --product-warning-text: #78321f;
+    --product-warning-bg: rgba(172, 80, 40, 0.1);
+    --product-warning-border: rgba(140, 61, 29, 0.3);
+    --lg-tint: rgba(235, 247, 239, 0.9);
+    --lg-tint-solid: rgba(244, 250, 246, 0.98);
   }
 }
 
@@ -57,7 +78,6 @@ body,
   width: 100%;
   height: 100%;
   min-width: 320px;
-  min-height: 420px;
   color: #f4efe2;
   background: radial-gradient(circle at 50% 32%, rgba(86, 132, 110, 0.32), transparent 46%),
     radial-gradient(circle at 80% 80%, rgba(157, 112, 255, 0.18), transparent 50%),
@@ -202,16 +222,19 @@ body,
 
 .hud-hidden .hud {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
 .hud__panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   max-height: calc(100vh - 48px);
   overflow: auto;
   pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--product-field-border) transparent;
 }
 
 .hud__header {
@@ -219,6 +242,8 @@ body,
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--product-field-border);
 }
 
 .hud__title {
@@ -226,6 +251,8 @@ body,
   font-size: clamp(1.2rem, 2vw, 1.8rem);
   font-weight: 700;
   letter-spacing: 0.01em;
+  color: var(--product-heading);
+  font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
 }
 
 .hud__eyebrow {
@@ -255,7 +282,12 @@ body,
 
 .hud__quest {
   display: grid;
-  gap: 8px;
+  gap: 12px;
+  background: var(--product-field-bg);
+  border-color: var(--product-field-border);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .hud__quest-header {
@@ -269,18 +301,20 @@ body,
 .hud__quest-header span {
   color: var(--product-highlight);
   font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .hud__quest-seeds {
   display: flex;
-  gap: 7px;
+  gap: 8px;
 }
 
 .hud__quest-seeds span {
-  width: 10px;
-  height: 10px;
+  flex: 1;
+  height: 5px;
   border: 1px solid color-mix(in srgb, var(--lg-fg) 38%, transparent);
-  border-radius: 50%;
+  border-radius: 999px;
   background: transparent;
   transition: background 240ms ease, box-shadow 240ms ease;
 }
@@ -316,6 +350,7 @@ body,
   border-radius: 10px;
   font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.55;
 }
 
 .hud__detail p {
@@ -351,19 +386,30 @@ body,
   opacity: 0.66;
 }
 
-.hud__error {
-  padding: 8px 10px;
+.app-warning {
+  position: absolute;
+  z-index: 30;
+  right: 18px;
+  bottom: 18px;
+  width: min(560px, calc(100% - 36px));
+  max-height: min(30dvh, 180px);
+  padding: 12px 16px;
+  overflow: auto;
+  overscroll-behavior: contain;
   border-radius: 12px;
-  color: #ffd6ca;
-  background: rgba(120, 30, 20, 0.4);
-  border: 1px solid rgba(255, 120, 100, 0.35);
+  color: var(--product-warning-text);
+  background: linear-gradient(var(--product-warning-bg), var(--product-warning-bg)),
+    var(--lg-tint-solid);
+  border: 1px solid var(--product-warning-border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
   font-size: 0.82rem;
-  line-height: 1.45;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 .hud__seed {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
 }
@@ -378,11 +424,11 @@ body,
 .hud__seed-input {
   flex: 1 1 auto;
   min-width: 0;
-  height: 32px;
+  height: 38px;
   padding: 0 10px;
   color: inherit;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: var(--product-field-bg);
+  border: 1px solid var(--product-field-border);
   border-radius: 12px;
   outline: none;
   font: inherit;
@@ -390,7 +436,17 @@ body,
 }
 
 .hud__seed-input:focus {
-  border-color: rgba(247, 199, 107, 0.8);
+  border-color: var(--product-highlight);
+  outline: 2px solid var(--product-highlight);
+  outline-offset: 2px;
+}
+
+.hud__seed-error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--product-highlight);
+  font-size: 0.76rem;
+  line-height: 1.5;
 }
 
 .hud__actions {
@@ -437,12 +493,20 @@ body,
   position: absolute;
   top: 0;
   left: calc(100% + 14px);
-  width: 240px;
+  width: min(340px, calc(100vw - 422px));
   max-height: calc(100vh - 48px);
   overflow: auto;
   pointer-events: auto;
   font-size: 0.84rem;
   line-height: 1.5;
+  background: var(--lg-tint-solid);
+}
+
+.hud__help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .hud__help strong {
@@ -458,10 +522,11 @@ body,
 }
 
 .hud__help li {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 4.4rem minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 9px;
   color: var(--lg-fg);
   opacity: 0.84;
 }
@@ -498,6 +563,7 @@ body,
   max-height: calc(100vh - 48px);
   overflow: auto;
   pointer-events: auto;
+  background: var(--lg-tint-solid);
 }
 
 .performance-panel__header {
@@ -674,7 +740,7 @@ kbd {
     rgba(7, 9, 20, 0.68);
 }
 
-.memory-overlay__card {
+.memory-overlay > .memory-overlay__card {
   width: min(520px, calc(100vw - 48px));
   padding: 26px;
 }
@@ -719,7 +785,7 @@ kbd {
     rgba(7, 9, 20, 0.72);
 }
 
-.purification-overlay__card {
+.purification-overlay > .purification-overlay__card {
   width: min(520px, calc(100vw - 48px));
   padding: 26px;
   text-align: center;
@@ -818,15 +884,10 @@ kbd {
   .hud {
     top: 14px;
     left: 14px;
-    width: calc(100vw - 28px);
+    width: min(360px, calc(100vw - 28px));
   }
 
-  .hud > .hud__help {
-    position: static;
-    width: auto;
-    margin-top: 10px;
-  }
-
+  .hud > .hud__help,
   .hud > .performance-panel {
     position: fixed;
     z-index: 1;
@@ -842,6 +903,7 @@ kbd {
 
 @media (prefers-reduced-motion: reduce) {
   .hud,
+  .hud__quest-seeds span,
   .hud__meter span {
     transition: none;
   }
@@ -849,11 +911,12 @@ kbd {
 
 /* Product shell ----------------------------------------------------------- */
 
-.app-root--large-text {
+/* UI sizes use rem, so the accessibility setting must reach the root unit. */
+html:has(.app-root--large-text) {
   font-size: 112.5%;
 }
 
-.app-root--high-contrast {
+.lg-root.app-root--high-contrast {
   --product-muted: rgba(255, 255, 255, 0.94);
 }
 
@@ -873,6 +936,12 @@ kbd {
   border-color: rgba(255, 255, 255, 0.52);
 }
 
+.app-root--high-contrast .lg-surface {
+  background: var(--lg-tint-solid);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .app-root[data-lg-theme="light"].app-root--high-contrast .lg-panel,
 .app-root[data-lg-theme="light"].app-root--high-contrast .lg-card,
 .app-root[data-lg-theme="light"].app-root--high-contrast .lg-button {
@@ -889,6 +958,9 @@ kbd {
 
 .app-root--high-contrast .hud__line,
 .app-root--high-contrast .hud__quest p,
+.app-root--high-contrast .hud__quest-meta,
+.app-root--high-contrast .hud__energy-label,
+.app-root--high-contrast .hud__runtime,
 .app-root--high-contrast .settings-toggle small,
 .app-root--high-contrast .game-menu__lead,
 .app-root--high-contrast .game-menu__footer,
@@ -920,10 +992,50 @@ kbd {
   backdrop-filter: blur(8px);
 }
 
-.game-menu__panel {
+.game-menu > .game-menu__panel {
   width: min(430px, calc(100vw - 48px));
   padding: clamp(28px, 5vw, 46px);
   text-align: center;
+}
+
+.game-menu > .game-menu__panel--title {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 1fr);
+  align-items: center;
+  gap: 38px;
+  width: min(820px, calc(100vw - 48px));
+  padding: clamp(28px, 5vw, 52px);
+  text-align: left;
+}
+
+.game-menu__panel--title .game-menu__mark {
+  margin-left: 0;
+}
+
+.game-menu__panel--title .game-menu__navigation {
+  padding-left: 30px;
+  border-left: 1px solid var(--product-field-border);
+}
+
+.game-menu__chapter {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--product-highlight);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+}
+
+.game-menu__journey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  color: var(--product-accent-soft);
+  font-size: 0.72rem;
+}
+
+.game-menu__journey span::before {
+  margin-right: 6px;
+  content: "✧";
 }
 
 .game-menu__panel--confirm {
@@ -1002,7 +1114,15 @@ kbd {
 }
 
 .game-menu__actions .lg-button {
-  min-height: 44px;
+  min-height: 46px;
+  font-size: 0.88rem;
+}
+
+.game-menu__actions .lg-button--primary {
+  min-height: 52px;
+  margin-bottom: 4px;
+  font-size: 1rem;
+  box-shadow: 0 5px 22px rgba(247, 199, 107, 0.12);
 }
 
 .game-menu__footer {
@@ -1012,13 +1132,14 @@ kbd {
   opacity: 0.68;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .settings-overlay {
   place-content: stretch center;
 }
 
-.settings-overlay__panel {
+.settings-overlay > .settings-overlay__panel {
   width: min(780px, calc(100vw - 48px));
   max-height: calc(100vh - 48px);
   padding: clamp(22px, 4vw, 34px);
@@ -1063,9 +1184,9 @@ kbd {
   gap: 8px;
   min-width: 0;
   padding: 14px;
-  color: #effff7;
-  background: rgba(3, 16, 13, 0.46);
-  border: 1px solid rgba(188, 240, 214, 0.15);
+  color: var(--lg-fg);
+  background: var(--product-field-bg);
+  border: 1px solid var(--product-field-border);
   border-radius: 14px;
   font-size: 0.8rem;
 }
@@ -1078,7 +1199,7 @@ kbd {
 }
 
 .settings-field output {
-  color: #82ebbb;
+  color: var(--product-accent-soft);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1086,10 +1207,9 @@ kbd {
   width: 100%;
   min-height: 38px;
   padding: 7px 10px;
-  color: #effff7;
-  color-scheme: dark;
-  background: #10251e;
-  border: 1px solid rgba(188, 240, 214, 0.22);
+  color: var(--lg-fg);
+  background: var(--lg-tint-solid);
+  border: 1px solid var(--product-field-border);
   border-radius: 9px;
   font: inherit;
 }
@@ -1121,8 +1241,7 @@ kbd {
 }
 
 .settings-toggle small {
-  color: #d8eee3;
-  opacity: 0.7;
+  color: var(--product-muted);
   line-height: 1.45;
 }
 
@@ -1138,7 +1257,7 @@ kbd {
   font-size: 0.74rem;
 }
 
-.credits-overlay__panel {
+.credits-overlay > .credits-overlay__panel {
   width: min(540px, calc(100vw - 48px));
   padding: clamp(28px, 5vw, 42px);
   text-align: center;
@@ -1162,13 +1281,13 @@ kbd {
   grid-template-columns: 72px 1fr;
   gap: 16px;
   padding: 10px 12px;
-  background: rgba(3, 16, 13, 0.4);
+  background: var(--product-field-bg);
   border-radius: 10px;
-  color: #effff7;
+  color: var(--lg-fg);
 }
 
 .credits-overlay__facts dt {
-  color: #82ebbb;
+  color: var(--product-accent-soft);
   font-weight: 700;
 }
 
@@ -1221,7 +1340,7 @@ kbd {
   backdrop-filter: blur(7px);
 }
 
-.chapter-complete__panel {
+.chapter-complete > .chapter-complete__panel {
   width: min(600px, calc(100vw - 48px));
   padding: clamp(28px, 5vw, 44px);
   text-align: center;
@@ -1263,9 +1382,9 @@ kbd {
 
 .chapter-complete__summary span {
   padding: 7px 11px;
-  color: #caffdf;
-  background: rgba(75, 208, 146, 0.12);
-  border: 1px solid rgba(130, 235, 187, 0.22);
+  color: var(--product-success-text);
+  background: var(--product-field-bg);
+  border: 1px solid var(--product-field-border);
   border-radius: 999px;
   font-size: 0.72rem;
 }
@@ -1284,6 +1403,63 @@ kbd {
   opacity: 0.52;
 }
 
+/* Bound every modal itself: large text and short windows must retain access
+   to both the heading and the final action, without scrolling behind it. */
+.game-menu__panel,
+.settings-overlay__panel,
+.credits-overlay__panel,
+.onboarding__card,
+.memory-overlay__card,
+.purification-overlay__card,
+.chapter-complete__panel {
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--product-field-border) transparent;
+}
+
+.settings-field select:focus-visible,
+.settings-field input:focus-visible,
+.settings-toggle input:focus-visible,
+.hud__creator-tools summary:focus-visible {
+  outline: 2px solid var(--product-highlight);
+  outline-offset: 3px;
+}
+
+.app-root[data-lg-theme="light"] {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  .app-root[data-lg-theme="auto"] {
+    color-scheme: light;
+  }
+}
+
+@media (max-width: 760px) {
+  .game-menu > .game-menu__panel--title {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    width: min(470px, calc(100vw - 48px));
+    text-align: center;
+  }
+
+  .game-menu__panel--title .game-menu__mark {
+    margin-left: auto;
+  }
+
+  .game-menu__panel--title .game-menu__navigation {
+    padding: 22px 0 0;
+    border-top: 1px solid var(--product-field-border);
+    border-left: 0;
+  }
+
+  .game-menu__journey {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 640px) {
   .game-menu,
   .settings-overlay,
@@ -1291,12 +1467,12 @@ kbd {
     padding: 14px;
   }
 
-  .game-menu__panel,
-  .game-menu__panel--confirm,
-  .settings-overlay__panel,
-  .credits-overlay__panel {
+  .game-menu > .game-menu__panel,
+  .game-menu > .game-menu__panel--confirm,
+  .settings-overlay > .settings-overlay__panel,
+  .credits-overlay > .credits-overlay__panel {
     width: calc(100vw - 28px);
-    max-height: calc(100vh - 28px);
+    max-height: calc(100dvh - 28px);
   }
 
   .settings-overlay__grid {
@@ -1324,6 +1500,29 @@ kbd {
   .app-shell--title .scene-host {
     transform: none;
   }
+}
+
+.app-root--reduced-motion *,
+.app-root--reduced-motion *::before,
+.app-root--reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+.app-root--reduced-motion .lg-button:hover,
+.app-root--reduced-motion .app-shell--title .scene-host {
+  transform: none;
+}
+
+.app-root--reduced-motion .lg-surface::before {
+  filter: none !important;
+}
+
+.app-root[data-lg-quality="low"]
+  :is(.game-menu, .settings-overlay, .credits-overlay, .chapter-complete) {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* M2 evidence workbench ---------------------------------------------------- */

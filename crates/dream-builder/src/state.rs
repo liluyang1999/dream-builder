@@ -7,6 +7,7 @@
 //!   owned clones — locks are never held across `.await` (these are all sync).
 //! - `Settings` derives `Serialize`/`Deserialize` so it round-trips to disk.
 
+use crate::domain::detail::DetailInfo;
 use crate::domain::scene::TreeScene;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
@@ -75,16 +76,16 @@ impl Default for Settings {
 impl Settings {
     pub fn validate(&self) -> Result<(), &'static str> {
         if self.master_volume > 100 {
-            return Err("masterVolume must be between 0 and 100");
+            return Err("主音量必须在 0 到 100 之间");
         }
         if self.music_volume > 100 {
-            return Err("musicVolume must be between 0 and 100");
+            return Err("音乐音量必须在 0 到 100 之间");
         }
         if self.effects_volume > 100 {
-            return Err("effectsVolume must be between 0 and 100");
+            return Err("音效音量必须在 0 到 100 之间");
         }
         if !(50..=150).contains(&self.camera_sensitivity) {
-            return Err("cameraSensitivity must be between 50 and 150");
+            return Err("镜头灵敏度必须在 50 到 150 之间");
         }
         Ok(())
     }
@@ -164,6 +165,21 @@ impl AppState {
         inner.cached_seed = Some(scene.seed);
         inner.cached_scene = Some(scene.clone());
     }
+
+    /// Reuse one cached detail without cloning or regenerating the whole scene.
+    /// A lookup never changes the active seed or its history.
+    pub fn cached_detail(&self, seed: u64, id: &str) -> Option<DetailInfo> {
+        let inner = self.lock();
+        let scene = inner
+            .cached_scene
+            .as_ref()
+            .filter(|scene| scene.seed == seed)?;
+        scene
+            .details
+            .iter()
+            .find(|detail| detail.id == id.trim())
+            .cloned()
+    }
 }
 
 #[cfg(test)]
@@ -190,6 +206,41 @@ mod tests {
         state.cache_scene(&built);
         assert!(state.cached_scene(7).is_some());
         assert!(state.cached_scene(8).is_none());
+    }
+
+    #[test]
+    fn cached_detail_matches_seed_and_normalized_id_without_changing_state() {
+        use crate::generation::SceneGenerator;
+        let state = AppState::new(Settings::default());
+        let settings = state.settings();
+        let history = state.history();
+        let scene = crate::generation::FantasyTreeGenerator.generate(7u64.into());
+        assert!(state.cached_detail(7, "rune-0").is_none());
+        state.cache_scene(&scene);
+
+        for detail in &scene.details {
+            assert_eq!(
+                state.cached_detail(7, &format!(" {} ", detail.id)),
+                Some(detail.clone())
+            );
+            assert!(state.cached_detail(8, &detail.id).is_none());
+        }
+        assert!(state.cached_detail(7, "missing-detail").is_none());
+        assert!(state.cached_detail(7, " ").is_none());
+        assert_eq!(state.settings(), settings);
+        assert_eq!(state.history(), history);
+
+        let replacement = crate::generation::FantasyTreeGenerator.generate(8u64.into());
+        state.cache_scene(&replacement);
+        assert!(state.cached_detail(7, "rune-0").is_none());
+        assert_eq!(
+            state.cached_detail(8, "rune-0"),
+            replacement
+                .details
+                .iter()
+                .find(|detail| detail.id == "rune-0")
+                .cloned()
+        );
     }
 
     #[test]

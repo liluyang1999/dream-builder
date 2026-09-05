@@ -23,7 +23,8 @@ pub trait Rng {
 
     /// An integer in `[min, max]` inclusive. `max` must be `>= min`.
     fn range_u32(&mut self, min: u32, max: u32) -> u32 {
-        min + (self.next_u32() % (max - min + 1))
+        let width = u64::from(max) - u64::from(min) + 1;
+        min + (u64::from(self.next_u32()) % width) as u32
     }
 }
 
@@ -68,6 +69,21 @@ mod tests {
         for _ in 0..1000 {
             let value = rng.range_u32(3, 7);
             assert!((3..=7).contains(&value));
+        }
+    }
+
+    #[test]
+    fn range_u32_supports_the_full_inclusive_domain() {
+        struct FixedRng(u32);
+        impl Rng for FixedRng {
+            fn next_u32(&mut self) -> u32 {
+                self.0
+            }
+        }
+
+        for value in [0, 1, u32::MAX / 2, u32::MAX] {
+            assert_eq!(FixedRng(value).range_u32(0, u32::MAX), value);
+            assert_eq!(FixedRng(value).range_u32(u32::MAX, u32::MAX), u32::MAX);
         }
     }
 

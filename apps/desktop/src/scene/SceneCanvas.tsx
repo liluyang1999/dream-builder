@@ -59,12 +59,9 @@ function SceneController({
         });
       },
       async exportGltf() {
-        const { GLTFExporter } = await import('three/examples/jsm/exporters/GLTFExporter.js');
-        const exporter = new GLTFExporter();
-        const result = await exporter.parseAsync(threeScene, { binary: true });
-        return result instanceof ArrayBuffer
-          ? new Blob([result], { type: 'model/gltf-binary' })
-          : null;
+        const { exportPortableScene } = await import('./exportScene');
+        const result = await exportPortableScene(threeScene);
+        return new Blob([result], { type: 'model/gltf-binary' });
       },
       resetCamera() {
         playerApiRef.current?.reset();
@@ -162,7 +159,7 @@ export function SceneCanvas({ scene, reducedMotion, fieldRef, apiRef }: Props) {
           />
         </EffectComposer>
       )}
-      <PerformanceProbe />
+      <PerformanceProbe renderDirectly={graphicsQuality === 'low'} />
       <SceneController apiRef={apiRef} playerApiRef={playerApiRef} />
     </Canvas>
   );

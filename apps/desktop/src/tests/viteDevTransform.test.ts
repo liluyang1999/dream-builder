@@ -1,5 +1,8 @@
 // @vitest-environment node
 
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { type ViteDevServer, createServer } from 'vite';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { sceneVendorChunk } from '../../viteChunks';
@@ -11,18 +14,26 @@ const desktopRoot = decodeURIComponent(new URL('../..', import.meta.url).pathnam
 
 describe('Vite development transform', () => {
   let server: ViteDevServer;
+  let cacheDir: string;
 
   beforeAll(async () => {
+    // A test server must not invalidate the running developer's optimized dependencies.
+    cacheDir = await mkdtemp(join(tmpdir(), 'dream-builder-vite-'));
     server = await createServer({
       root: desktopRoot,
       configFile: `${desktopRoot}/vite.config.ts`,
+      cacheDir,
       optimizeDeps: { noDiscovery: true },
       server: { middlewareMode: true },
     });
   });
 
   afterAll(async () => {
-    await server.close();
+    try {
+      await server?.close();
+    } finally {
+      if (cacheDir) await rm(cacheDir, { recursive: true, force: true });
+    }
   }, 30_000);
 
   test('downlevels standard decorators before serving application modules', async () => {

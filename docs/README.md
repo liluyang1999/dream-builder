@@ -24,7 +24,7 @@
 | 08 | [`tauri.html`](tauri.html) | Tauri 2 外壳、插件、路径基准与 WebView2 Evergreen 策略 |
 | 09 | [`security.html`](security.html) | Capability/ACL、CSP、边界校验与依赖供应链 |
 | 10 | [`build.html`](build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源与两段式版本 |
-| 11 | [`quality.html`](quality.html) | 九阶段质量门禁与持续集成 |
+| 11 | [`quality.html`](quality.html) | 十阶段质量门禁、测试隔离与持续集成 |
 | 12 | [`release.html`](release.html) | Windows 打包、源码指纹、签名与安装卸载合同 |
 | 13 | [`code-map.html`](code-map.html) | 覆盖每一个源码模块的完整索引 |
 | 14 | [`glossary.html`](glossary.html) | 跨栈术语速查 |

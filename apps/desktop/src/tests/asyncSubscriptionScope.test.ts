@@ -53,4 +53,15 @@ describe('createAsyncSubscriptionScope', () => {
     expect(onError).toHaveBeenCalledTimes(2);
     expect(laterCleanup).toHaveBeenCalledTimes(1);
   });
+
+  test('observes native unlisteners whose cleanup returns a rejected promise', async () => {
+    const onError = vi.fn();
+    const scope = createAsyncSubscriptionScope(onError);
+    const error = new Error('native unlisten failed');
+    scope.add(Promise.resolve(() => Promise.reject(error)));
+    await Promise.resolve();
+    scope.close();
+    await Promise.resolve();
+    expect(onError).toHaveBeenCalledWith(error);
+  });
 });

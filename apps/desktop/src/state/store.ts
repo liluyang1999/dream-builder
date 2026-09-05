@@ -139,7 +139,7 @@ export const useAppStore = create<AppState>((set) => ({
   chapterCompleteOpen: false,
 
   setSeed(seed) {
-    if (!Number.isFinite(seed) || seed < 0) return;
+    if (!Number.isSafeInteger(seed) || seed < 0) return;
     writeStoredSeed(seed);
     set({ seed, selection: INITIAL_SELECTION, selectedDetail: null });
   },
@@ -254,10 +254,13 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ hudHidden: !state.hudHidden }));
   },
   toggleHelp() {
-    set((state) => ({ helpOpen: !state.helpOpen }));
+    set((state) => ({
+      helpOpen: !state.helpOpen,
+      ...(!state.helpOpen ? { hudHidden: false } : {}),
+    }));
   },
   setHelpOpen(open) {
-    set({ helpOpen: open });
+    set({ helpOpen: open, ...(open ? { hudHidden: false } : {}) });
   },
   hydrateSettings(settings) {
     writeStoredSeed(settings.seed);
@@ -314,12 +317,30 @@ export const useAppStore = create<AppState>((set) => ({
   },
 }));
 
+/** Read the latest preferences when closing before the next debounced save. */
+export function readCurrentSettings(): Settings {
+  const state = useAppStore.getState();
+  return {
+    seed: state.seed,
+    theme: state.theme,
+    reducedMotion: state.reducedMotion,
+    graphicsQuality: state.graphicsQuality,
+    masterVolume: state.masterVolume,
+    musicVolume: state.musicVolume,
+    effectsVolume: state.effectsVolume,
+    cameraSensitivity: state.cameraSensitivity,
+    highContrast: state.highContrast,
+    textScale: state.textScale,
+    showHints: state.showHints,
+  };
+}
+
 function readStoredSeed(): number | null {
   try {
     const raw = globalThis.localStorage?.getItem(SEED_STORAGE_KEY);
-    if (!raw) return null;
-    const value = Number.parseInt(raw, 10);
-    return Number.isFinite(value) && value >= 0 ? value : null;
+    if (!raw?.trim()) return null;
+    const value = Number(raw);
+    return Number.isSafeInteger(value) && value >= 0 ? value : null;
   } catch {
     return null;
   }

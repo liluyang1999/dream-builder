@@ -86,50 +86,62 @@ export function GameMenu({ onNewGame, onOpenHelp, onQuit }: Props) {
     <div className="game-menu">
       <GlassPanel
         ref={dialogRef}
-        className="game-menu__panel"
+        className={`game-menu__panel${paused ? '' : ' game-menu__panel--title'}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="game-menu-title"
       >
-        <div className="game-menu__mark" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <span className="game-menu__eyebrow">{paused ? '旅程暂停' : 'Dream Builder'}</span>
-        <h1 id="game-menu-title">{paused ? '聆听森林的呼吸' : '智慧树之森'}</h1>
-        <p className="game-menu__lead">
-          {paused
-            ? '你的进度已经自动保存。准备好后，从最近的脚步继续。'
-            : '成为能听见森林记忆的小小守林人，让失色的智慧树重新发光。'}
-        </p>
-
-        <div className="game-menu__actions">
-          {paused ? (
-            <GlassButton ref={primaryRef} variant="primary" onClick={resumeGame}>
-              继续旅程
-            </GlassButton>
-          ) : (
-            <GlassButton ref={primaryRef} variant="primary" onClick={startGame}>
-              {hasProgress ? '继续旅程' : '进入森林'}
-            </GlassButton>
-          )}
-
-          {!paused && hasProgress ? (
-            <GlassButton onClick={() => setConfirmingNewGame(true)}>开始新旅程</GlassButton>
-          ) : null}
-          <GlassButton onClick={() => setSettingsOpen(true)}>设置</GlassButton>
-          {paused ? <GlassButton onClick={onOpenHelp}>操作帮助</GlassButton> : null}
+        <div className="game-menu__story">
+          <div className="game-menu__mark" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
+          <span className="game-menu__eyebrow">{paused ? '旅程暂停' : 'Dream Builder'}</span>
+          <h1 id="game-menu-title">{paused ? '聆听森林的呼吸' : '智慧树之森'}</h1>
+          {!paused ? <span className="game-menu__chapter">第一章 · 微光归途</span> : null}
+          <p className="game-menu__lead">
+            {paused
+              ? '你的进度已经自动保存。准备好后，从最近的脚步继续。'
+              : '成为能听见森林记忆的小小守林人，让失色的智慧树重新发光。'}
+          </p>
           {!paused ? (
-            <GlassButton onClick={() => setCreditsOpen(true)}>制作信息</GlassButton>
+            <div className="game-menu__journey" aria-label="旅程内容">
+              <span>寻找微光</span>
+              <span>聆听记忆</span>
+              <span>唤醒森林</span>
+            </div>
           ) : null}
-          {paused ? <GlassButton onClick={returnToTitle}>返回标题</GlassButton> : null}
-          <GlassButton onClick={onQuit}>退出游戏</GlassButton>
         </div>
 
-        <small className="game-menu__footer">
-          {paused ? '按 Esc 也可继续' : '单人 · 离线 · 自动保存'}
-        </small>
+        <div className="game-menu__navigation">
+          <div className="game-menu__actions">
+            {paused ? (
+              <GlassButton ref={primaryRef} variant="primary" onClick={resumeGame}>
+                继续旅程
+              </GlassButton>
+            ) : (
+              <GlassButton ref={primaryRef} variant="primary" onClick={startGame}>
+                {hasProgress ? '继续旅程' : '进入森林'}
+              </GlassButton>
+            )}
+
+            {!paused && hasProgress ? (
+              <GlassButton onClick={() => setConfirmingNewGame(true)}>开始新旅程</GlassButton>
+            ) : null}
+            <GlassButton onClick={() => setSettingsOpen(true)}>设置</GlassButton>
+            {paused ? <GlassButton onClick={onOpenHelp}>操作帮助</GlassButton> : null}
+            {!paused ? (
+              <GlassButton onClick={() => setCreditsOpen(true)}>制作信息</GlassButton>
+            ) : null}
+            {paused ? <GlassButton onClick={returnToTitle}>返回标题</GlassButton> : null}
+            <GlassButton onClick={onQuit}>退出游戏</GlassButton>
+          </div>
+
+          <small className="game-menu__footer">
+            {paused ? '按 Esc 也可继续' : '单人 · 离线 · 自动保存'}
+          </small>
+        </div>
       </GlassPanel>
     </div>
   );

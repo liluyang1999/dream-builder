@@ -9,6 +9,20 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Refined the forest title screen and HUD, responsive modal layouts, light/dark
+  contrast, real large-text scaling, reduced motion, and keyboard focus behavior.
+- Native detail lookups reuse scene metadata instead of regenerating the tree;
+  particles advance by elapsed time and low quality now explicitly renders frames.
+- Settings writes are ordered and flushed before closing; native menu/tray actions
+  use one dispatcher. Worker, export, audio, and async cleanup failures recover
+  without stalled promises or stale setting errors.
+- Rechecked all fifteen teaching pages against the code, corrected stale behavior
+  descriptions, and made the complete source-map coverage check fail independently.
+- GLB exports use a portable snapshot with supported materials and preserve live
+  scene resources; runtime sky and postprocessing remain outside the model format.
+- Updated the existing nanoid override to 3.3.18 for GHSA-2v37-7h3g-55p8;
+  declared Node 24 test types and isolated temporary Vite test caches.
+
 - Documentation is now split by audience rather than by topic. `docs/` holds
   only teaching material — fifteen topic HTML pages plus `assets/learn.css` and
   a GitHub-facing `README.md` index, all at one level with no subdirectory

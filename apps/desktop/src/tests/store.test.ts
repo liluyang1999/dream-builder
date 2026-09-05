@@ -31,6 +31,8 @@ function reset(): void {
     activeMemoryId: null,
     progressRecoveryStatus: 'none',
     chapterCompleteOpen: false,
+    helpOpen: false,
+    hudHidden: false,
   });
 }
 
@@ -55,6 +57,26 @@ describe('app store', () => {
     useAppStore.getState().select('   ');
     expect(useAppStore.getState().selection.selectedId).toBeNull();
   });
+
+  test.each(['toggleHelp', 'setHelpOpen'] as const)(
+    '%s reveals a hidden HUD before opening help',
+    (action) => {
+      useAppStore.getState().toggleHud();
+      useAppStore.getState()[action](true);
+
+      expect(useAppStore.getState().helpOpen).toBe(true);
+      expect(useAppStore.getState().hudHidden).toBe(false);
+    },
+  );
+
+  test.each([1.5, -1, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1])(
+    'rejects invalid seed %s before changing state or storage',
+    (seed) => {
+      useAppStore.getState().setSeed(seed);
+      expect(useAppStore.getState().seed).toBe(424242);
+      expect(localStorage.getItem('dream-builder.seed')).toBeNull();
+    },
+  );
 
   test('scene history is most-recent-first and deduplicated', () => {
     const { applySceneResult } = useAppStore.getState();

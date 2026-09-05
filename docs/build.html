@@ -70,7 +70,7 @@
   </p>
   <h3>开发期：Vite dev server</h3>
   <ul>
-    <li>源码以原生 ES module 直接提供，只按需转换，因此冷启动与热更新不随项目规模线性变差。</li>
+    <li>源码以原生 ES module 直接提供，只按需转换；通常能减少开发期等待，但实际启动成本仍取决于模块数量和依赖预构建。</li>
     <li><code>server.strictPort</code> 固定 <code>127.0.0.1:1420</code>：Tauri 配置按此端口连接，端口被占用时应当失败而不是悄悄换端口。</li>
     <li><code>clearScreen: false</code> 保留 Tauri CLI 的原生日志，否则 Rust 编译输出会被前端刷屏覆盖。</li>
     <li><code>envPrefix: ['VITE_', 'TAURI_']</code> 让 Tauri 注入的环境变量可以进入前端，同时仍然拒绝暴露任意进程变量。</li>
@@ -128,7 +128,7 @@
   <div class="callout">
     <strong>统一入口：</strong><a href="../justfile">justfile</a> 是跨语言任务入口，
     <code>just check</code> / <code>just bundle</code> 包住 pnpm 与 cargo 两侧命令；
-    根 <code>package.json</code> 的脚本与之一一对应，因此本机、CI 和发布使用的是同一组命令，
+    根 <code>package.json</code> 提供前端脚本，<code>just check</code> 再组合 pnpm 与 Cargo 检查；本机、CI 和发布复用这些命令，
     而不是三份互相漂移的说明。
   </div>
         </section>
@@ -164,7 +164,7 @@
   <p>
     React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；产品版本 1.0 不要求依赖采用相同数字。
     依赖升级必须看 API、锁文件、公告、目标平台与实际回归。当前依赖解析还通过 override 固定
-    <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.17</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
+    <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.18</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
   </p>
         </section>
 

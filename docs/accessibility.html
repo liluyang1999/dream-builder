@@ -92,8 +92,21 @@
     <strong>系统偏好与游戏内设置并存：</strong>
     <a href="../apps/desktop/src/styles.css">styles.css</a> 同时响应
     <code>@media (prefers-reduced-motion: reduce)</code>。操作系统已经声明“减少动态”时不需要玩家再找一次开关，
-    而游戏内开关又允许在系统未声明时单独降低动效。两者是“或”的关系，不是互相覆盖。
+    而游戏内开关又允许在系统未声明时单独降低动效。界面 CSS 对两者按“或”的关系处理；3D 场景使用游戏设置中的 reducedMotion 值，原生设置水合后以保存的偏好为准。
   </div>
+  <h3>漂亮界面先保证文字和操作能到达</h3>
+  <p>
+    标题用双栏区分世界介绍和进入游戏的动作，小窗口则改为单栏；HUD 把当前目标放在前面，创作工具收进工坊。
+    装饰只提供气氛，按钮、目标和错误提示仍用文字表达。浅色、深色和高对比共享颜色变量，避免只换面板却忘记文字。
+  </p>
+  <p>
+    <code>rem</code> 相对于 HTML 根字号，而不是最近的父节点。因此“大文字”通过
+    <code>html:has(.app-root--large-text)</code> 放大根字号，才能同时影响 HUD、按钮与弹窗。
+    弹窗限制最大高度并允许内部滚动，帮助面板固定在可视区域；放大后仍须用 Tab 走到最后一个按钮。
+    游戏内“减少动态”也映射成根节点类，停用界面流光和位移动效。相关实现见
+    <a href="../apps/desktop/src/styles.css">styles.css</a>，选择器说明见
+    <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:has">MDN 的 :has()</a>。
+  </p>
   <h3>三种输入设备，两种事件模型</h3>
   <div class="grid grid--3">
     <article class="card">

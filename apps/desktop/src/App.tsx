@@ -14,11 +14,13 @@ import { AudioDirector } from './audio/AudioDirector';
 import { GamepadNavigator } from './interaction/GamepadNavigator';
 import { useKeyboardShortcuts } from './interaction/useKeyboardShortcuts';
 import { createAsyncSubscriptionScope } from './ipc/asyncSubscriptionScope';
+import { errorMessage } from './ipc/errorMessage';
+import { installNativeCloseGuard } from './ipc/nativeCloseGuard';
 import { isTauriRuntime } from './ipc/runtime';
 import { treeApi } from './ipc/treeApi';
 import { performanceCapture } from './performance/performanceCapture';
 import type { SceneApi } from './scene/SceneCanvas';
-import { useAppStore } from './state/store';
+import { readCurrentSettings, useAppStore } from './state/store';
 import { ChapterCompleteOverlay } from './ui/ChapterCompleteOverlay';
 import { CreditsOverlay } from './ui/CreditsOverlay';
 import { GameMenu } from './ui/GameMenu';
@@ -39,6 +41,8 @@ const SceneCanvas = lazy(async () => {
 export function App() {
   const seed = useAppStore((state) => state.seed);
   const scene = useAppStore((state) => state.scene);
+  const source = useAppStore((state) => state.source);
+  const warning = useAppStore((state) => state.warning);
   const reducedMotion = useAppStore((state) => state.reducedMotion);
   const graphicsQuality = useAppStore((state) => state.graphicsQuality);
   const masterVolume = useAppStore((state) => state.masterVolume);
@@ -70,19 +74,30 @@ export function App() {
 
   const fieldRef = useRef<MagicField | null>(null);
   const sceneApiRef = useRef<SceneApi | null>(null);
+  const settingsWarningRef = useRef<string | null>(null);
 
   // --- side-effecting handlers -------------------------------------------
   const handleResetCamera = useCallback(() => sceneApiRef.current?.resetCamera(), []);
 
   const handleScreenshot = useCallback(async () => {
-    const blob = await sceneApiRef.current?.screenshot();
-    if (blob) downloadBlob(blob, `dream-builder-${seed}-${Date.now()}.png`);
-  }, [seed]);
+    try {
+      const blob = await sceneApiRef.current?.screenshot();
+      if (!blob) throw new Error('场景尚未准备好，请稍后重试。');
+      downloadBlob(blob, `dream-builder-${seed}-${Date.now()}.png`);
+    } catch (error) {
+      setWarning(`截图失败：${errorMessage(error)}`);
+    }
+  }, [seed, setWarning]);
 
   const handleExportGltf = useCallback(async () => {
-    const blob = await sceneApiRef.current?.exportGltf();
-    if (blob) downloadBlob(blob, `dream-builder-${seed}.glb`);
-  }, [seed]);
+    try {
+      const blob = await sceneApiRef.current?.exportGltf();
+      if (!blob) throw new Error('场景尚未准备好，请稍后重试。');
+      downloadBlob(blob, `dream-builder-${seed}.glb`);
+    } catch (error) {
+      setWarning(`导出模型失败：${errorMessage(error)}`);
+    }
+  }, [seed, setWarning]);
 
   const handleExportScene = useCallback(async () => {
     await exportSceneFile(seed, setWarning);
@@ -123,6 +138,7 @@ export function App() {
       return;
     }
     try {
+      await treeApi.saveSettings(readCurrentSettings());
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
       await getCurrentWindow().close();
     } catch (error) {
@@ -219,8 +235,15 @@ export function App() {
           textScale,
           showHints,
         })
+        .then(() => {
+          if (!active) return;
+          if (settingsWarningRef.current === useAppStore.getState().warning) setWarning(null);
+          settingsWarningRef.current = null;
+        })
         .catch((error: unknown) => {
-          if (active) setWarning(`无法保存设置：${errorMessage(error)}`);
+          if (!active) return;
+          settingsWarningRef.current = `无法保存设置：${errorMessage(error)}`;
+          setWarning(settingsWarningRef.current);
         });
     }, 150);
     return () => {
@@ -244,13 +267,30 @@ export function App() {
   ]);
 
   useEffect(() => {
+    if (!settingsReady || !isTauriRuntime()) return;
+    const subscriptions = createAsyncSubscriptionScope((error) => {
+      setWarning(`无法保护退出前的设置：${errorMessage(error)}`);
+    });
+    subscriptions.add(
+      import('@tauri-apps/api/window').then(({ getCurrentWindow }) =>
+        installNativeCloseGuard(
+          getCurrentWindow(),
+          () => treeApi.saveSettings(readCurrentSettings()),
+          (error) => setWarning(`无法保存设置并退出：${errorMessage(error)}`),
+        ),
+      ),
+    );
+    return () => subscriptions.close();
+  }, [settingsReady, setWarning]);
+
+  useEffect(() => {
     if (!selectedId || !scene) {
       setSelectedDetail(null);
       return;
     }
     let active = true;
     treeApi
-      .loadDetail(selectedId, scene)
+      .loadDetail(selectedId, scene, source ?? 'fallback')
       .then((detail) => {
         if (active) setSelectedDetail(detail);
       })
@@ -260,7 +300,7 @@ export function App() {
     return () => {
       active = false;
     };
-  }, [selectedId, scene, setSelectedDetail, setWarning]);
+  }, [selectedId, scene, source, setSelectedDetail, setWarning]);
 
   useEffect(() => {
     const subscriptions = createAsyncSubscriptionScope((error) => {
@@ -297,6 +337,7 @@ export function App() {
       quality={graphicsQuality}
       className={[
         'app-root',
+        reducedMotion ? 'app-root--reduced-motion' : '',
         highContrast ? 'app-root--high-contrast' : '',
         textScale === 'large' ? 'app-root--large-text' : '',
       ]
@@ -348,6 +389,11 @@ export function App() {
         <CreditsOverlay />
         <ProgressRecoveryNotice />
         <ChapterCompleteOverlay onScreenshot={() => void handleScreenshot()} />
+        {warning ? (
+          <div className="app-warning" role="alert">
+            {warning}
+          </div>
+        ) : null}
       </div>
     </GlassProvider>
   );
@@ -367,19 +413,18 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 4294967295);
 }
 
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  try {
+    document.body.appendChild(link);
+    link.click();
+  } finally {
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
 }
 
 async function toggleFullscreen(): Promise<void> {

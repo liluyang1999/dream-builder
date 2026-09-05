@@ -1,4 +1,4 @@
-export type Unsubscribe = () => void;
+export type Unsubscribe = () => void | Promise<void>;
 
 export interface AsyncSubscriptionScope {
   add(subscription: Promise<Unsubscribe>): void;
@@ -28,7 +28,8 @@ export function createAsyncSubscriptionScope(
 
   const runCleanup = (cleanup: Unsubscribe): void => {
     try {
-      cleanup();
+      const result = cleanup();
+      if (result) void result.catch(report);
     } catch (error) {
       report(error);
     }

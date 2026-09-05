@@ -47,3 +47,22 @@ fn detail_kind_serializes_lowercase_union() {
     let kind = json["kind"].as_str().expect("kind is a string");
     assert!(matches!(kind, "rune" | "crystal" | "leaf"));
 }
+
+#[test]
+fn native_menu_dispatch_has_one_global_registration() {
+    // Tauri's tray menu callback also joins the global listener list. A second
+    // registration runs every action twice, cancelling toggles and double-quitting.
+    // Check the wiring without requiring a native window in the test process.
+    let registrations = [
+        include_str!("../src/lib.rs"),
+        include_str!("../src/menu.rs"),
+    ]
+    .iter()
+    .map(|source| source.matches(".on_menu_event(").count())
+    .sum::<usize>();
+
+    assert_eq!(
+        registrations, 1,
+        "native menus must share one global dispatcher"
+    );
+}

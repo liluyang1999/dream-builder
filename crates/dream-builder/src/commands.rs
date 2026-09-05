@@ -32,7 +32,14 @@ pub fn generate_tree(seed: u64, state: State<'_, AppState>) -> Result<TreeScene,
 
 /// Look up the metadata for one interactive object.
 #[tauri::command]
-pub fn detail_info(seed: u64, id: String) -> Result<DetailInfo, AppError> {
+pub fn detail_info(
+    seed: u64,
+    id: String,
+    state: State<'_, AppState>,
+) -> Result<DetailInfo, AppError> {
+    if let Some(detail) = state.cached_detail(seed, &id) {
+        return Ok(detail);
+    }
     FantasyTreeGenerator.generate_detail(seed.into(), &id)
 }
 
@@ -61,11 +68,22 @@ pub fn save_settings(
     state: State<'_, AppState>,
     settings: Settings,
 ) -> Result<(), AppError> {
+    save_settings_snapshot(&state, settings, |settings| {
+        persistence::save_settings(&app, settings)
+    })
+}
+
+fn save_settings_snapshot(
+    state: &AppState,
+    settings: Settings,
+    persist: impl FnOnce(&Settings) -> Result<(), AppError>,
+) -> Result<(), AppError> {
     settings
         .validate()
         .map_err(|reason| AppError::InvalidSettings(reason.to_string()))?;
-    state.set_settings(settings.clone());
-    persistence::save_settings(&app, &settings)
+    persist(&settings)?;
+    state.set_settings(settings);
+    Ok(())
 }
 
 /// Serialize the scene for `seed` to a JSON file at `path` (async I/O).
@@ -77,4 +95,64 @@ pub async fn export_scene(path: String, seed: u64) -> Result<(), AppError> {
         .await
         .map_err(|e| AppError::Export(e.to_string()))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn failed_settings_save_preserves_the_last_committed_snapshot() {
+        let original = Settings::default();
+        let state = AppState::new(original.clone());
+        let updated = Settings {
+            master_volume: 15,
+            ..original.clone()
+        };
+
+        let error = save_settings_snapshot(&state, updated, |_| {
+            Err(AppError::Persistence("test write failure".into()))
+        })
+        .expect_err("failed persistence must reject the command");
+
+        assert_eq!(error.code(), "persistence_error");
+        assert_eq!(state.settings(), original);
+    }
+
+    #[test]
+    fn settings_are_committed_only_after_successful_persistence() {
+        let original = Settings::default();
+        let state = AppState::new(original.clone());
+        let updated = Settings {
+            high_contrast: true,
+            ..original.clone()
+        };
+
+        save_settings_snapshot(&state, updated.clone(), |saved| {
+            assert_eq!(saved, &updated);
+            assert_eq!(state.settings(), original);
+            Ok(())
+        })
+        .expect("successful persistence commits the snapshot");
+
+        assert_eq!(state.settings(), updated);
+    }
+
+    #[test]
+    fn invalid_settings_never_reach_persistence() {
+        let original = Settings::default();
+        let state = AppState::new(original.clone());
+        let invalid = Settings {
+            effects_volume: 101,
+            ..original.clone()
+        };
+
+        let error = save_settings_snapshot(&state, invalid, |_| {
+            panic!("invalid settings must not be persisted")
+        })
+        .expect_err("invalid settings must reject the command");
+
+        assert_eq!(error.code(), "invalid_settings");
+        assert_eq!(state.settings(), original);
+    }
 }

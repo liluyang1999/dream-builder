@@ -70,7 +70,7 @@
   </p>
   <div class="grid grid--3">
     <article class="card"><h3>Canvas</h3><p><a href="../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas</a> 配置相机、DPR、色调映射、场景 API、后处理和截图所需的 drawing buffer。</p></article>
-    <article class="card"><h3>世界</h3><p><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld</a> 组合玩家、卡通森林、光种、记忆、检查点和净化节点。</p></article>
+    <article class="card"><h3>世界</h3><p><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld</a> 组合光种、记忆、检查点和净化节点；玩家与卡通森林由 SceneCanvas 在同一场景中组合。</p></article>
     <article class="card"><h3>智慧树</h3><p><a href="../apps/desktop/src/scene/TreeContent.tsx">TreeContent</a> 把 Rust 返回的枝干、叶簇、符文、水晶与地面光环组合为场景。</p></article>
     <article class="card"><h3>程序化森林</h3><p><a href="../apps/desktop/src/scene/CartoonForest.tsx">CartoonForest</a> 按 seed 和质量档生成可重建装饰，但关键路径与碰撞保持稳定。</p></article>
     <article class="card"><h3>粒子</h3><p><a href="../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles</a> 用 BufferGeometry 和 <code>useFrame</code> 更新位置，从 ref 读取后端场。</p></article>
@@ -108,11 +108,37 @@
       水平前向，俯视不会让角色钻入地面。减少动态模式降低相机滞后和强反馈，保证舒适性。
     </p>
   </details>
+  <h3>一帧有多长，和谁负责画出来，是两件事</h3>
+  <p>
+    <code>useFrame</code> 的 <code>delta</code> 表示距离上一帧经过的秒数。粒子位移按它缩放，
+    才能让 60 Hz 与 144 Hz 屏幕上的漂移速度接近；如果每帧固定加一段距离，高刷新率屏幕就会把动画加速。
+    长时间切到后台再回来时还要限制单次时间步，避免粒子突然飞出场景。参见
+    <a href="../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles.tsx</a>。
+  </p>
+  <p>
+    R3F 中正数优先级的帧回调会接管自动绘制。中、高画质由 <code>EffectComposer</code> 绘制后再统计；
+    低画质关闭后处理时，<a href="../apps/desktop/src/scene/PerformanceProbe.tsx">PerformanceProbe</a>
+    必须先直接绘制场景，再记录本帧数据。否则输入与统计仍在运行，屏幕却没有新画面。
+    这也是为什么测试画质开关要实际看画布，不能只检查设置值。
+  </p>
+  <h3>模型文件与游戏画面有什么不同</h3>
+  <p>
+    GLB 保存几何、变换与标准材质，不能原样保存游戏的任意 GLSL 程序、Bloom 和动态天空。
+    <a href="../apps/desktop/src/scene/exportScene.ts">exportScene.ts</a> 为导出建立独立快照，
+    把当前卡通材质和水晶颜色转换为通用材质，保留实例布局（导入器需支持 <code>EXT_mesh_gpu_instancing</code> 扩展）；
+    天空和不受格式支持的环境光不写入模型。
+    面向相机的符文贴片不写入模型，粒子只保留静态位置；卡通明暗和水晶流光会变成标准材质的近似效果。
+    所以导出适合继续编辑模型，需要二维场景图像则使用“留影”。
+  </p>
+  <p>
+    导出结束或失败时，只释放快照自己创建的资源。不能为了让导出器接受场景而直接替换游戏里的材质，
+    也不能释放共用纹理，否则下载完成后游戏反而可能变黑。这类所有权边界也需要回归测试。
+  </p>
   <h3>液态玻璃 UI 是一个独立的可复用包</h3>
   <p>
     <code>@dream-builder/liquid-glass</code> 不是散落在应用里的几条 CSS，而是
     <a href="../packages/liquid-glass/src/index.ts">有明确导出面的工作区包</a>。
-    它演示了一个小型 React 组件库该有的样子：一个上下文 Provider、一个承担全部视觉的基元，
+    它演示了一个小型 React 组件库的组织方式：一个上下文 Provider、共享容器和 CSS，
     以及几个语义化包装。
   </p>
   <div class="table-wrap">
@@ -120,7 +146,7 @@
       <thead><tr><th>导出</th><th>角色</th></tr></thead>
       <tbody>
         <tr><th><a href="../packages/liquid-glass/src/GlassProvider.tsx">GlassProvider</a> / <code>useGlass</code></th><td>用 Context 向下传递主题与质量档，避免每个组件各自探测环境</td></tr>
-        <tr><th><a href="../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface</a></th><td>唯一真正实现玻璃外观的基元，其余组件都由它组合而来</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface</a></th><td>面板、卡片和徽章共用的玻璃容器；按钮保留原生 button 元素并共享同一套 CSS</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/GlassPanel.tsx">GlassPanel</a> · <a href="../packages/liquid-glass/src/GlassCard.tsx">GlassCard</a> · <a href="../packages/liquid-glass/src/GlassButton.tsx">GlassButton</a> · <a href="../packages/liquid-glass/src/GlassBadge.tsx">GlassBadge</a></th><td>语义化包装：调用方表达“这是一个面板/卡片/按钮”，而不是拼装视觉参数</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/theme.ts">theme.ts</a></th><td>只导出 <code>GlassTheme</code> 与 <code>GlassQuality</code> 两个字面量联合，是包的公共词汇表</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/useGlassQuality.ts">detectGlassQuality</a></th><td>按运行环境能力选择画质档</td></tr>
@@ -149,8 +175,8 @@
   <p>
     <a href="../apps/desktop/src/audio/forestAudio.ts">forestAudio.ts</a> 使用 Web Audio API 合成环境层，
     <a href="../apps/desktop/src/audio/progressAudio.ts">progressAudio.ts</a> 将进度差异映射为短声效。
-    AudioDirector 在首次用户手势后安全恢复 AudioContext，分别应用主音量、环境音和效果音；静音与页面卸载必须释放节点，
-    避免后台声音和资源泄漏。
+    AudioDirector 在首次用户手势后安全恢复 AudioContext，分别应用主音量、环境音和效果音；静音通过增益控制，卸载时释放音频图；被中断的解锁不会继续操作已释放的 AudioContext，
+    下次挂载还能重新创建。这样既避免后台声音和资源泄漏，也保留浏览器拒绝自动播放后的重试机会。
   </p>
         </section>
 

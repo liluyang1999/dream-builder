@@ -85,7 +85,7 @@
         <tr><th>Frozen lockfile</th><td>锁文件与清单不一致时直接失败的安装模式，保证 CI 复现既定依赖树而不是解析新版本。</td></tr>
         <tr><th>焦点陷阱</th><td>让 <kbd>Tab</kbd> 在模态对话框内循环并在关闭时归还焦点的可访问性模式。</td></tr>
         <tr><th>边沿检测</th><td>比较相邻两次采样只在状态跳变时触发动作；轮询式 Gamepad API 必须这样处理长按。</td></tr>
-        <tr><th><code>prefers-reduced-motion</code></th><td>操作系统级“减少动态”偏好的 CSS 媒体查询；与游戏内开关是“或”的关系。</td></tr>
+        <tr><th><code>prefers-reduced-motion</code></th><td>操作系统级“减少动态”偏好的 CSS 媒体查询；界面 CSS 与游戏内开关按“或”的关系处理，3D 场景读取游戏中保存的偏好。</td></tr>
         <tr><th>Zustand</th><td>轻量 React 状态库；本项目用选择器订阅切片，核心转换仍由纯 reducer 决定。</td></tr>
         <tr><th>Zod</th><td>运行时 schema 库，可在解析成功后推导 TypeScript 类型。</td></tr>
         <tr><th>Newtype</th><td>用单字段 Rust 类型给裸值增加领域语义与构造不变量。</td></tr>

@@ -160,12 +160,22 @@
   transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.lg-button:hover {
+.lg-button:hover:not(:disabled) {
   transform: translateY(-1px);
 }
 
 .lg-button:active {
   transform: translateY(0);
+}
+
+.lg-button:focus-visible {
+  outline: 2px solid var(--lg-fg);
+  outline-offset: 3px;
+}
+
+.lg-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
 }
 
 .lg-button--primary {
@@ -176,7 +186,7 @@
   backdrop-filter: none;
 }
 
-.lg-button--primary:hover {
+.lg-button--primary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--lg-accent) 80%, white);
 }
 
@@ -196,5 +206,8 @@
   }
   .lg-root[data-lg-quality="high"] .lg-surface[data-lg-refraction="on"]::before {
     filter: none;
+  }
+  .lg-button:hover {
+    transform: none;
   }
 }

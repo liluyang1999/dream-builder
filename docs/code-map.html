@@ -139,6 +139,8 @@
       <tbody>
         <tr><th><a href="../apps/desktop/src/ipc/runtime.ts">ipc/runtime.ts</a></th><td>判断当前是否运行在 Tauri 中，决定走原生命令还是浏览器回退</td></tr>
         <tr><th><a href="../apps/desktop/src/ipc/treeApi.ts">ipc/treeApi.ts</a></th><td>唯一的 Rust 客户端：invoke、事件订阅、Zod 校验与失败回退</td></tr>
+        <tr><th><a href="../apps/desktop/src/ipc/nativeCloseGuard.ts">ipc/nativeCloseGuard.ts</a></th><td>关闭前等待设置保存，合并重复关闭请求，保存失败时保留窗口</td></tr>
+        <tr><th><a href="../apps/desktop/src/ipc/errorMessage.ts">ipc/errorMessage.ts</a></th><td>把 JavaScript Error、Rust 结构化错误与字符串统一成可读提示</td></tr>
         <tr><th><a href="../apps/desktop/src/ipc/instrument.ts">ipc/instrument.ts</a></th><td>TC39 标准方法装饰器 <code>@logged</code> / <code>@measure</code>，为 IPC 加日志与计时</td></tr>
         <tr><th><a href="../apps/desktop/src/ipc/asyncSubscriptionScope.ts">ipc/asyncSubscriptionScope.ts</a></th><td>管理异步返回的 unlisten，处理 StrictMode 重复挂载与卸载竞态</td></tr>
         <tr><th><a href="../apps/desktop/src/workers/protocol.ts">workers/protocol.ts</a></th><td>Worker 请求/响应消息类型，用回声 <code>id</code> 关联并发请求</td></tr>
@@ -167,7 +169,8 @@
     <table>
       <tbody>
         <tr><th><a href="../apps/desktop/src/scene/SceneCanvas.tsx">SceneCanvas.tsx</a></th><td>R3F <code>&lt;Canvas&gt;</code> 宿主：相机、DPR、色调映射、Bloom、截图与 glTF 导出 API</td></tr>
-        <tr><th><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld.tsx</a></th><td>组合玩家、森林、光种、记忆、检查点与净化节点的世界根</td></tr>
+        <tr><th><a href="../apps/desktop/src/scene/exportScene.ts">exportScene.ts</a></th><td>生成便携模型快照，转换运行时材质并释放导出专用资源，不改动正在游玩的场景</td></tr>
+        <tr><th><a href="../apps/desktop/src/scene/GameplayWorld.tsx">GameplayWorld.tsx</a></th><td>组合光种、记忆、检查点与净化节点；玩家与森林由 SceneCanvas 组合</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/GameplayController.tsx">GameplayController.tsx</a></th><td>接近判定与互动输入适配器，只派发领域动作，不自行决定进度</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/PlayerController.tsx">PlayerController.tsx</a></th><td>把归一化输入交给纯运动函数，并让第三人称相机随玩家平移</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/CartoonForest.tsx">CartoonForest.tsx</a></th><td>按 seed 与画质档生成可重建装饰，关键路径与碰撞保持稳定</td></tr>
@@ -180,6 +183,7 @@
         <tr><th><a href="../apps/desktop/src/scene/CrystalMesh.tsx">CrystalMesh.tsx</a></th><td>水晶：自定义 Fresnel shader 八面体加点光源，悬停与选中时脉动</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/materials/crystalMaterial.ts">materials/crystalMaterial.ts</a></th><td>水晶 GLSL：视图法线、Fresnel 边缘与时间 uniform 流光</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/GroundHalo.tsx">GroundHalo.tsx</a></th><td>树下柔和的加色地面光环</td></tr>
+        <tr><th><a href="../apps/desktop/src/scene/magicParticleMotion.ts">magicParticleMotion.ts</a></th><td>纯粒子步进：按秒缩放速度、限制恢复时间步、复用预分配缓冲区</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/MagicParticles.tsx">MagicParticles.tsx</a></th><td>逐帧模拟的魔法粒子，从 ref 读取后端魔法场，不触发 React 重渲染</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/LightSeed.tsx">LightSeed.tsx</a></th><td>光种的三种视觉状态与收集消散表现</td></tr>
         <tr><th><a href="../apps/desktop/src/scene/MemoryFragment.tsx">MemoryFragment.tsx</a></th><td>森林记忆碎片的世界表现与可读提示</td></tr>
@@ -197,15 +201,15 @@
       <tbody>
         <tr><th><a href="../apps/desktop/src/ui/Hud.tsx">Hud.tsx</a></th><td>玩家优先的抬头显示：标题、状态行、目标与工坊入口</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/QuestPanel.tsx">QuestPanel.tsx</a></th><td>根据已提交进度显示当前目标，不自行推断完成度</td></tr>
-        <tr><th><a href="../apps/desktop/src/ui/Toolbar.tsx">Toolbar.tsx</a></th><td>相机重置、HUD 切换、全屏、截图与帮助的按钮组</td></tr>
-        <tr><th><a href="../apps/desktop/src/ui/SeedForm.tsx">SeedForm.tsx</a></th><td>seed 输入与历史选择，属于创作工具而非玩家主循环</td></tr>
+        <tr><th><a href="../apps/desktop/src/ui/Toolbar.tsx">Toolbar.tsx</a></th><td>返回安全点、截图、暂停菜单与帮助的按钮组</td></tr>
+        <tr><th><a href="../apps/desktop/src/ui/SeedForm.tsx">SeedForm.tsx</a></th><td>seed 数值输入、范围校验与重新生成，属于创作工具而非玩家主循环</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/DetailsPanel.tsx">DetailsPanel.tsx</a></th><td>展示选中符文/水晶/叶簇的名称、说明与能量</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/GameMenu.tsx">GameMenu.tsx</a></th><td>标题与暂停菜单：继续、新游戏确认、设置、制作信息、退出</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/SettingsOverlay.tsx">SettingsOverlay.tsx</a></th><td>主题、画质、三条音量、镜头灵敏度与四项无障碍开关</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/HelpOverlay.tsx">HelpOverlay.tsx</a></th><td>键盘与手柄操作说明，并提供性能记录器入口</td></tr>
-        <tr><th><a href="../apps/desktop/src/ui/MemoryOverlay.tsx">MemoryOverlay.tsx</a></th><td>森林记忆的模态阅读界面，读毕计入进度</td></tr>
+        <tr><th><a href="../apps/desktop/src/ui/MemoryOverlay.tsx">MemoryOverlay.tsx</a></th><td>显示已由 GameplayController 提交阅读记录的森林记忆，不自行修改进度</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/PurificationOverlay.tsx">PurificationOverlay.tsx</a></th><td>方向谜题的可视化与输入界面，规则仍在纯模块中</td></tr>
-        <tr><th><a href="../apps/desktop/src/ui/ChapterCompleteOverlay.tsx">ChapterCompleteOverlay.tsx</a></th><td>章节结尾：继续漫游或安全重开，不改动已提交进度</td></tr>
+        <tr><th><a href="../apps/desktop/src/ui/ChapterCompleteOverlay.tsx">ChapterCompleteOverlay.tsx</a></th><td>章节结尾：继续漫游、保存留影或返回标题，不改动已提交进度</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/CreditsOverlay.tsx">CreditsOverlay.tsx</a></th><td>制作信息、版本与诊断日志目录入口</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/OnboardingHint.tsx">OnboardingHint.tsx</a></th><td>首次进入的轻提示，可由设置关闭，并可为观察重置</td></tr>
         <tr><th><a href="../apps/desktop/src/ui/ProgressRecoveryNotice.tsx">ProgressRecoveryNotice.tsx</a></th><td>存档回退到备份或被隔离时的中文可恢复提示</td></tr>
@@ -236,7 +240,7 @@
         <tr><th><a href="../apps/desktop/src/performance/gameplayPerformanceEvents.ts">gameplayPerformanceEvents.ts</a></th><td>把进度快照差异翻译成 mark / begin-phase / end-phase 事件</td></tr>
         <tr><th><a href="../apps/desktop/src/playtest/m2Evidence.ts">playtest/m2Evidence.ts</a></th><td>M2 门槛常量与判定：五份匿名观察、完成时限、首条路线时间与帧率预算</td></tr>
         <tr><th><a href="../apps/desktop/src/playtest/M2EvidenceWorkbench.tsx">playtest/M2EvidenceWorkbench.tsx</a></th><td>仅本机的证据工作台，不联网、不采集身份，只用 P01–P05 匿名编号</td></tr>
-        <tr><th><a href="../apps/desktop/src/tests/">tests/</a></th><td>33 个测试文件：纯规则、契约、组件、存档、性能与开发变换</td></tr>
+        <tr><th><a href="../apps/desktop/src/tests/">tests/</a></th><td>行为回归测试：纯规则、契约、组件、存档、Worker 故障恢复、画质绘制、粒子时间步与开发变换；当前数量由测试命令统计</td></tr>
       </tbody>
     </table>
   </div>
@@ -248,7 +252,11 @@
         <tr><th><a href="../packages/ipc-contracts/src/index.ts">ipc-contracts/index.ts</a></th><td>全部跨边界 Zod schema、推导类型、设置默认值与 <code>ParseResult</code></td></tr>
         <tr><th><a href="../packages/liquid-glass/src/index.ts">liquid-glass/index.ts</a></th><td>玻璃组件包的导出面，并在导入时注入样式</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/GlassProvider.tsx">GlassProvider.tsx</a></th><td>主题与画质档的 Context 提供者及 <code>useGlass</code></td></tr>
-        <tr><th><a href="../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface.tsx</a></th><td>实现玻璃外观的唯一基元</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassPanel.tsx">GlassPanel.tsx</a></th><td>通用面板包装，组合 GlassSurface 并保留 DOM 引用</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassCard.tsx">GlassCard.tsx</a></th><td>卡片包装，用于一组相关内容</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassBadge.tsx">GlassBadge.tsx</a></th><td>紧凑徽章包装，用于标签与状态</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassButton.tsx">GlassButton.tsx</a></th><td>原生 button，共享玻璃样式、主操作样式与键盘语义</td></tr>
+        <tr><th><a href="../packages/liquid-glass/src/GlassSurface.tsx">GlassSurface.tsx</a></th><td>面板、卡片和徽章的共享容器；按钮直接复用样式</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/useGlassQuality.ts">useGlassQuality.ts</a></th><td>基于能力与偏好的画质探测，不维护浏览器黑名单</td></tr>
         <tr><th><a href="../packages/liquid-glass/src/theme.ts">theme.ts</a></th><td>包的公共词汇表：<code>GlassTheme</code> 与 <code>GlassQuality</code></td></tr>
       </tbody>

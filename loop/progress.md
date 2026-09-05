@@ -3,7 +3,7 @@
 本页是**当前状态的唯一可写位置**。任何影响范围、验收状态或门禁的改动都必须同步这里。
 判定规则见 [`concepts.md`](concepts.md)：自动化门禁与外部人工门槛永远分开记账。
 
-- 记录更新时间：2026-08-23
+- 记录更新时间：2026-09-05
 - 产品版本：1.0（两段式 `主版本.功能版本`，真相源 [`version.json`](../version.json)）
 - 交付形态：Windows x64 单人离线第三人称卡通森林游戏，NSIS 安装包 + 便携 EXE
 
@@ -32,7 +32,8 @@
 | 证据身份可复算 | `pnpm m2:verify` 复算报告哈希、时长、来源、阶段与帧率预算 |
 | 产物精确文件集与来源指纹 | `pnpm release:verify` |
 | 桌面最小权限与 CSP | `pnpm desktop:verify-security` |
-| 教学档案覆盖全部源码模块 | `pnpm docs:verify` 枚举真实源码树比对 |
+| 教学档案覆盖全部源码模块 | `pnpm docs:verify` 枚举真实源码树，只认可 `docs/code-map.html` 中的完整清单 |
+| UI、渲染、IPC 与导出复盘 | [`evidence/2026-09-05-ui-runtime-quality-review.md`](evidence/2026-09-05-ui-runtime-quality-review.md)：真实浏览器与隔离 Tauri 验证、失败回归和测试清理 |
 
 ## 三、未闭合的外部门槛
 
@@ -52,13 +53,13 @@
 
 | 门禁 | 结果 |
 |---|---|
-| `pnpm check` | 九阶段全部通过 |
-| Vitest | 33 个测试文件、118 项测试通过 |
-| `cargo test --workspace --locked` | 25 项通过（22 单元 + 3 跨边界） |
+| `pnpm check` | 十阶段全部通过 |
+| Vitest | 42 个测试文件、173 项测试通过 |
+| `cargo test --workspace --locked` | 31 项通过（27 单元 + 4 跨边界） |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | 无告警 |
 | `cargo fmt --check` | 通过 |
-| 教学档案 | 15 页、95/95 源码模块覆盖、全部链接可解析 |
-| 前端分块预算 | `three-engine` 687,857 / 700,000 字节，首屏不预加载 3D 块 |
+| 教学档案 | 15 页、99/99 源码模块覆盖、全部链接可解析 |
+| 前端分块预算 | `three-engine` 687,920 / 700,000 字节，首屏不预加载 3D 块 |
 
 ## 五、结构约定（2026-08-23 起）
 

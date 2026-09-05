@@ -10,11 +10,9 @@ import { useFrame } from '@react-three/fiber';
 import { type RefObject, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useAppStore } from '../state/store';
+import { advanceMagicParticlePositions } from './magicParticleMotion';
 
 const COUNT = 260;
-const PULSE_RANGE_MULTIPLIER = 1.6;
-const PULSE_FORCE_SCALE = 0.012;
-const WIND_SCALE = 0.012;
 
 interface Props {
   scene: TreeScene;
@@ -65,50 +63,7 @@ export function MagicParticles({ scene, reducedMotion, fieldRef }: Props) {
     if (!points || reducedMotion) return;
     const elapsed = state.clock.elapsedTime;
     const field = fieldRef.current;
-    const baseAttraction = selectedId ? 0.018 : 0.008;
-    const windX = (field?.wind.x ?? 0) * WIND_SCALE;
-    const windY = (field?.wind.y ?? 0) * WIND_SCALE;
-    const windZ = (field?.wind.z ?? 0) * WIND_SCALE;
-    const pulses = field?.pulses ?? [];
-
-    for (let index = 0; index < COUNT; index += 1) {
-      const offset = index * 3;
-      const phase = (phases[index] ?? 0) + elapsed * (0.35 + (index % 7) * 0.018);
-      let dx = Math.sin(phase) * baseAttraction + windX;
-      let dy = Math.cos(phase * 0.7) * 0.004 + windY;
-      let dz = Math.cos(phase) * baseAttraction + windZ;
-
-      const x = positions[offset] ?? 0;
-      const y = positions[offset + 1] ?? 0;
-      const z = positions[offset + 2] ?? 0;
-
-      for (const pulse of pulses) {
-        const pdx = pulse.center.x - x;
-        const pdy = pulse.center.y - y;
-        const pdz = pulse.center.z - z;
-        const dist = Math.hypot(pdx, pdy, pdz);
-        const reach = pulse.radius * PULSE_RANGE_MULTIPLIER;
-        if (dist > 0 && dist < reach) {
-          const falloff = 1 - dist / reach;
-          const force = falloff * pulse.strength * PULSE_FORCE_SCALE;
-          const inv = force / dist;
-          dx += pdx * inv;
-          dy += pdy * inv;
-          dz += pdz * inv;
-        }
-      }
-
-      let nx = x + dx;
-      const ny = y + dy;
-      let nz = z + dz;
-      if (Math.hypot(nx, nz) > 3.4) {
-        nx *= 0.92;
-        nz *= 0.92;
-      }
-      positions[offset] = nx;
-      positions[offset + 1] = ny > 4.6 ? 0.28 : ny;
-      positions[offset + 2] = nz;
-    }
+    advanceMagicParticlePositions(positions, phases, elapsed, delta, field, selectedId !== null);
 
     positionAttribute.needsUpdate = true;
     points.rotation.y = elapsed * 0.025;
