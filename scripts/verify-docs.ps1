@@ -316,6 +316,30 @@ if ($strayDirectories.Count -gt 0) {
     throw "docs/ must not hold non-teaching subdirectories (engineering records belong in loop/); found: $($strayDirectories -join ', ')"
 }
 
+# Release packaging copies Markdown documents too. A successful HTML/link
+# check must not conceal a stale document path in the build or verifier.
+$releaseDocumentCount = 0
+foreach ($scriptName in @("release-build.ps1", "release-verify.ps1")) {
+    $scriptText = Read-Utf8Text (Join-Path $repositoryRoot "scripts\$scriptName")
+    $documentReferences = [regex]::Matches(
+        $scriptText, 'Join-Path\s+\$repositoryRoot\s+"(?<path>[^"\r\n]+\.(?:md|html))"'
+    )
+    if ($documentReferences.Count -eq 0) {
+        throw "Release script has no document source to verify: $scriptName"
+    }
+    foreach ($reference in $documentReferences) {
+        $relativePath = $reference.Groups["path"].Value
+        $resolvedPath = [IO.Path]::GetFullPath((Join-Path $repositoryRoot $relativePath))
+        if (-not $resolvedPath.StartsWith($repositoryRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Release document path escapes the repository: $scriptName -> $relativePath"
+        }
+        if (-not (Test-Path -LiteralPath $resolvedPath -PathType Leaf)) {
+            throw "Release script references a missing document: $scriptName -> $relativePath"
+        }
+        $releaseDocumentCount++
+    }
+}
+
 $textLength = (($combinedHtml -replace '<[^>]+>', ' ') -replace '\s+', ' ').Trim().Length
 if ($pages.Count -lt 15 -or $allSectionIds.Count -lt 20 -or $textLength -lt 30000) {
     throw "Teaching archive is not comprehensive enough (pages=$($pages.Count), sections=$($allSectionIds.Count), characters=$textLength)."
@@ -331,4 +355,5 @@ Write-Host "Teaching archive verified:" -ForegroundColor Green
     Links = $totalLinks
     DocumentedModules = $documentedModuleCount
     IndexLinks = $markdownLinkCount
+    ReleaseDocuments = $releaseDocumentCount
 } | Format-List

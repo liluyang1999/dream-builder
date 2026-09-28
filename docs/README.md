@@ -23,7 +23,7 @@
 | 07 | [`rust.html`](rust.html) | 领域模型、trait 接缝、错误处理、持久化与确定性生成 |
 | 08 | [`tauri.html`](tauri.html) | Tauri 2 外壳、插件、路径基准与 WebView2 Evergreen 策略 |
 | 09 | [`security.html`](security.html) | Capability/ACL、CSP、边界校验与依赖供应链 |
-| 10 | [`build.html`](build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源与两段式版本 |
+| 10 | [`build.html`](build.html) | Vite/Rollup 分块预算、`build.rs` 版本资源、两段式版本与缓存清理 |
 | 11 | [`quality.html`](quality.html) | 十阶段质量门禁、测试隔离与持续集成 |
 | 12 | [`release.html`](release.html) | Windows 打包、源码指纹、签名与安装卸载合同 |
 | 13 | [`code-map.html`](code-map.html) | 覆盖每一个源码模块的完整索引 |
@@ -44,6 +44,7 @@
 
 - **自包含**：无远程脚本、字体或样式，离线可读、可打印、可随仓库归档。
 - **可验证**：`pnpm docs:verify` 检查每页结构、页面可达性、锚点、本地链接，
-  并枚举真实源码树，确认每一个源码模块都在 [`code-map.html`](code-map.html) 中有说明。
+  并枚举真实源码树，确认每一个源码模块都在 [`code-map.html`](code-map.html) 中有说明；
+  同时检查发布脚本引用的交付文档仍然存在。
 - **描述现状**：所有结论描述当前仓库的实际实现，不是理想化示例；
   未通过的人工门槛在档案中保持可见，不被自动化结果掩盖。

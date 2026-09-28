@@ -168,6 +168,36 @@
   </p>
         </section>
 
+        <section id="build-cleanup">
+  <p class="section-kicker">Build storage</p>
+  <h2>构建缓存不是游戏体积</h2>
+  <p>
+    Rust 的 <code>target/</code> 会同时保存调试符号、增量编译、中间依赖、测试程序与发布产物。
+    多轮编译后它可能远大于最终 EXE。清理会让下一次编译变慢，但不需要删除源码或玩家存档。
+    先停止本项目的构建和运行进程，再在仓库根目录使用工具自己的清理入口：
+  </p>
+  <pre><code>cargo clean --target-dir ./target
+pnpm store prune</code></pre>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>目录</th><th>用途</th><th>处理原则</th></tr></thead>
+      <tbody>
+        <tr><th><code>target/</code></th><td>可重新生成的 Rust 构建结果</td><td>先保留并验证需要交付的候选包，再运行 cargo clean</td></tr>
+        <tr><th><code>.pnpm-store/</code></th><td>共享内容存储</td><td>用 store prune 清除无引用包，不跟随其中的目录链接递归删除</td></tr>
+        <tr><th><code>.pnpm-cache/</code>、Vite/Vitest 缓存</th><td>下载元数据和转换加速</td><td>停止对应进程后可重建；仅删除已确认的项目内缓存路径</td></tr>
+        <tr><th><code>node_modules/</code></th><td>当前可用的开发依赖</td><td>日常保留；删除后需要 pnpm install --frozen-lockfile 才能工作</td></tr>
+        <tr><th><code>output/release/</code></th><td>带来源与校验和的交付候选</td><td>用 release:verify 核对，不能仅凭文件名把旧包当作新包</td></tr>
+        <tr><th><code>docs/</code>、<code>loop/</code>、<code>.git/</code></th><td>教学、证据与版本历史</td><td>长期保留；历史证据与用户配置不属于缓存</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    pnpm 可能使用硬链接，存储目录还可能包含指回项目的链接。目录内文件大小之和是逻辑大小，
+    不能直接当成磁盘实际释放量。清理前后使用同一种、不跟随链接的统计方式，并检查源码差异、
+    锁定依赖安装与遗留进程。正式玩家数据不在此清理范围内。
+  </p>
+        </section>
+
         <nav class="pager" aria-label="翻页">
           <a class="pager__link" href="./security.html"><span>上一页</span><strong>09 · 安全边界</strong></a>
           <a class="pager__link pager__link--next" href="./quality.html"><span>下一页</span><strong>11 · 质量与 CI</strong></a>

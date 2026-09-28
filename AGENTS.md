@@ -56,7 +56,7 @@ pnpm loop:verify              # Loop Engineering records, required files, and li
 pnpm pnpm:verify-layout       # all pnpm stores/caches remain below the repository root
 pnpm dev                      # Vite dev server on http://127.0.0.1:1420 (strict port)
 pnpm test                     # Vitest across the workspace (single run)
-pnpm test -- treeApi          # filter to one test file
+pnpm test treeApi             # filter to one test file
 pnpm typecheck                # tsc --noEmit across all TS packages
 pnpm lint                     # biome check .
 pnpm fmt                      # biome format --write .
@@ -92,7 +92,7 @@ The root `tauri` script does `cd crates/dream-builder && tauri` so Tauri-CLI fin
 The frontend can run **without the Rust backend present** (`pnpm dev` in a browser). Runtime detection lives in `apps/desktop/src/ipc/runtime.ts`.
 
 - In Tauri, `apps/desktop/src/ipc/treeApi.ts` invokes commands implemented by `crates/dream-builder/src/commands.rs` and subscribes to Rust events.
-- In a browser, scene generation runs through `apps/desktop/src/workers/fallback.worker.ts`; IPC failure or invalid payloads also fall back and surface a Chinese warning in the HUD.
+- In a browser, scene generation runs through `apps/desktop/src/workers/fallback.worker.ts`; IPC failure or invalid payloads also fall back and surface a global Chinese warning above the current screen or overlay.
 - `packages/ipc-contracts/src/index.ts` is the frontend type/runtime guard for camelCase payloads. Matching Rust domain structs live under `crates/dream-builder/src/domain/`.
 
 When changing the wire format, update the Rust domain/serde shape, the Zod contract, the browser fallback generator, and cross-boundary tests. Rust generation must remain deterministic for a given seed.

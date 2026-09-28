@@ -88,6 +88,12 @@
     对路径、大小与 SHA-256 形成排序索引，再计算整棵源码树指纹。产物生成后任何源文件变化都会让独立验证拒绝旧清单。
   </p>
   <h3>候选、生产和签名</h3>
+  <p>
+    构建成功只证明 EXE 与安装器可以生成；完整候选还要复制许可证、交付手册并生成清单。
+    手册的唯一源文件是 <a href="../loop/product/release-runbook.md">loop/product/release-runbook.md</a>。
+    <code>pnpm docs:verify</code> 同时检查发布构建与验证脚本引用的文档路径；完整交付仍要执行
+    <code>pnpm release:build</code> 和 <code>pnpm release:verify</code>，两类检查不能互相代替。
+  </p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>类型</th><th>允许状态</th><th>可以怎样称呼</th></tr></thead>

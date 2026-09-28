@@ -240,7 +240,7 @@ try {
     }
 
     $sourceLicense = Join-Path $repositoryRoot "crates\dream-builder\installer\LICENSE.txt"
-    $sourceRunbook = Join-Path $repositoryRoot "docs\game\release-runbook.md"
+    $sourceRunbook = Join-Path $repositoryRoot "loop\product\release-runbook.md"
     $copyPairs = @(
         @($sourceLicense, (Join-Path $resolvedReleaseDirectory "LICENSE.txt")),
         @($sourceRunbook, (Join-Path $resolvedReleaseDirectory "README-zh-CN.md"))

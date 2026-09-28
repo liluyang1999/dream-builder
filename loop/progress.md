@@ -3,7 +3,7 @@
 本页是**当前状态的唯一可写位置**。任何影响范围、验收状态或门禁的改动都必须同步这里。
 判定规则见 [`concepts.md`](concepts.md)：自动化门禁与外部人工门槛永远分开记账。
 
-- 记录更新时间：2026-09-05
+- 记录更新时间：2026-09-28
 - 产品版本：1.0（两段式 `主版本.功能版本`，真相源 [`version.json`](../version.json)）
 - 交付形态：Windows x64 单人离线第三人称卡通森林游戏，NSIS 安装包 + 便携 EXE
 
@@ -26,14 +26,18 @@
 
 | 事实 | 证据 |
 |---|---|
-| 目标设备十分钟原生性能达标 | [`evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json`](evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json)，覆盖 `scene-load` 与 `cleansing` |
-| 复苏场景稳态性能 | [`evidence/2026-07-26T07-41-32Z-release-1.0-steady-state-tauri.json`](evidence/2026-07-26T07-41-32Z-release-1.0-steady-state-tauri.json) |
-| 当前用户安装—首次启动—单实例—退出—卸载闭环 | [`evidence/2026-08-10-release-1.0-lifecycle.md`](evidence/2026-08-10-release-1.0-lifecycle.md)，绑定干净提交与 EXE/安装器 SHA-256 |
+| 历史构建的目标设备十分钟原生性能达标 | [`evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json`](evidence/2026-07-23T15-28-24Z-m2-performance-tauri.json)，覆盖 `scene-load` 与 `cleansing` |
+| 历史构建的复苏场景稳态性能 | [`evidence/2026-07-26T07-41-32Z-release-1.0-steady-state-tauri.json`](evidence/2026-07-26T07-41-32Z-release-1.0-steady-state-tauri.json) |
+| 历史候选的当前用户安装—首次启动—单实例—退出—卸载闭环 | [`evidence/2026-08-10-release-1.0-lifecycle.md`](evidence/2026-08-10-release-1.0-lifecycle.md)，仅绑定其中记录的提交与 EXE/安装器 SHA-256 |
 | 证据身份可复算 | `pnpm m2:verify` 复算报告哈希、时长、来源、阶段与帧率预算 |
 | 产物精确文件集与来源指纹 | `pnpm release:verify` |
 | 桌面最小权限与 CSP | `pnpm desktop:verify-security` |
 | 教学档案覆盖全部源码模块 | `pnpm docs:verify` 枚举真实源码树，只认可 `docs/code-map.html` 中的完整清单 |
 | UI、渲染、IPC 与导出复盘 | [`evidence/2026-09-05-ui-runtime-quality-review.md`](evidence/2026-09-05-ui-runtime-quality-review.md)：真实浏览器与隔离 Tauri 验证、失败回归和测试清理 |
+| 发布文档、依赖与磁盘复盘 | [`evidence/2026-09-28-maintenance-review.md`](evidence/2026-09-28-maintenance-review.md)：发布路径失败回归、全量门禁、真实 UI/原生验证与首次缓存清理 |
+
+历史性能与安装记录继续有效地描述当时的构建，不能当成当前候选的新测量。
+最终发行候选仍需重新绑定原生性能及受影响的安装/升级证据。
 
 ## 三、未闭合的外部门槛
 
@@ -55,10 +59,12 @@
 |---|---|
 | `pnpm check` | 十阶段全部通过 |
 | Vitest | 42 个测试文件、173 项测试通过 |
+| 测试工具依赖 | Vitest 升级至 4.1.11；`pnpm audit --audit-level low` 未发现已知 npm 公告 |
 | `cargo test --workspace --locked` | 31 项通过（27 单元 + 4 跨边界） |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | 无告警 |
 | `cargo fmt --check` | 通过 |
 | 教学档案 | 15 页、99/99 源码模块覆盖、全部链接可解析 |
+| 发布手册路径 | 构建与验证脚本均指向 `loop/product/release-runbook.md`；两处旧路径均经失败回归确认 |
 | 前端分块预算 | `three-engine` 687,920 / 700,000 字节，首屏不预加载 3D 块 |
 
 ## 五、结构约定（2026-08-23 起）
@@ -70,9 +76,25 @@
 
 教学内容不再放在 `loop/`，工程记录也不再放进 `docs/`。两条门禁分别守住各自的完整性。
 
-## 六、下一轮建议顺序
+## 六、依赖维护跟进
+
+2026-09-28 通过 OSV 对 Cargo.lock 的 481 个 registry 包逐一查询，发现 7 个带 RustSec
+信息公告的包，不能写成“Rust 审计零发现”：
+
+- `glib 0.18.5` 的 [RUSTSEC-2024-0429](https://rustsec.org/advisories/RUSTSEC-2024-0429.html)
+  为潜在不健全 API；`proc-macro-error 1.0.4` 的
+  [RUSTSEC-2024-0370](https://rustsec.org/advisories/RUSTSEC-2024-0370.html) 为停止维护。
+  `cargo tree --locked --target x86_64-pc-windows-msvc -i` 确认两者不在当前 Windows 依赖树中。
+- Windows 依赖链中的 `urlpattern 0.3.0 → tauri-utils 2.9.3 → Tauri` 使用五个停止维护的
+  `unic-* 0.9.0` 包：RUSTSEC-2025-0075 / 0080 / 0081 / 0098 / 0100。
+  公告没有提供这些包的修复版本；应跟进上游替换并完成 Tauri 平台回归，不用强制改锁文件掩盖它们。
+
+这是依赖维护风险记录，不代表已证明游戏中存在可利用路径，也不替代今后的联网审计。
+
+## 七、下一轮建议顺序
 
 1. 组织五人无提示观察，关闭 M2 的最后一项。
 2. 补齐代码签名证书，产出可宣称生产的签名候选。
 3. 在干净 Windows 账户完成安装、完整章节与覆盖升级演练。
-4. 以上三项各自归档证据并回写本页，再讨论 1.x 的新功能。
+4. 跟进 Rust 传递依赖维护状态，并为最终候选重新采集性能、安装和升级证据。
+5. 验收证据归档并回写本页，再讨论 1.x 的新功能。

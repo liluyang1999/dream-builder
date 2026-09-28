@@ -244,7 +244,7 @@ try {
     Copy-Item -LiteralPath $binaryPath -Destination $portableOutput -Force
     Copy-Item -LiteralPath $installerPath -Destination $installerOutput -Force
     Copy-Item -LiteralPath (Join-Path $repositoryRoot "crates\dream-builder\installer\LICENSE.txt") -Destination $licenseOutput -Force
-    Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs\game\release-runbook.md") -Destination $runbookOutput -Force
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot "loop\product\release-runbook.md") -Destination $runbookOutput -Force
 
     $deliverables = @($portableOutput, $installerOutput, $licenseOutput, $runbookOutput)
     $fileRecords = foreach ($path in $deliverables) {

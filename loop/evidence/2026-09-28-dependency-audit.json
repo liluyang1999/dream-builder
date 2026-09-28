@@ -1,0 +1,57 @@
+{
+  "checkedOn": "2026-09-28",
+  "source": "OSV querybatch; RustSec primary advisories",
+  "cargoLockSha256": "B308BDCF4F3FD5C40AA121ED8EA74C0A2E03C40F68A66727A57DCB5F8A1A24F1",
+  "target": "x86_64-pc-windows-msvc",
+  "packagesChecked": 481,
+  "findings": [
+    {
+      "Package": "glib",
+      "Version": "0.18.5",
+      "Advisories": ["GHSA-wrw7-89jp-8q8g", "RUSTSEC-2024-0429"]
+    },
+    {
+      "Package": "proc-macro-error",
+      "Version": "1.0.4",
+      "Advisories": ["RUSTSEC-2024-0370"]
+    },
+    {
+      "Package": "unic-char-property",
+      "Version": "0.9.0",
+      "Advisories": ["RUSTSEC-2025-0081"]
+    },
+    {
+      "Package": "unic-char-range",
+      "Version": "0.9.0",
+      "Advisories": ["RUSTSEC-2025-0075"]
+    },
+    {
+      "Package": "unic-common",
+      "Version": "0.9.0",
+      "Advisories": ["RUSTSEC-2025-0080"]
+    },
+    {
+      "Package": "unic-ucd-ident",
+      "Version": "0.9.0",
+      "Advisories": ["RUSTSEC-2025-0100"]
+    },
+    {
+      "Package": "unic-ucd-version",
+      "Version": "0.9.0",
+      "Advisories": ["RUSTSEC-2025-0098"]
+    }
+  ],
+  "inactiveOnTarget": ["glib", "proc-macro-error"],
+  "activeMaintenanceNotices": [
+    "unic-char-property",
+    "unic-char-range",
+    "unic-common",
+    "unic-ucd-ident",
+    "unic-ucd-version"
+  ],
+  "javascript": {
+    "command": "pnpm audit --audit-level low",
+    "knownVulnerabilities": 0,
+    "vitest": "4.1.11"
+  }
+}

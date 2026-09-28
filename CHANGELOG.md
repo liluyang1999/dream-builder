@@ -9,6 +9,12 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Fixed the release builder and verifier to read the canonical handoff manual
+  from `loop/product`; document checks now reject missing release-document paths.
+- Updated Vitest to 4.1.11 for GHSA-82fw-gwwq-j7x9 while preserving all existing
+  test assertions and production dependencies.
+- Documented safe build-cache cleanup and separate Rust dependency auditing;
+  moved the old quality snapshot out of the current acceptance matrix.
 - Refined the forest title screen and HUD, responsive modal layouts, light/dark
   contrast, real large-text scaling, reduced motion, and keyboard focus behavior.
 - Native detail lookups reuse scene metadata instead of regenerating the tree;
