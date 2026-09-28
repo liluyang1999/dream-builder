@@ -65,6 +65,7 @@
 | `cargo fmt --check` | 通过 |
 | 教学档案 | 15 页、99/99 源码模块覆盖、全部链接可解析 |
 | 发布手册路径 | 构建与验证脚本均指向 `loop/product/release-runbook.md`；两处旧路径均经失败回归确认 |
+| 发布 PowerShell 宿主 | [模块路径继承问题](evidence/2026-09-28-release-host-compatibility.md)已做最小失败/成功对照；两份脚本显式加载宿主自带的安全模块 |
 | 前端分块预算 | `three-engine` 687,920 / 700,000 字节，首屏不预加载 3D 块 |
 
 ## 五、结构约定（2026-08-23 起）

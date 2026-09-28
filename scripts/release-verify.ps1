@@ -7,6 +7,10 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+# A Node/pnpm parent can pass PowerShell 7 module paths to Windows PowerShell.
+# Load the matching host's built-in module instead of a higher-version shadow.
+Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1") -ErrorAction Stop
+
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 . (Join-Path $PSScriptRoot "lib\version-contract.ps1")
 . (Join-Path $PSScriptRoot "lib\file-hash.ps1")

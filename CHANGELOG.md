@@ -11,6 +11,8 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 - Fixed the release builder and verifier to read the canonical handoff manual
   from `loop/product`; document checks now reject missing release-document paths.
+- Pinned Authenticode module loading to the current PowerShell host so a pnpm
+  child cannot accidentally load PowerShell 7 modules into Windows PowerShell 5.1.
 - Updated Vitest to 4.1.11 for GHSA-82fw-gwwq-j7x9 while preserving all existing
   test assertions and production dependencies.
 - Documented safe build-cache cleanup and separate Rust dependency auditing;

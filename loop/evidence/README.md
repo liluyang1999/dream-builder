@@ -5,6 +5,7 @@
 
 最新复盘见 [2026-09-28 · 可交付性与磁盘清理](2026-09-28-maintenance-review.md)，
 依赖检查见 [2026-09-28 审计数据](2026-09-28-dependency-audit.json)。
+最终打包暴露的环境问题见 [PowerShell 宿主兼容补充](2026-09-28-release-host-compatibility.md)。
 前次质量复盘见 [2026-09-05 · UI 与运行时](2026-09-05-ui-runtime-quality-review.md)；
 原验收页中的 [2026-08-10 质量快照](2026-08-10-quality-snapshot.md) 已单独归档。
 最新状态统一见 [progress.md](../progress.md)。

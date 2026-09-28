@@ -104,6 +104,14 @@
       </tbody>
     </table>
   </div>
+  <h3>签名检查使用宿主模块</h3>
+  <p>
+    发布脚本由 pnpm 再启动 PowerShell 时，会继承父进程的模块搜索路径。
+    PowerShell 7 的模块不能直接当作 Windows PowerShell 5.1 的内置模块加载；这可能导致签名命令自动加载失败。
+    因此两份发布脚本从 <code>$PSHOME/Modules</code> 显式加载当前宿主自己的安全模块，
+    继续执行真实的 Authenticode 检查，不修改用户的全局配置。模块路径继承规则见
+    <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_psmodulepath?view=powershell-7.6">Microsoft 的 PSModulePath 说明</a>。
+  </p>
   <h3>安装与卸载合同</h3>
   <p>
     <a href="../scripts/release-install-state.ps1">release-install-state.ps1</a> 在安装后检查唯一卸载项、
