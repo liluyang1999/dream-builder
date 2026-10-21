@@ -13,7 +13,8 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security\Microsof
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 . (Join-Path $PSScriptRoot "lib\version-contract.ps1")
-. (Join-Path $PSScriptRoot "lib\file-hash.ps1")
+. (Join-Path $PSScriptRoot "lib\source-tree.ps1")
+. (Join-Path $PSScriptRoot "lib\release-files.ps1")
 Push-Location $repositoryRoot
 
 try {
@@ -51,42 +52,6 @@ try {
         }
     }
 
-    function Get-SourceTreeSha256 {
-        param([Parameter(Mandatory = $true)][string]$Root)
-
-        $relativePaths = [string[]]@(
-            & git -c core.quotepath=false ls-files --cached --others --exclude-standard
-        )
-        if ($LASTEXITCODE -ne 0) {
-            throw "Could not enumerate the Git source tree."
-        }
-        [Array]::Sort($relativePaths, [StringComparer]::Ordinal)
-
-        $records = foreach ($relativePath in $relativePaths) {
-            $nativeRelativePath = $relativePath.Replace("/", [IO.Path]::DirectorySeparatorChar)
-            $fullPath = Join-Path $Root $nativeRelativePath
-            if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
-                $item = Get-Item -LiteralPath $fullPath
-                $hash = Get-DreamBuilderSha256 -LiteralPath $fullPath
-                "$relativePath`t$($item.Length)`t$hash"
-            } else {
-                "$relativePath`tMISSING"
-            }
-        }
-
-        $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
-        $indexBytes = $utf8WithoutBom.GetBytes(([string]::Join("`n", $records) + "`n"))
-        $sha256 = [Security.Cryptography.SHA256]::Create()
-        try {
-            return (
-                $sha256.ComputeHash($indexBytes) |
-                    ForEach-Object { $_.ToString("X2") }
-            ) -join ""
-        } finally {
-            $sha256.Dispose()
-        }
-    }
-
     $versionContract = Get-DreamBuilderVersionContract -RepositoryRoot $repositoryRoot
     $version = $versionContract.ProductVersion
     $tauriConfig = $versionContract.TauriConfig
@@ -117,8 +82,9 @@ try {
         "SHA256SUMS.txt"
         "release-manifest.json"
     )
+    Assert-DreamBuilderReleaseDirectory -LiteralPath $resolvedReleaseDirectory -ExpectedNames $expectedDirectoryNames
     $actualDirectoryNames = @(
-        Get-ChildItem -LiteralPath $resolvedReleaseDirectory -File |
+        Get-ChildItem -LiteralPath $resolvedReleaseDirectory -Force |
             Select-Object -ExpandProperty Name
     )
     Assert-SameNames $actualDirectoryNames $expectedDirectoryNames "Release file set"
@@ -163,7 +129,7 @@ try {
     if ([string]$manifest.sourceTreeSha256 -notmatch '^[0-9a-fA-F]{64}$') {
         throw "Manifest sourceTreeSha256 is not a SHA-256 digest."
     }
-    $currentSourceTreeSha256 = Get-SourceTreeSha256 $repositoryRoot
+    $currentSourceTreeSha256 = Get-DreamBuilderSourceTreeSha256 $repositoryRoot
     Assert-Equal (
         [string]$manifest.sourceTreeSha256
     ) $currentSourceTreeSha256 "Manifest source tree SHA-256"

@@ -16,8 +16,10 @@ Import-Module (Join-Path $PSHOME "Modules\Microsoft.PowerShell.Security\Microsof
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $temporarySigningDirectory = $null
+$stagingDirectory = $null
 . (Join-Path $PSScriptRoot "lib\version-contract.ps1")
-. (Join-Path $PSScriptRoot "lib\file-hash.ps1")
+. (Join-Path $PSScriptRoot "lib\source-tree.ps1")
+. (Join-Path $PSScriptRoot "lib\release-files.ps1")
 Push-Location $repositoryRoot
 
 try {
@@ -44,46 +46,23 @@ try {
         return Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
     }
 
-    function Get-SourceTreeSha256 {
-        param([Parameter(Mandatory = $true)][string]$Root)
-
-        $relativePaths = [string[]]@(
-            & git -c core.quotepath=false ls-files --cached --others --exclude-standard
-        )
-        if ($LASTEXITCODE -ne 0) {
-            throw "Could not enumerate the Git source tree."
-        }
-        [Array]::Sort($relativePaths, [StringComparer]::Ordinal)
-
-        $records = foreach ($relativePath in $relativePaths) {
-            $nativeRelativePath = $relativePath.Replace("/", [IO.Path]::DirectorySeparatorChar)
-            $fullPath = Join-Path $Root $nativeRelativePath
-            if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
-                $item = Get-Item -LiteralPath $fullPath
-                $hash = Get-DreamBuilderSha256 -LiteralPath $fullPath
-                "$relativePath`t$($item.Length)`t$hash"
-            } else {
-                "$relativePath`tMISSING"
-            }
-        }
-
-        $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
-        $indexBytes = $utf8WithoutBom.GetBytes(([string]::Join("`n", $records) + "`n"))
-        $sha256 = [Security.Cryptography.SHA256]::Create()
-        try {
-            return (
-                $sha256.ComputeHash($indexBytes) |
-                    ForEach-Object { $_.ToString("X2") }
-            ) -join ""
-        } finally {
-            $sha256.Dispose()
-        }
-    }
-
     $versionContract = Get-DreamBuilderVersionContract -RepositoryRoot $repositoryRoot
     $productVersion = $versionContract.ProductVersion
     $toolingVersion = $versionContract.ToolingVersion
     $tauriConfig = $versionContract.TauriConfig
+    $releaseNames = @(
+        "Dream-Builder-Fantasy-Tree_${productVersion}_x64.exe",
+        "Dream-Builder-Fantasy-Tree_${productVersion}_x64-setup.exe",
+        "LICENSE.txt", "README-zh-CN.md", "SHA256SUMS.txt", "release-manifest.json"
+    )
+    $resolvedOutputRoot = if ([IO.Path]::IsPathRooted($OutputDirectory)) {
+        [IO.Path]::GetFullPath($OutputDirectory)
+    } else {
+        [IO.Path]::GetFullPath((Join-Path $repositoryRoot $OutputDirectory))
+    }
+    $releaseDirectory = Join-Path $resolvedOutputRoot $productVersion
+    # Fail before compiling or touching an existing candidate if its directory is unexpected.
+    Assert-DreamBuilderReleaseDirectory -LiteralPath $releaseDirectory -ExpectedNames $releaseNames -AllowMissing
     $capabilityConfig = Read-JsonFile (
         Join-Path $repositoryRoot "crates\dream-builder\capabilities\default.json"
     )
@@ -163,7 +142,7 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw "Could not resolve the source commit."
     }
-    $sourceTreeSha256 = Get-SourceTreeSha256 $repositoryRoot
+    $sourceTreeSha256 = Get-DreamBuilderSourceTreeSha256 $repositoryRoot
 
     if (-not $SkipQualityGate) {
         Invoke-CheckedCommand "Frontend quality gate" "pnpm" @("check")
@@ -178,6 +157,15 @@ try {
             "-D",
             "warnings"
         )
+        $previousRustdocFlags = $env:RUSTDOCFLAGS
+        try {
+            $env:RUSTDOCFLAGS = "-D warnings"
+            Invoke-CheckedCommand "Rust documentation" "cargo" @(
+                "doc", "--workspace", "--no-deps", "--locked"
+            )
+        } finally {
+            $env:RUSTDOCFLAGS = $previousRustdocFlags
+        }
     }
 
     $tauriArguments = @("tauri", "build")
@@ -205,6 +193,10 @@ try {
         $tauriArguments += @("--config", $signingConfigPath)
     }
     Invoke-CheckedCommand "Tauri Windows bundle" "pnpm" $tauriArguments
+    Invoke-CheckedCommand "Native NSIS version and downgrade policy" "powershell" @(
+        "-NoLogo", "-NoProfile", "-File",
+        (Join-Path $repositoryRoot "scripts\tests\installer-versions.test.ps1")
+    )
 
     $binaryPath = Join-Path $repositoryRoot "target\release\dream-builder.exe"
     if (-not (Test-Path -LiteralPath $binaryPath -PathType Leaf)) {
@@ -232,18 +224,15 @@ try {
         }
     }
 
-    $resolvedOutputRoot = if ([IO.Path]::IsPathRooted($OutputDirectory)) {
-        [IO.Path]::GetFullPath($OutputDirectory)
-    } else {
-        [IO.Path]::GetFullPath((Join-Path $repositoryRoot $OutputDirectory))
-    }
-    $releaseDirectory = Join-Path $resolvedOutputRoot $productVersion
-    New-Item -ItemType Directory -Path $releaseDirectory -Force | Out-Null
+    Assert-DreamBuilderReleaseDirectory -LiteralPath $releaseDirectory -ExpectedNames $releaseNames -AllowMissing
+    $plannedStagingDirectory = Join-Path $resolvedOutputRoot (".$productVersion-staging-" + [Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $plannedStagingDirectory | Out-Null
+    $stagingDirectory = $plannedStagingDirectory
 
-    $portableOutput = Join-Path $releaseDirectory "Dream-Builder-Fantasy-Tree_${productVersion}_x64.exe"
-    $installerOutput = Join-Path $releaseDirectory "Dream-Builder-Fantasy-Tree_${productVersion}_x64-setup.exe"
-    $licenseOutput = Join-Path $releaseDirectory "LICENSE.txt"
-    $runbookOutput = Join-Path $releaseDirectory "README-zh-CN.md"
+    $portableOutput = Join-Path $stagingDirectory "Dream-Builder-Fantasy-Tree_${productVersion}_x64.exe"
+    $installerOutput = Join-Path $stagingDirectory "Dream-Builder-Fantasy-Tree_${productVersion}_x64-setup.exe"
+    $licenseOutput = Join-Path $stagingDirectory "LICENSE.txt"
+    $runbookOutput = Join-Path $stagingDirectory "README-zh-CN.md"
 
     Copy-Item -LiteralPath $binaryPath -Destination $portableOutput -Force
     Copy-Item -LiteralPath $installerPath -Destination $installerOutput -Force
@@ -276,7 +265,7 @@ try {
     }
 
     $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
-    $checksumPath = Join-Path $releaseDirectory "SHA256SUMS.txt"
+    $checksumPath = Join-Path $stagingDirectory "SHA256SUMS.txt"
     $checksumLines = @(
         $fileRecords | ForEach-Object { "$($_.sha256)  $($_.name)" }
     )
@@ -295,7 +284,7 @@ try {
         signatures = $signatureRecords
         files = $fileRecords
     }
-    $manifestPath = Join-Path $releaseDirectory "release-manifest.json"
+    $manifestPath = Join-Path $stagingDirectory "release-manifest.json"
     [IO.File]::WriteAllText(
         $manifestPath,
         ($manifest | ConvertTo-Json -Depth 6),
@@ -308,12 +297,14 @@ try {
         "-File",
         (Join-Path $repositoryRoot "scripts\release-verify.ps1"),
         "-ReleaseDirectory",
-        $releaseDirectory
+        $stagingDirectory
     )
     if ($RequireSigned) {
         $verificationArguments += @("-RequireCleanSource", "-RequireSigned")
     }
     Invoke-CheckedCommand "Release artifact verification" "powershell" $verificationArguments
+    Publish-DreamBuilderReleaseDirectory -StagingDirectory $stagingDirectory -ReleaseDirectory $releaseDirectory -ExpectedNames $releaseNames
+    $stagingDirectory = $null
 
     Write-Host ""
     $releaseLabel = if ($RequireSigned) {
@@ -328,21 +319,22 @@ try {
         Select-Object Name, Length |
         Format-Table -AutoSize
 } finally {
-    if ($null -ne $temporarySigningDirectory -and (
-        Test-Path -LiteralPath $temporarySigningDirectory -PathType Container
-    )) {
-        $resolvedTemporarySigningDirectory = [IO.Path]::GetFullPath(
-            $temporarySigningDirectory
-        )
-        $resolvedSystemTempRoot = (
-            [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd("\")
-        ) + "\"
-        if ($resolvedTemporarySigningDirectory.StartsWith(
-            $resolvedSystemTempRoot,
-            [StringComparison]::OrdinalIgnoreCase
-        )) {
-            Remove-Item -LiteralPath $resolvedTemporarySigningDirectory -Recurse -Force
+    try {
+        try {
+            if ($null -ne $stagingDirectory) {
+                Remove-DreamBuilderReleaseStagingDirectory -LiteralPath $stagingDirectory -ExpectedNames $releaseNames
+            }
+        } finally {
+            if ($null -ne $temporarySigningDirectory) {
+                $resolvedTemporarySigningDirectory = [IO.Path]::GetFullPath($temporarySigningDirectory)
+                $resolvedSystemTempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd("\") + "\"
+                if (-not $resolvedTemporarySigningDirectory.StartsWith($resolvedSystemTempRoot, [StringComparison]::OrdinalIgnoreCase)) {
+                    throw "Signing cleanup escaped the system temporary directory."
+                }
+                Remove-DreamBuilderReleaseStagingDirectory -LiteralPath $resolvedTemporarySigningDirectory -ExpectedNames @("tauri.signing.json")
+            }
         }
+    } finally {
+        Pop-Location
     }
-    Pop-Location
 }

@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateSet("Installed", "Absent")]
-    [string]$ExpectedState
+    [string]$ExpectedState,
+    [string]$ExpectedInstallDirectory
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,6 +10,13 @@ Set-StrictMode -Version Latest
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 . (Join-Path $PSScriptRoot "lib\version-contract.ps1")
+. (Join-Path $PSScriptRoot "lib\install-state.ps1")
+if ($ExpectedState -eq "Absent" -and [string]::IsNullOrWhiteSpace($ExpectedInstallDirectory)) {
+    throw "Absent verification requires -ExpectedInstallDirectory from the Installed report; default paths cannot prove a custom installation was removed."
+}
+if (-not [string]::IsNullOrWhiteSpace($ExpectedInstallDirectory)) {
+    $ExpectedInstallDirectory = Resolve-DreamBuilderInstallDirectory -Value $ExpectedInstallDirectory
+}
 Push-Location $repositoryRoot
 
 try {
@@ -43,10 +51,10 @@ try {
     )
 
     $shortcutRoots = @(
-        "$env:APPDATA\Microsoft\Windows\Start Menu\Programs",
-        "$env:ProgramData\Microsoft\Windows\Start Menu\Programs",
-        "$env:USERPROFILE\Desktop",
-        "$env:PUBLIC\Desktop"
+        [Environment]::GetFolderPath("Programs"),
+        [Environment]::GetFolderPath("CommonPrograms"),
+        [Environment]::GetFolderPath("DesktopDirectory"),
+        [Environment]::GetFolderPath("CommonDesktopDirectory")
     )
     $shortcuts = @(
         Get-ChildItem -LiteralPath $shortcutRoots -Recurse -Filter "*.lnk" -ErrorAction SilentlyContinue |
@@ -73,8 +81,11 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($programFilesX86)) {
         $programDirectoryCandidates += (Join-Path $programFilesX86 $productName)
     }
-    $existingProgramDirectories = @(
-        $programDirectoryCandidates |
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedInstallDirectory)) {
+        $programDirectoryCandidates += $ExpectedInstallDirectory
+    }
+    $userDataDirectories = @(
+        @("$env:LOCALAPPDATA\$($tauriConfig.identifier)", "$env:APPDATA\$($tauriConfig.identifier)") |
             Where-Object { Test-Path -LiteralPath $_ -PathType Container }
     )
 
@@ -93,6 +104,11 @@ try {
         if ([string]::IsNullOrWhiteSpace($installLocation)) {
             throw "The uninstall entry does not declare an install location."
         }
+        $installLocation = Resolve-DreamBuilderInstallDirectory -Value $installLocation
+        if (-not [string]::IsNullOrWhiteSpace($ExpectedInstallDirectory) -and
+            -not [string]::Equals($installLocation, $ExpectedInstallDirectory, [StringComparison]::OrdinalIgnoreCase)) {
+            throw "The installed location does not match -ExpectedInstallDirectory."
+        }
         if (-not (Test-Path -LiteralPath $installLocation -PathType Container)) {
             throw "Install location does not exist: $installLocation"
         }
@@ -101,6 +117,9 @@ try {
             throw "The uninstall entry does not declare an uninstall command."
         }
         $uninstallerPath = Join-Path $installLocation "uninstall.exe"
+        if ($uninstallString.Trim().Trim('"') -ne $uninstallerPath) {
+            throw "The uninstall command does not target the installed uninstaller."
+        }
         if (-not (Test-Path -LiteralPath $uninstallerPath -PathType Leaf)) {
             throw "The installed uninstaller does not exist: $uninstallerPath"
         }
@@ -125,9 +144,22 @@ try {
         if ($mainExecutables.Count -ne 1) {
             throw "Expected exactly one versioned application EXE; found $($mainExecutables.Count)."
         }
-        if ($shortcuts.Count -lt 1) {
-            throw "No Start menu or desktop shortcut was found for '$productName'."
+        $shell = New-Object -ComObject WScript.Shell
+        try {
+            $shortcutTargets = @(
+                foreach ($shortcut in $shortcuts) {
+                    $link = $shell.CreateShortcut($shortcut.FullName)
+                    try {
+                        [pscustomobject]@{ Path = $shortcut.FullName; TargetPath = [string]$link.TargetPath }
+                    } finally {
+                        [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($link)
+                    }
+                }
+            )
+        } finally {
+            [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell)
         }
+        Assert-DreamBuilderShortcutTargets -Shortcuts $shortcutTargets -ExpectedExecutable $mainExecutables[0].FullName
 
         [pscustomobject]@{
             ExpectedState = $ExpectedState
@@ -139,9 +171,8 @@ try {
             UninstallEntry = [string]$entry.PSPath
             Shortcuts = @($shortcuts | Select-Object -ExpandProperty FullName)
             RunningProcesses = $processes.Count
-            UserDataPreserved = Test-Path -LiteralPath (
-                "$env:LOCALAPPDATA\$($tauriConfig.identifier)"
-            )
+            UserDataPreserved = $userDataDirectories.Count -gt 0
+            UserDataDirectories = $userDataDirectories
         } | ConvertTo-Json -Depth 4
     } else {
         if ($installEntries.Count -ne 0) {
@@ -150,9 +181,7 @@ try {
         if ($shortcuts.Count -ne 0) {
             throw "Expected no '$productName' shortcuts; found $($shortcuts.Count)."
         }
-        if ($existingProgramDirectories.Count -ne 0) {
-            throw "Installed program directories remain: $($existingProgramDirectories -join ', ')"
-        }
+        Assert-DreamBuilderAbsentInstallDirectories -Directories $programDirectoryCandidates
         if ($processes.Count -ne 0) {
             throw "Expected no running '$productName' process; found $($processes.Count)."
         }
@@ -161,13 +190,13 @@ try {
             ExpectedState = $ExpectedState
             Product = $productName
             Version = $version
+            CheckedInstallLocation = $ExpectedInstallDirectory
             UninstallEntries = 0
             ProgramDirectories = 0
             Shortcuts = 0
             RunningProcesses = 0
-            UserDataPreserved = Test-Path -LiteralPath (
-                "$env:LOCALAPPDATA\$($tauriConfig.identifier)"
-            )
+            UserDataPreserved = $userDataDirectories.Count -gt 0
+            UserDataDirectories = $userDataDirectories
         } | ConvertTo-Json -Depth 3
     }
 } finally {

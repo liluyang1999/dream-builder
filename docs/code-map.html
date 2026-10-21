@@ -271,7 +271,8 @@
         <tr><th><a href="../crates/dream-builder/src/lib.rs">lib.rs</a></th><td>panic logger、插件、菜单、setup、托管状态、命令注册与事件循环</td></tr>
         <tr><th><a href="../crates/dream-builder/src/commands.rs">commands.rs</a></th><td>七个薄 IPC 命令：输入校验、状态访问、异步导出与结构化错误</td></tr>
         <tr><th><a href="../crates/dream-builder/src/state.rs">state.rs</a></th><td><code>Arc&lt;Mutex&lt;Inner&gt;&gt;</code> 管理设置不变量、活动 seed、历史与场景缓存</td></tr>
-        <tr><th><a href="../crates/dream-builder/src/persistence.rs">persistence.rs</a></th><td>通过 <code>StoreExt</code> 读写设置；读尽力而为，写返回结构化错误</td></tr>
+        <tr><th><a href="../crates/dream-builder/src/persistence.rs">persistence.rs</a></th><td>兼容原设置 JSON、保留未知根键、有界读取与保存；不维护第二份内存缓存</td></tr>
+        <tr><th><a href="../crates/dream-builder/src/atomic_file.rs">atomic_file.rs</a></th><td>同目录临时文件、同步后替换、失败保留旧内容与临时文件清理</td></tr>
         <tr><th><a href="../crates/dream-builder/src/events.rs">events.rs</a></th><td>周期性发出 <code>magic-field</code>，同步锁绝不跨越 await</td></tr>
         <tr><th><a href="../crates/dream-builder/src/menu.rs">menu.rs</a></th><td>原生菜单与托盘，点击转为 <code>menu:&lt;id&gt;</code> 前端事件，并负责聚焦主窗口</td></tr>
         <tr><th><a href="../crates/dream-builder/src/errors.rs">errors.rs</a></th><td><code>AppError</code>：thiserror 文本加手写 Serialize，稳定输出 <code>{ code, message }</code></td></tr>
@@ -302,6 +303,9 @@
         <tr><th><a href="../biome.json">biome.json</a></th><td>格式化与静态检查合一，避免 ESLint/Prettier 规则漂移</td></tr>
         <tr><th><a href="../vitest.config.ts">vitest.config.ts</a></th><td>projects 模型发现应用与共享包各自的测试环境</td></tr>
         <tr><th><a href="../Cargo.toml">Cargo.toml</a></th><td>Rust 工作区、edition、共享 lints 与 release profile</td></tr>
+        <tr><th><a href="../rust-toolchain.toml">rust-toolchain.toml</a></th><td>本机与 CI 使用同一固定 Rust 工具链及组件</td></tr>
+        <tr><th><a href="../scripts/clean.ps1">clean.ps1</a></th><td>预览和清理固定生成目录，拒绝链接并保留依赖、候选包和用户数据</td></tr>
+        <tr><th><a href="../scripts/tests/">scripts/tests/</a></th><td>发布文件、安装状态、源码身份与清理边界的真实文件系统回归</td></tr>
         <tr><th><a href="../justfile">justfile</a></th><td>跨语言统一任务入口，与 pnpm 脚本一一对应</td></tr>
         <tr><th><a href="../apps/desktop/vite.config.ts">vite.config.ts</a></th><td>React 插件、ES2022 降级、严格端口、环境变量前缀与构建预算</td></tr>
         <tr><th><a href="../apps/desktop/viteChunks.ts">viteChunks.ts</a></th><td>Three 引擎、R3F 运行时与后处理的手动分块规则</td></tr>

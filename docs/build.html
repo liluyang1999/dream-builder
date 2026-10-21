@@ -164,7 +164,8 @@
   <p>
     React、Tauri、pnpm、WebView2 等依赖各自使用自己的版本政策；产品版本 1.0 不要求依赖采用相同数字。
     依赖升级必须看 API、锁文件、公告、目标平台与实际回归。当前依赖解析还通过 override 固定
-    <code>postcss 8.5.23</code> 和 <code>nanoid 3.3.18</code>，用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
+    <code>postcss 8.5.23</code>、<code>nanoid 3.3.18</code>、<code>undici 8.10.2</code> 和 <code>source-map-js 1.2.2</code>，
+    用于消除已知安全公告；这类覆盖要在上游链路自然升级后再审慎移除。
   </p>
         </section>
 
@@ -176,8 +177,15 @@
     多轮编译后它可能远大于最终 EXE。清理会让下一次编译变慢，但不需要删除源码或玩家存档。
     先停止本项目的构建和运行进程，再在仓库根目录使用工具自己的清理入口：
   </p>
-  <pre><code>cargo clean --target-dir ./target
+  <pre><code>pnpm clean:preview
+pnpm clean
 pnpm store prune</code></pre>
+  <p>
+    <a href="../scripts/clean.ps1">清理入口</a>先检查整份固定目录清单，再执行删除；遇到目录联接、符号链接或非预期文件会停止。
+    <code>clean:preview</code> 只显示计划。实际清理保留 <code>node_modules</code> 的依赖、pnpm 有效存储、
+    <code>output/release</code> 候选包和玩家数据；Rust 构建结果仍交给 <code>cargo clean</code> 删除。
+    <code>pnpm store prune</code> 另行清除包管理器确认不再使用的依赖，不能用递归删除整个存储目录代替。
+  </p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>目录</th><th>用途</th><th>处理原则</th></tr></thead>

@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-21",
+  "platform": "Windows x64, current account",
+  "installed": {
+    "status": "passed",
+    "startedAtUtc": "2026-10-21T03:38:44.5923367Z",
+    "finishedAtUtc": "2026-10-21T03:39:18.6362839Z",
+    "executableSha256": "B4BE2589E80A763A1B09811230415C9E76EFD55816D05272ADD76A28978736B0",
+    "formalIdentifier": "com.dreambuilder.fantasytree",
+    "uiForestAndMenu": true,
+    "nativeIpcAndSettings": true,
+    "singleInstance": true,
+    "uiExitTwice": true,
+    "preferencesSurvivedRestart": true,
+    "originalSettingsBytesAndMtimeRestored": true,
+    "formalLocalInitiallyAbsentAndRemoved": true,
+    "taskProfileProcessesExited": true
+  },
+  "portable": {
+    "status": "passed",
+    "startedAtUtc": "2026-10-21T03:39:47.2021293Z",
+    "finishedAtUtc": "2026-10-21T03:40:16.1561158Z",
+    "executableSha256": "074B9ED5B3992EDA1903B3F9ECCE16167D20AA6AD3420A1E401BAED382D8C146",
+    "formalIdentifier": "com.dreambuilder.fantasytree",
+    "uiForestAndMenu": true,
+    "nativeIpcAndSettings": true,
+    "singleInstance": true,
+    "uiExitTwice": true,
+    "preferencesSurvivedRestart": true,
+    "originalSettingsBytesAndMtimeRestored": true,
+    "formalLocalInitiallyAbsentAndRemoved": true,
+    "taskProfileProcessesExited": true
+  },
+  "installerSha256": "DF2D5606388BBBCB2680A66B907E664FF55618B979E4C6A9FE1228A79289B41F",
+  "note": "Portable UNK and installed NSS bundle markers differ; these records identify tested bytes, not a signing or clean-account acceptance."
+}

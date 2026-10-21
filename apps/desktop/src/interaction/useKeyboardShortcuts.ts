@@ -24,7 +24,15 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers): void {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent): void {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey
+      ) {
+        return;
+      }
       if (document.querySelector('[aria-modal="true"]')) return;
       const target = event.target as HTMLElement | null;
       if (target && (target.isContentEditable || isFormField(target))) return;

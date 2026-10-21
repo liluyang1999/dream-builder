@@ -71,6 +71,7 @@
     <div class="layer"><strong>domain/</strong><span><code>Vec3</code>、<code>Seed</code>、<code>Energy</code>、树场景、细节、魔法场和 builder；只表达数据与不变量。</span></div>
     <div class="layer"><strong>generation/</strong><span>RNG trait、SeededRng、SceneGenerator trait 与 FantasyTreeGenerator；给定 seed 可重放。</span></div>
     <div class="layer"><strong>state.rs</strong><span>设置、seed 历史、活动 seed 与场景缓存，封装在 <code>Arc&lt;Mutex&lt;Inner&gt;&gt;</code>。</span></div>
+    <div class="layer"><strong>persistence.rs + atomic_file.rs</strong><span>前者理解设置 JSON，后者只负责安全替换文件；与游戏规则、窗口和 UI 分离。</span></div>
     <div class="layer"><strong>commands.rs</strong><span>七个薄 IPC 命令；输入校验、状态访问、异步导出与结构化错误。</span></div>
     <div class="layer"><strong>lib.rs</strong><span>插件、菜单、setup、托管状态、后台事件、命令注册和进程生命周期。</span></div>
   </div>
@@ -115,8 +116,14 @@
   <p>
     <a href="../crates/dream-builder/src/state.rs">AppState</a> 克隆的是 <code>Arc</code>，不是复制状态。
     每个方法内部短暂加锁，复制所需值后立即释放。<a href="../crates/dream-builder/src/events.rs">事件任务</a>
-    在 <code>interval.tick().await</code> 之后才读取设置，绝不让同步 Mutex guard 跨越 await。
-    文件导出使用 <code>tokio::fs::write</code>，避免阻塞异步执行器线程。
+    在 <code>interval.tick().await</code> 之后才读取活动场景的 seed，绝不让同步 Mutex guard 跨越 await。
+    生成、保存与导出中的阻塞计算或文件操作进入 <code>spawn_blocking</code> 工作线程，避免卡住窗口和异步执行器。
+    设置提交另有一把串行锁：磁盘提交与内存提交不能被另一份设置或 seed 激活操作插入；读取当前设置只需短暂访问状态锁。
+  </p>
+  <p>
+    工作线程不一定按请求顺序完成。生成命令在启动线程前领取递增的请求编号，完成后只有最新编号可以更新活动场景和历史；
+    旧任务仍可把自己的结果交回原调用者，但不能把世界切回旧 seed。动态光效读取已提交场景的 seed，
+    因此较晚落盘的旧设置也不会改变正在显示的森林。这和前端丢弃过期响应一起守住了同一个规则：最后一次选择生效。
   </p>
   <h3>详情查询为什么不用重新生成整棵树</h3>
   <p>
@@ -126,16 +133,16 @@
   </p>
   <h3>持久化：读尽力而为，写必须报告失败</h3>
   <p>
-    <a href="../crates/dream-builder/src/persistence.rs">persistence.rs</a> 通过 Store 插件的扩展 trait
-    <code>StoreExt</code> 使用插件能力——这是 Tauri 插件在 Rust 侧的惯用形态：插件为
-    <code>AppHandle</code> 增加方法，而不是要求你自己持有一个全局对象。设置落在
-    <code>settings.json</code> 的 <code>settings</code> 键下。
+    <a href="../crates/dream-builder/src/persistence.rs">persistence.rs</a> 直接读写应用数据目录中的
+    <code>settings.json</code>，继续使用原有的 <code>settings</code> 键，并保留文档中不认识的根级字段。
+    内存中的当前设置只由 AppState 管理，避免插件缓存与运行状态各自保存一份、失败时产生分歧。
+    文件读取和写入都限制为 1 MiB，防止异常文件造成无限内存分配。
   </p>
   <div class="grid">
     <article class="card">
       <h3>读：三层回退</h3>
       <p>
-        打不开 store、反序列化失败、或反序列化成功但
+        打不开文件、反序列化失败、或反序列化成功但
         <code>validate()</code> 不通过，三种情况都返回默认设置。
         玩家宁可看到默认主题，也不能因为一个坏文件启动不了游戏。
       </p>
@@ -154,7 +161,9 @@
     写失败的后果是“玩家以为改好了，下次启动全部丢失”，只有报告出来才能补救。
     同一条原则也出现在前端存档层——加载可以回退到备份，保存失败必须提示。
     设置命令按“校验 → 持久化 → 提交内存”执行；磁盘保存失败时，原生内存仍保留上次提交的设置。
-    这保证的是内存提交顺序，文件替换与断电恢复仍由 Store 插件的具体持久化机制决定。
+    <a href="../crates/dream-builder/src/atomic_file.rs">atomic_file.rs</a> 先在目标文件旁创建独占临时文件，
+    写完并同步后才重命名替换目标。写入中断或目标被占用时，旧文件仍在，临时文件由资源所有者清理。
+    场景导出复用相同机制。这里保证失败时不暴露半份新内容；不能把一次文件系统测试当成所有设备断电行为的保证。
   </p>
   <h3>整数边界不能靠运气避开</h3>
   <p>

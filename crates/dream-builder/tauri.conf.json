@@ -40,6 +40,7 @@
     "longDescription": "《智慧树之森》是一款单人离线第三人称卡通森林冒险游戏。探索蘑菇坡、溪流与遗迹，收集三枚光种，聆听森林记忆并完成净化，让中央智慧树与周围生态重新发光。",
     "licenseFile": "installer/LICENSE.txt",
     "windows": {
+      "allowDowngrades": false,
       "webviewInstallMode": {
         "type": "downloadBootstrapper",
         "silent": true

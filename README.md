@@ -99,9 +99,14 @@ cargo check --workspace --all-targets --locked
 ```
 
 `pnpm check` 依次验证版本/WebView2、桌面 CSP 与最小权限、教学 HTML、工程循环记录、
-本地 pnpm 布局、归档 M2 性能证据、Biome、TypeScript、Vitest、Vite 生产构建和 bundle 预算。
+本地 pnpm 布局、归档 M2 性能证据、工程脚本回归、Biome、TypeScript、Vitest、Vite 生产构建和 bundle 预算。
 GitHub Actions 在 Windows 上执行同一组前端与 Rust 门禁；可单独运行
 `pnpm desktop:verify-security`、`pnpm docs:verify` 或 `pnpm loop:verify` 复核单条边界。
+
+Rust 工具链由 [rust-toolchain.toml](rust-toolchain.toml) 固定，本机和 CI 共用。
+`pnpm test:engineering` 用隔离的真实目录验证交付文件、源码指纹、卸载路径与清理边界。
+测试与打包结束后，先运行 `pnpm clean:preview` 检查计划，再运行 `pnpm clean`；
+它保留源码、依赖和已核验的发布候选，不触碰玩家存档。
 
 ## Windows 构建与发布候选
 

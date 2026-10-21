@@ -50,6 +50,17 @@ impl Mul<f32> for Vec3 {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Seed(pub u64);
 
+/// JSON numbers cross into JavaScript, whose integer precision ends here.
+pub const MAX_SAFE_SEED: u64 = 9_007_199_254_740_991;
+
+pub fn validate_wire_seed(seed: u64) -> Result<(), &'static str> {
+    if seed > MAX_SAFE_SEED {
+        Err("种子必须在 0 到 9007199254740991 之间")
+    } else {
+        Ok(())
+    }
+}
+
 impl From<u64> for Seed {
     fn from(value: u64) -> Self {
         Seed(value)

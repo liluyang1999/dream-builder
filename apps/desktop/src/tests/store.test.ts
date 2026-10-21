@@ -1,5 +1,6 @@
 import { DEFAULT_SETTINGS, type TreeScene } from '@dream-builder/ipc-contracts';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { createFallbackTreeScene } from '../data/fallbackTree';
 import { INITIAL_GAME_PROGRESS, parseStoredGameProgress } from '../game/gameProgress';
 import { useAppStore } from '../state/store';
 
@@ -56,6 +57,55 @@ describe('app store', () => {
   test('empty click id is ignored by the reducer', () => {
     useAppStore.getState().select('   ');
     expect(useAppStore.getState().selection.selectedId).toBeNull();
+  });
+
+  test('clears metadata only when the selected object changes', () => {
+    const detail = createFallbackTreeScene(11).details[0];
+    if (!detail) throw new Error('fixture has no detail');
+    const store = useAppStore.getState();
+    store.select(detail.id);
+    store.setSelectedDetail(detail);
+
+    store.select('   ');
+    expect(useAppStore.getState().selectedDetail).toBe(detail);
+    store.select(detail.id);
+    expect(useAppStore.getState().selectedDetail).toBe(detail);
+
+    store.select('leaf-1');
+    expect(useAppStore.getState().selectedDetail).toBeNull();
+  });
+
+  test('discards selection from a previous world when new scene data arrives', () => {
+    const scene = createFallbackTreeScene(11);
+    const detail = scene.details[0];
+    if (!detail) throw new Error('fixture has no detail');
+    const store = useAppStore.getState();
+    store.applySceneResult({ scene, source: 'fallback', warning: null });
+    store.setSeed(12);
+    // The previous world remains visible while its replacement is loading.
+    store.select(detail.id);
+    store.setSelectedDetail(detail);
+    store.hover(detail.id);
+
+    store.applySceneResult({
+      scene: createFallbackTreeScene(12),
+      source: 'fallback',
+      warning: null,
+    });
+
+    expect(useAppStore.getState().selection).toEqual({ hoveredId: null, selectedId: null });
+    expect(useAppStore.getState().selectedDetail).toBeNull();
+  });
+
+  test('ignores details that resolve after the selected object has changed', () => {
+    const detail = createFallbackTreeScene(11).details[0];
+    if (!detail) throw new Error('fixture has no detail');
+    const store = useAppStore.getState();
+    store.select(detail.id);
+    store.select('leaf-1');
+    store.setSelectedDetail(detail);
+
+    expect(useAppStore.getState().selectedDetail).toBeNull();
   });
 
   test.each(['toggleHelp', 'setHelpOpen'] as const)(

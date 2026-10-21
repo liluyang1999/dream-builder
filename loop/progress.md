@@ -3,7 +3,7 @@
 本页是**当前状态的唯一可写位置**。任何影响范围、验收状态或门禁的改动都必须同步这里。
 判定规则见 [`concepts.md`](concepts.md)：自动化门禁与外部人工门槛永远分开记账。
 
-- 记录更新时间：2026-09-28
+- 记录更新时间：2026-10-21
 - 产品版本：1.0（两段式 `主版本.功能版本`，真相源 [`version.json`](../version.json)）
 - 交付形态：Windows x64 单人离线第三人称卡通森林游戏，NSIS 安装包 + 便携 EXE
 
@@ -35,6 +35,7 @@
 | 教学档案覆盖全部源码模块 | `pnpm docs:verify` 枚举真实源码树，只认可 `docs/code-map.html` 中的完整清单 |
 | UI、渲染、IPC 与导出复盘 | [`evidence/2026-09-05-ui-runtime-quality-review.md`](evidence/2026-09-05-ui-runtime-quality-review.md)：真实浏览器与隔离 Tauri 验证、失败回归和测试清理 |
 | 发布文档、依赖与磁盘复盘 | [`evidence/2026-09-28-maintenance-review.md`](evidence/2026-09-28-maintenance-review.md)：发布路径失败回归、全量门禁、真实 UI/原生验证与首次缓存清理 |
+| 原生持久化、并发状态与安装交付 | [`evidence/2026-10-21-engineering-delivery-review.md`](evidence/2026-10-21-engineering-delivery-review.md)：完整构建、安装版与便携版真实运行、同版重装、降级拒绝、卸载及原设置恢复 |
 
 历史性能与安装记录继续有效地描述当时的构建，不能当成当前候选的新测量。
 最终发行候选仍需重新绑定原生性能及受影响的安装/升级证据。
@@ -57,13 +58,16 @@
 
 | 门禁 | 结果 |
 |---|---|
-| `pnpm check` | 十阶段全部通过 |
-| Vitest | 42 个测试文件、173 项测试通过 |
-| 测试工具依赖 | Vitest 升级至 4.1.11；`pnpm audit --audit-level low` 未发现已知 npm 公告 |
-| `cargo test --workspace --locked` | 31 项通过（27 单元 + 4 跨边界） |
+| `pnpm check` | 十一阶段全部通过，包含工程脚本回归 |
+| Vitest | 44 个测试文件、180 项测试通过 |
+| 工程脚本 | 44 项通过：清理 18、发布目录 12、安装状态 9、来源指纹 5 |
+| NSIS 原生版本比较 | 16 项真实编译/执行测试通过；不替代跨产品版本升级演练 |
+| 测试工具依赖 | Vite 6.4.4、undici 8.10.2、source-map-js 1.2.2；`pnpm audit --audit-level low` 未发现已知 npm 公告 |
+| `cargo test --workspace --locked` | 46 项通过（42 单元 + 4 跨边界） |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | 无告警 |
 | `cargo fmt --check` | 通过 |
-| 教学档案 | 15 页、99/99 源码模块覆盖、全部链接可解析 |
+| `cargo doc --workspace --no-deps --locked` | `RUSTDOCFLAGS=-D warnings` 下通过，已加入 CI |
+| 教学档案 | 15 页、100/100 源码模块覆盖、全部链接可解析；Edge 桌面/窄屏 30 项布局检查通过 |
 | 发布手册路径 | 构建与验证脚本均指向 `loop/product/release-runbook.md`；两处旧路径均经失败回归确认 |
 | 发布 PowerShell 宿主 | [模块路径继承问题](evidence/2026-09-28-release-host-compatibility.md)已做最小失败/成功对照；两份脚本显式加载宿主自带的安全模块 |
 | 前端分块预算 | `three-engine` 687,920 / 700,000 字节，首屏不预加载 3D 块 |
@@ -79,8 +83,9 @@
 
 ## 六、依赖维护跟进
 
-2026-09-28 通过 OSV 对 Cargo.lock 的 481 个 registry 包逐一查询，发现 7 个带 RustSec
-信息公告的包，不能写成“Rust 审计零发现”：
+2026-10-21 通过 OSV 对 Cargo.lock 的 479 个 registry 包逐一查询，发现 10 个带 RustSec
+信息公告的包（9 项停止维护、1 项不健全 API），[原始结果](evidence/2026-10-21-dependency-audit.json)
+已归档，不能写成“Rust 审计零发现”：
 
 - `glib 0.18.5` 的 [RUSTSEC-2024-0429](https://rustsec.org/advisories/RUSTSEC-2024-0429.html)
   为潜在不健全 API；`proc-macro-error 1.0.4` 的
@@ -89,6 +94,11 @@
 - Windows 依赖链中的 `urlpattern 0.3.0 → tauri-utils 2.9.3 → Tauri` 使用五个停止维护的
   `unic-* 0.9.0` 包：RUSTSEC-2025-0075 / 0080 / 0081 / 0098 / 0100。
   公告没有提供这些包的修复版本；应跟进上游替换并完成 Tauri 平台回归，不用强制改锁文件掩盖它们。
+- `zbus_names 4.3.4`、`zvariant 5.13.1`、`zvariant_derive 5.13.1` 分别对应
+  [RUSTSEC-2026-0371](https://rustsec.org/advisories/RUSTSEC-2026-0371.html)、
+  [RUSTSEC-2026-0370](https://rustsec.org/advisories/RUSTSEC-2026-0370.html)、
+  [RUSTSEC-2026-0372](https://rustsec.org/advisories/RUSTSEC-2026-0372.html)。
+  三者均已停止维护、没有同名修复版本；Linux 插件链需迁移到 zbus 6，当前 Windows 目标不包含它们。
 
 这是依赖维护风险记录，不代表已证明游戏中存在可利用路径，也不替代今后的联网审计。
 

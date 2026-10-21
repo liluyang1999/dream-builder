@@ -148,6 +148,8 @@ export const useAppStore = create<AppState>((set) => ({
       scene,
       source,
       warning,
+      selection: INITIAL_SELECTION,
+      selectedDetail: null,
       history: [scene.seed, ...state.history.filter((s) => s !== scene.seed)].slice(
         0,
         HISTORY_LIMIT,
@@ -164,7 +166,14 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ selection: reduceSelectionState(state.selection, { type: 'hover-clear' }) }));
   },
   select(id) {
-    set((state) => ({ selection: reduceSelectionState(state.selection, { type: 'click', id }) }));
+    set((state) => {
+      const selection = reduceSelectionState(state.selection, { type: 'click', id });
+      return {
+        selection,
+        selectedDetail:
+          selection.selectedId === state.selection.selectedId ? state.selectedDetail : null,
+      };
+    });
   },
   clearSelection() {
     set((state) => ({
@@ -173,7 +182,11 @@ export const useAppStore = create<AppState>((set) => ({
     }));
   },
   setSelectedDetail(detail) {
-    set({ selectedDetail: detail });
+    set((state) =>
+      detail === null || detail.id === state.selection.selectedId
+        ? { selectedDetail: detail }
+        : state,
+    );
   },
   setTheme(theme) {
     set({ theme });

@@ -1,7 +1,7 @@
 ; Dream Builder customization of the Tauri CLI 2.11.4 default NSIS template.
 ; Upstream: https://github.com/tauri-apps/tauri/blob/tauri-cli-v2.11.4/crates/tauri-bundler/src/bundle/windows/nsis/installer.nsi
-; The only behavior changes use DREAM_BUILDER_DISPLAY_VERSION for visible
-; installer strings and Windows Installed Apps while VERSION stays internal.
+; Customizations keep player-visible versions in two components and normalize
+; installed versions before comparison, including the silent-install early check.
 
 Unicode true
 ManifestDPIAware true
@@ -36,6 +36,10 @@ ManifestDPIAwareness PerMonitorV2
 ${StrCase}
 ${StrLoc}
 
+; Hooks define functions that call the Tauri plugin while this file is compiled.
+; Register it before including hooks, not only before the installer sections.
+!addplugindir "{{additional_plugins_path}}"
+
 {{#if installer_hooks}}
 !include "{{installer_hooks}}"
 {{/if}}
@@ -60,7 +64,6 @@ ${StrLoc}
 !define COPYRIGHT "{{copyright}}"
 !define OUTFILE "{{out_file}}"
 !define ARCH "{{arch}}"
-!define ADDITIONALPLUGINSPATH "{{additional_plugins_path}}"
 !define ALLOWDOWNGRADES "{{allow_downgrades}}"
 !define DISPLAYLANGUAGESELECTOR "{{display_language_selector}}"
 !define INSTALLWEBVIEW2MODE "{{install_webview2_mode}}"
@@ -97,9 +100,6 @@ VIAddVersionKey "FileDescription" "${PRODUCTNAME}"
 VIAddVersionKey "LegalCopyright" "${COPYRIGHT}"
 VIAddVersionKey "FileVersion" "${DREAM_BUILDER_DISPLAY_VERSION}"
 VIAddVersionKey "ProductVersion" "${DREAM_BUILDER_DISPLAY_VERSION}"
-
-# additional plugins
-!addplugindir "${ADDITIONALPLUGINSPATH}"
 
 ; Uninstaller signing command
 !if "${UNINSTALLERSIGNCOMMAND}" != ""
@@ -235,8 +235,7 @@ Function PageReinstall
   ${EndIf}
   ${IfThen} $R0 == "" ${|} StrCpy $R4 "$(unknown)" ${|}
 
-  nsis_tauri_utils::SemverCompare "${VERSION}" $R0
-  Pop $R0
+  !insertmacro DreamBuilderCompareInstalledVersion "${VERSION}" "$R0" $R0
   ; Reinstalling the same version
   ${If} $R0 = 0
     StrCpy $R1 "$(alreadyInstalledLong)"
@@ -475,6 +474,9 @@ FunctionEnd
 !insertmacro MUI_LANGUAGE "{{this}}"
 {{/each}}
 !insertmacro MUI_RESERVEFILE_LANGDLL
+
+LangString DreamBuilderInvalidInstalledVersion ${LANG_SIMPCHINESE} "无法确认已安装版本。请先备份存档，再通过系统设置卸载旧版后安装。"
+LangString DreamBuilderInvalidInstalledVersion ${LANG_ENGLISH} "The installed version cannot be verified. Back up your saves, then uninstall the old version through Windows Settings before installing."
 {{#each language_files}}
   !include "{{this}}"
 {{/each}}
@@ -530,21 +532,12 @@ FunctionEnd
 
 
 Section EarlyChecks
-  ; Abort silent installer if downgrades is disabled
-  !if "${ALLOWDOWNGRADES}" == "false"
-  ${If} ${Silent}
-    ; If downgrading
-    ${If} $R0 = -1
-      System::Call 'kernel32::AttachConsole(i -1)i.r0'
-      ${If} $0 <> 0
-        System::Call 'kernel32::GetStdHandle(i -11)i.r0'
-        System::call 'kernel32::SetConsoleTextAttribute(i r0, i 0x0004)' ; set red color
-        FileWrite $0 "$(silentDowngrades)"
-      ${EndIf}
-      Abort
-    ${EndIf}
+  ; Silent installs skip PageReinstall, so always read and compare here afresh.
+  ReadRegStr $R5 SHCTX "${UNINSTKEY}" "UninstallString"
+  ReadRegStr $R0 SHCTX "${UNINSTKEY}" "DisplayVersion"
+  ${If} "$R5$R0" != ""
+    !insertmacro DreamBuilderEnforceInstalledVersion "${VERSION}" "$R0" "${ALLOWDOWNGRADES}" "$(DreamBuilderInvalidInstalledVersion)" "$(silentDowngrades)"
   ${EndIf}
-  !endif
 
 SectionEnd
 

@@ -14,6 +14,14 @@ use thiserror::Error;
 /// Every fallible command in the app returns `Result<_, AppError>`.
 #[derive(Debug, Error)]
 pub enum AppError {
+    /// A seed cannot round-trip through a JavaScript number without data loss.
+    #[error("种子必须在 0 到 9007199254740991 之间")]
+    InvalidSeed,
+
+    /// A background scene worker could not complete its task.
+    #[error("无法生成场景：{0}")]
+    Generation(String),
+
     /// A detail id was requested that no interactive object owns.
     #[error("找不到交互对象“{0}”的详情")]
     InvalidDetail(String),
@@ -35,6 +43,8 @@ impl AppError {
     /// Stable, machine-readable code surfaced to the frontend.
     pub fn code(&self) -> &'static str {
         match self {
+            AppError::InvalidSeed => "invalid_seed",
+            AppError::Generation(_) => "generation_error",
             AppError::InvalidDetail(_) => "invalid_detail",
             AppError::InvalidSettings(_) => "invalid_settings",
             AppError::Persistence(_) => "persistence_error",

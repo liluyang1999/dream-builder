@@ -20,6 +20,11 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "biome check .",
     "fmt": "biome format --write .",
+    "clean": "powershell -NoLogo -NoProfile -File scripts/clean.ps1",
+    "clean:preview": "powershell -NoLogo -NoProfile -File scripts/clean.ps1 -WhatIf",
+    "test:cleanup": "powershell -NoLogo -NoProfile -File scripts/tests/generated-files.tests.ps1",
+    "test:installer": "powershell -NoLogo -NoProfile -File scripts/tests/installer-versions.test.ps1",
+    "test:engineering": "pnpm test:cleanup && powershell -NoLogo -NoProfile -File scripts/tests/release-files.test.ps1 && powershell -NoLogo -NoProfile -File scripts/tests/install-state.test.ps1 && powershell -NoLogo -NoProfile -File scripts/tests/source-tree.test.ps1",
     "tauri": "cd crates/dream-builder && tauri",
     "m2:verify": "powershell -NoLogo -NoProfile -File scripts/verify-m2-evidence.ps1",
     "release:build": "powershell -NoLogo -NoProfile -File scripts/release-build.ps1",
@@ -28,13 +33,13 @@
     "release:verify:production": "powershell -NoLogo -NoProfile -File scripts/release-verify.ps1 -RequireCleanSource -RequireSigned",
     "release:verify:installed": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Installed",
     "release:verify:uninstalled": "powershell -NoLogo -NoProfile -File scripts/release-install-state.ps1 -ExpectedState Absent",
-    "check": "pnpm version:verify && pnpm desktop:verify-security && pnpm docs:verify && pnpm loop:verify && pnpm pnpm:verify-layout && pnpm m2:verify && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm version:verify && pnpm desktop:verify-security && pnpm docs:verify && pnpm loop:verify && pnpm pnpm:verify-layout && pnpm m2:verify && pnpm test:engineering && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@tauri-apps/cli": "2.11.4",
     "typescript": "^5.9.3",
-    "vite": "^6.4.3",
+    "vite": "^6.4.4",
     "vitest": "^4.1.11"
   }
 }

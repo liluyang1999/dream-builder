@@ -71,7 +71,7 @@
   <ol>
     <li>安装 panic logger，使未捕获 Rust panic 进入诊断日志；</li>
     <li>安装 single-instance，第二次启动时聚焦主窗口；</li>
-    <li>安装 log、store、dialog 和 opener 四个插件——注意这里没有文件系统插件，导出写盘由 Rust 命令自己完成；</li>
+    <li>安装 log、dialog 和 opener 三个插件；设置和导出由 Rust 文件适配层负责，避免退出时由另一套插件缓存重新覆盖设置；</li>
     <li>构建原生菜单并把点击转发为前端事件；</li>
     <li>在 setup 中载入设置、创建 AppState、注册托盘并启动魔法场任务；</li>
     <li>通过 <code>generate_handler!</code> 注册命令；</li>

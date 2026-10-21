@@ -9,6 +9,18 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Native settings and scene exports now replace complete files atomically;
+  one native snapshot owns settings, and failed writes preserve prior state.
+- Frontend entry chunks recover through React error boundaries; selection,
+  late detail responses, scene identity, and repeated shortcuts stay consistent.
+- Release assembly validates staging before replacing a candidate, rejects hidden
+  or linked entries, and verifies custom installation paths and shortcut targets.
+- NSIS compares the public two-component version correctly, identifies reinstall
+  and upgrade paths, and refuses downgrades in both interactive and silent runs.
+- Added engineering filesystem regressions, a fixed Rust toolchain, and a safe
+  generated-output cleanup command with a preview mode.
+- Updated Vite, undici and source-map-js to their verified security patch versions.
+
 - Fixed the release builder and verifier to read the canonical handoff manual
   from `loop/product`; document checks now reject missing release-document paths.
 - Pinned Authenticode module loading to the current PowerShell host so a pnpm

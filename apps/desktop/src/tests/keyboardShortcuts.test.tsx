@@ -42,4 +42,17 @@ describe('useKeyboardShortcuts', () => {
     );
     modal.remove();
   });
+
+  test('triggers one-shot actions only once when a key is held down', () => {
+    const callbacks = handlers();
+    renderHook(() => useKeyboardShortcuts(callbacks));
+
+    for (const key of ['r', 'h', 'f', 'p', 'g', '?', 'Escape']) {
+      fireEvent.keyDown(window, { key });
+      fireEvent.keyDown(window, { key, repeat: true });
+      fireEvent.keyDown(window, { key, repeat: true });
+    }
+
+    for (const callback of Object.values(callbacks)) expect(callback).toHaveBeenCalledOnce();
+  });
 });

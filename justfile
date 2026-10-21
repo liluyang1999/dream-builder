@@ -1,6 +1,7 @@
 # Unified cross-language task entrypoint for the Dream Builder monorepo.
 # `just <task>` mirrors the root package.json scripts so local and CI use one set of commands.
 # On Windows recipes run through PowerShell.
+# Recipe-scoped environment variables require just 1.47 or newer.
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 # List available recipes.
@@ -14,6 +15,13 @@ dev:
 # Type-check + bundle the frontend.
 build:
     pnpm build
+
+# Preview or remove reproducible build outputs, preserving dependencies and releases.
+clean-preview:
+    pnpm clean:preview
+
+clean:
+    pnpm clean
 
 # Format every language in place.
 fmt:
@@ -40,11 +48,13 @@ docs:
     pnpm loop:verify
 
 # Full local gate: contracts, pnpm layout, frontend, Rust, and release build prerequisites.
+[env('RUSTDOCFLAGS', '-D warnings')]
 check:
     pnpm check
     cargo fmt --check
     cargo test --workspace --locked
     cargo clippy --workspace --all-targets --locked -- -D warnings
+    cargo doc --workspace --no-deps --locked
 
 # Run the full native Tauri shell in dev.
 tauri-dev:
@@ -75,8 +85,8 @@ release-verify-installed:
     pnpm release:verify:installed
 
 # Verify program files and integration entries are gone while user data remains allowed.
-release-verify-uninstalled:
-    pnpm release:verify:uninstalled
+release-verify-uninstalled $install_directory:
+    pnpm release:verify:uninstalled -ExpectedInstallDirectory "$env:install_directory"
 
 # Verify the archived native M2 report hash, provenance, phases, and budget.
 m2-verify:

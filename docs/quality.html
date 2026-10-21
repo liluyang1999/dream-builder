@@ -74,7 +74,7 @@
   cargo check --workspace --all-targets --locked</code></pre>
   <h3><code>pnpm check</code> 内部顺序</h3>
   <p>
-    十个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
+    十一个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
     最慢的生产构建放在最后。任何一步非零退出都会中断整条链。
   </p>
   <ol>
@@ -84,6 +84,7 @@
     <li><code>loop:verify</code>：<a href="../loop/README.md">Loop Engineering 记录</a>的必备文件、目录结构、相对链接与证据指针，并要求 <code>progress.md</code> 保持未闭合门槛可见；</li>
     <li><code>pnpm:verify-layout</code>：store/cache/virtual store 解析后的绝对路径都在项目根内；</li>
     <li><code>m2:verify</code>：归档的原生性能报告哈希、来源与帧率预算未被改写；</li>
+    <li><code>test:engineering</code>：真实临时目录验证清理白名单、隐藏文件与链接拒绝、发布失败保留旧包、自定义安装路径和源码指纹；测试结束自动清理夹具；</li>
     <li><code>biome check</code>：格式、可疑代码和导入组织；</li>
     <li><code>tsc --noEmit</code>：所有工作区包严格类型检查；</li>
     <li><code>vitest run</code>：纯规则、契约、组件、存档、性能与开发变换测试；</li>
@@ -145,7 +146,7 @@
     <table>
       <thead><tr><th>工作流</th><th>触发</th><th>做什么</th></tr></thead>
       <tbody>
-        <tr><th><a href="../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test 与 Clippy</td></tr>
+        <tr><th><a href="../.github/workflows/ci.yml">ci.yml</a></th><td>每次 push 与 pull request</td><td>两个并行 job：TypeScript/React 跑 <code>pnpm check</code>，Rust/Tauri 跑 fmt、test、Clippy 和文档编译</td></tr>
         <tr><th><a href="../.github/workflows/release.yml">release.yml</a></th><td>手动触发或 <code>v*</code> 标签</td><td>跑完整发布门禁并上传带校验和的未签名 Windows 候选包</td></tr>
       </tbody>
     </table>
@@ -156,6 +157,7 @@
     <li><strong><code>permissions: contents: read</code>：</strong>显式收窄 <code>GITHUB_TOKEN</code>。构建与测试不需要写仓库，最小权限让被攻破的依赖也无法推送提交。</li>
     <li><strong><code>concurrency</code> + <code>cancel-in-progress</code>：</strong>同一分支的新推送取消旧运行，既省算力也避免用过期结果判断当前代码。</li>
     <li><strong><code>node-version-file: .nvmrc</code>：</strong>Node 版本从仓库文件读取，而不是写死在工作流里，本机与 CI 只有一个真相源。</li>
+    <li><strong><a href="../rust-toolchain.toml">rust-toolchain.toml</a>：</strong>Rust 编译器、格式化器和 Clippy 跟随固定版本，避免本机与 CI 的浮动 stable 在同一份源码上得出不同结果。</li>
     <li><strong><code>pnpm/action-setup</code>：</strong>不指定版本，改为读取 <code>package.json</code> 的 <code>packageManager</code> 字段，因此 CI 用的就是本地那一版 pnpm。</li>
     <li><strong><code>--frozen-lockfile</code>：</strong>锁文件与清单不一致时安装必须失败。CI 的职责是复现既定依赖树，不是替开发者解析新版本。</li>
     <li><strong><code>if-no-files-found: error</code>：</strong>产物目录为空时上传步骤失败。否则一次“成功但没有产物”的运行会被误当成发布成功。</li>

@@ -32,9 +32,8 @@ import { PurificationOverlay } from './ui/PurificationOverlay';
 import { SettingsOverlay } from './ui/SettingsOverlay';
 
 const SCENE_LOAD_SETTLE_MS = 1_000;
-const sceneCanvasModule = import('./scene/SceneCanvas');
 const SceneCanvas = lazy(async () => {
-  const module = await sceneCanvasModule;
+  const module = await import('./scene/SceneCanvas');
   return { default: module.SceneCanvas };
 });
 

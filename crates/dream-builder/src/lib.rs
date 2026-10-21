@@ -5,6 +5,7 @@
 //! layers directly. `run()` wires up Tauri: plugins, shared state, menu, tray,
 //! the background event emitter, and the command handlers.
 
+mod atomic_file;
 pub mod commands;
 pub mod domain;
 pub mod errors;
@@ -38,7 +39,6 @@ pub fn run() {
             menu::focus_main_window(app);
         }))
         .plugin(tauri_plugin_log::Builder::new().build())
-        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .menu(menu::build_menu)

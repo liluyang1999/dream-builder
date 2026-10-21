@@ -42,6 +42,16 @@ describe('tree IPC degradation', () => {
     expect(result.warning).toBe('无法调用 Rust 后端：后端不可用');
   });
 
+  test('rejects a valid native scene belonging to another requested seed', async () => {
+    native.invoke.mockResolvedValue(createFallbackTreeScene(12));
+
+    const result = await treeApi.loadScene(11);
+
+    expect(result.source).toBe('fallback');
+    expect(result.scene.seed).toBe(11);
+    expect(result.warning).toContain('种子');
+  });
+
   test('serializes settings snapshots and lets a newer save recover from an earlier rejection', async () => {
     let failFirst!: (error: Error) => void;
     native.invoke

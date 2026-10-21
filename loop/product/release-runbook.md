@@ -30,6 +30,9 @@ SHA-256 指纹、字节数、文件 SHA-256、清单与校验和一致性、许�
 改动源码，旧产物会被拒绝。候选包可以明确显示为 `NotSigned`，但损坏、无效或不受信任
 的签名会直接失败。
 
+文件集检查也包括隐藏文件、额外目录及链接。构建在同级临时目录完成独立验证后才替换旧候选；
+验证或替换失败保留旧候选，避免把半份新产物交给下一位使用者。不要在交付目录中存放个人文件。
+
 生产分发在完成代码签名并重新生成清单与校验和后必须运行：
 
 ```powershell
@@ -90,6 +93,9 @@ pnpm release:build:signed
 确认设置和章节存档仍能恢复。进度快照带版本号，当前版本会迁移一致的旧存档，并为最近一份
 有效进度保留本机备份。不要把降级到旧版本当作受支持的存档迁移路径。
 
+安装器允许同版重装与向前升级，明确拒绝降级和无法解析的已装版本；静默安装执行同一检查。
+两段式显示版本只在内部比较时机械补足，不改写玩家看到的版本。
+
 ## 卸载与用户数据
 
 通过 Windows“已安装的应用”卸载。卸载验收必须确认程序文件、开始菜单项和卸载项消失。
@@ -97,7 +103,16 @@ pnpm release:build:signed
 开始新旅程并退出，再由用户明确删除与产品标识对应的应用数据目录。发布或支持人员不得
 在没有备份和明确授权时删除玩家数据。
 
-卸载并退出所有游戏进程后运行 `pnpm release:verify:uninstalled`。它要求卸载项、程序目录、
+保存安装检查输出的 `InstallLocation`，卸载并退出所有游戏进程后运行：
+
+```powershell
+pnpm release:verify:uninstalled -ExpectedInstallDirectory "D:\Games\Dream Builder Fantasy Tree"
+```
+
+使用 just 时等价命令为 `just release-verify-uninstalled "D:\Games\Dream Builder Fantasy Tree"`。
+完整本地门禁 `just check` 需要 just 1.47 或更新版本，并与 CI 一样将 Rustdoc 警告视为错误。
+
+把示例路径替换为安装检查实际返回的路径，不能凭默认目录猜测。它要求卸载项、程序目录、
 快捷方式和运行进程全部消失；`com.dreambuilder.fantasytree` 用户数据目录允许按上述策略保留。
 
 ## 故障恢复

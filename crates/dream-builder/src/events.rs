@@ -28,7 +28,7 @@ pub fn spawn_magic_field_emitter<R: Runtime>(app: AppHandle<R>, state: AppState)
             interval.tick().await;
             tick = tick.wrapping_add(1);
             // Lock acquired and dropped here, before the next await.
-            let seed = state.settings().seed;
+            let seed = state.active_scene_seed();
             let field = compute_magic_field(seed, tick);
             if app.emit(MAGIC_FIELD_EVENT, &field).is_err() {
                 break; // window/app gone — stop the loop.

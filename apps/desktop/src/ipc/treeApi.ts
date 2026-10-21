@@ -60,6 +60,13 @@ class TreeApiClient {
           warning: `Rust 返回的数据未通过校验：${parsed.reason}`,
         };
       }
+      if (parsed.value.seed !== seed) {
+        return {
+          scene: await createFallbackScene(seed),
+          source: 'fallback',
+          warning: 'Rust 返回的场景种子与当前请求不一致，已使用本地回退树数据。',
+        };
+      }
       return { scene: parsed.value, source: 'rust', warning: null };
     } catch (error) {
       return {

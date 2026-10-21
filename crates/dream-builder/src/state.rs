@@ -8,6 +8,7 @@
 //! - `Settings` derives `Serialize`/`Deserialize` so it round-trips to disk.
 
 use crate::domain::detail::DetailInfo;
+use crate::domain::geometry::validate_wire_seed;
 use crate::domain::scene::TreeScene;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
@@ -75,6 +76,7 @@ impl Default for Settings {
 
 impl Settings {
     pub fn validate(&self) -> Result<(), &'static str> {
+        validate_wire_seed(self.seed)?;
         if self.master_volume > 100 {
             return Err("主音量必须在 0 到 100 之间");
         }
@@ -97,23 +99,33 @@ struct Inner {
     history: Vec<u64>,
     cached_seed: Option<u64>,
     cached_scene: Option<TreeScene>,
+    scene_request_generation: u64,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct SceneRequest {
+    generation: u64,
+    pub(crate) seed: u64,
 }
 
 /// Cheaply-cloneable handle to the shared state (clones share one `Mutex`).
 #[derive(Clone)]
 pub struct AppState {
     inner: Arc<Mutex<Inner>>,
+    settings_commit: Arc<Mutex<()>>,
 }
 
 impl AppState {
     pub fn new(settings: Settings) -> Self {
         let history = vec![settings.seed];
         Self {
+            settings_commit: Arc::new(Mutex::new(())),
             inner: Arc::new(Mutex::new(Inner {
                 settings,
                 history,
                 cached_seed: None,
                 cached_scene: None,
+                scene_request_generation: 0,
             })),
         }
     }
@@ -128,27 +140,59 @@ impl AppState {
         self.lock().settings.clone()
     }
 
-    pub fn set_settings(&self, settings: Settings) {
+    /// Seed of the scene currently committed for background effects.
+    pub fn active_scene_seed(&self) -> u64 {
+        let inner = self.lock();
+        inner.cached_seed.unwrap_or(inner.settings.seed)
+    }
+
+    /// Serialize disk and memory commits without blocking read-only state access.
+    /// Call this from a blocking worker; the inner state lock is never held
+    /// during filesystem I/O, and a failed save leaves the snapshot untouched.
+    pub(crate) fn commit_settings<E>(
+        &self,
+        settings: Settings,
+        persist: impl FnOnce(&Settings) -> Result<(), E>,
+    ) -> Result<(), E> {
+        let _commit = self
+            .settings_commit
+            .lock()
+            .expect("settings commit mutex poisoned");
+        persist(&settings)?;
         self.lock().settings = settings;
+        Ok(())
     }
 
-    /// Update the seed used by background systems without replacing the other
-    /// persisted preferences in the same settings snapshot.
-    pub fn set_active_seed(&self, seed: u64) {
-        self.lock().settings.seed = seed;
-    }
-
-    /// Record a freshly generated seed at the front of the history (most recent
-    /// first), de-duplicated, capped at 32 entries.
-    pub fn record_seed(&self, seed: u64) {
+    /// Commit only the newest request: an older worker may finish after it.
+    /// Active seed, history and scene cache change together under one lock.
+    pub(crate) fn finish_scene_request(&self, request: SceneRequest, scene: &TreeScene) {
+        let _commit = self
+            .settings_commit
+            .lock()
+            .expect("settings commit mutex poisoned");
         let mut inner = self.lock();
-        inner.history.retain(|&existing| existing != seed);
-        inner.history.insert(0, seed);
+        if request.generation != inner.scene_request_generation {
+            return;
+        }
+        inner.settings.seed = request.seed;
+        inner.history.retain(|&existing| existing != request.seed);
+        inner.history.insert(0, request.seed);
         inner.history.truncate(32);
+        inner.cached_seed = Some(scene.seed);
+        inner.cached_scene = Some(scene.clone());
     }
 
     pub fn history(&self) -> Vec<u64> {
         self.lock().history.clone()
+    }
+
+    pub(crate) fn begin_scene_request(&self, seed: u64) -> SceneRequest {
+        let mut inner = self.lock();
+        inner.scene_request_generation = inner.scene_request_generation.wrapping_add(1);
+        SceneRequest {
+            generation: inner.scene_request_generation,
+            seed,
+        }
     }
 
     /// Return the cached scene if it matches `seed`.
@@ -160,7 +204,10 @@ impl AppState {
         }
     }
 
-    pub fn cache_scene(&self, scene: &TreeScene) {
+    // Fixtures may populate a cache directly; production writes go exclusively
+    // through finish_scene_request so stale workers cannot change active effects.
+    #[cfg(test)]
+    fn cache_scene(&self, scene: &TreeScene) {
         let mut inner = self.lock();
         inner.cached_seed = Some(scene.seed);
         inner.cached_scene = Some(scene.clone());
@@ -186,12 +233,19 @@ impl AppState {
 mod tests {
     use super::*;
 
+    fn activate_seed(state: &AppState, seed: u64) {
+        use crate::generation::SceneGenerator;
+        let request = state.begin_scene_request(seed);
+        let scene = crate::generation::FantasyTreeGenerator.generate(seed.into());
+        state.finish_scene_request(request, &scene);
+    }
+
     #[test]
     fn history_dedupes_and_orders_recent_first() {
         let state = AppState::new(Settings::default());
-        state.record_seed(1);
-        state.record_seed(2);
-        state.record_seed(1);
+        activate_seed(&state, 1);
+        activate_seed(&state, 2);
+        activate_seed(&state, 1);
         let history = state.history();
         assert_eq!(history.first(), Some(&1));
         assert_eq!(history.iter().filter(|&&s| s == 1).count(), 1);
@@ -252,7 +306,7 @@ mod tests {
             ..Settings::default()
         });
 
-        state.set_active_seed(99);
+        activate_seed(&state, 99);
 
         assert_eq!(
             state.settings(),
@@ -293,5 +347,20 @@ mod tests {
             ..Settings::default()
         };
         assert!(invalid_camera.validate().is_err());
+    }
+
+    #[test]
+    fn settings_reject_seeds_that_javascript_cannot_represent_exactly() {
+        let unsafe_seed = Settings {
+            seed: 9_007_199_254_740_992,
+            ..Settings::default()
+        };
+        assert!(unsafe_seed.validate().is_err());
+
+        let maximum = Settings {
+            seed: 9_007_199_254_740_991,
+            ..Settings::default()
+        };
+        assert!(maximum.validate().is_ok());
     }
 }

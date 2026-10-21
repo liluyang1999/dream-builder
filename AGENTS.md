@@ -62,10 +62,15 @@ pnpm lint                     # biome check .
 pnpm fmt                      # biome format --write .
 pnpm build                    # tsc type-check then vite build → apps/desktop/dist
 pnpm check                    # contracts + docs + loop + layout + lint + typecheck + test + build
+pnpm test:engineering         # filesystem, delivery, install-state, and cleanup regressions
+pnpm clean:preview            # inspect the fixed generated-output cleanup plan
+pnpm clean                    # remove build outputs; keep dependencies, releases, player data
 pnpm m2:verify                # verify the archived native report hash and performance gates
 ```
 
 Rust backend (requires Rust toolchain + MSVC for Windows bundling), run from repo root:
+
+`rust-toolchain.toml` pins the compiler, rustfmt, Clippy, and Windows target for local and CI builds.
 
 ```bash
 cargo test                    # workspace tests
@@ -123,7 +128,7 @@ When changing the wire format, update the Rust domain/serde shape, the Zod contr
 - **Two-component public versions.** `version.json::productVersion` is the sole product version and uses `major.feature`. npm, Cargo, and Tauri machine manifests receive a mechanically derived SemVer compatibility value, but player UI, docs, release manifests/files, Windows EXE version strings, and Installed Apps must show only `productVersion`. Never expose or maintain a second product version, and never edit one manifest in isolation.
 - **Project-local pnpm data.** `storeDir`, `cacheDir`, and `virtualStoreDir` must resolve below the repository root, and the global virtual store stays disabled. Do not add user-level or drive-root pnpm configuration.
 - **UI strings are Chinese.** Status, error, and detail copy is zh-CN in both Rust and TS. Match that when editing user-visible text unless told otherwise.
-- **Default seed is `424242`** in both the Zustand store and Rust `Settings::default`. Settings hydrate before the first scene load; seed changes update the active Rust state immediately and persist as one settings snapshot.
+- **Default seed is `424242`** in both the Zustand store and Rust `Settings::default`. Settings hydrate before the first scene load; only the latest scene request commits the active Rust scene. Settings persist as one snapshot, while effects follow the committed scene seed.
 - **Vite env prefixes** are extended to include `TAURI_` (see `apps/desktop/vite.config.ts`).
 - **Cargo package name is `dream-builder`**, so the binary is `dream-builder.exe` (Windows). The user-facing product name (`tauri.conf.json::productName`) is still "Dream Builder Fantasy Tree" — this only affects installer/Add-Remove-Programs labels.
 - **Bundle target is NSIS only** (`tauri.conf.json::bundle.targets: ["nsis"]`) — one clean installer, not the full `.exe + .msi + NSIS` triple.
