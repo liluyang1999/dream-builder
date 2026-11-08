@@ -9,6 +9,8 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Reattach the camera target to the current player when orbit controls become
+  available, preserving saved checkpoint and movement state across startup.
 - Keep gameplay point lights mounted with zero intensity while inactive, so seed,
   memory and restoration transitions reuse a fixed shader light budget. Add real
   Three scene-graph regressions for light counts and visual parameters.

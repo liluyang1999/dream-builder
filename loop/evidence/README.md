@@ -5,6 +5,7 @@
 
 最新复盘见 [2026-11-09 · 工程与教学](2026-11-09-engineering-review.md)，
 冷运行长帧及图形程序诊断见[追加追踪](2026-11-09-cold-render-followup.md)，保留修复前的原始报告。
+后续灯光实测与同档重启镜头问题见[镜头复核](2026-11-09-camera-restore-followup.md)。
 依赖审计保留[修复前](2026-11-09-dependency-audit.json)与[修复后](2026-11-09-dependency-audit-after.json)的独立结果。
 此前复盘见 [2026-10-21 · 工程交付](2026-10-21-engineering-delivery-review.md)，
 包含 [正式标识原生运行](2026-10-21-native-runtime.json) 与 [依赖审计](2026-10-21-dependency-audit.json)。

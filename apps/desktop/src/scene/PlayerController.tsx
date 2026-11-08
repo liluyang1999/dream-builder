@@ -70,6 +70,15 @@ export function PlayerController({
   }, [apiRef]);
 
   useEffect(() => {
+    if (!controls) return;
+    // Controls can mount after the initial reset or be replaced during play.
+    // Retarget the current motion state without requesting another respawn.
+    const { position } = motionRef.current;
+    controls.target.set(position.x, PLAYER_CAMERA_TARGET_HEIGHT, position.z);
+    controls.update();
+  }, [controls]);
+
+  useEffect(() => {
     if (!inputLocked) return;
     gamepadAwaitingReleaseRef.current = true;
     motionRef.current = {
