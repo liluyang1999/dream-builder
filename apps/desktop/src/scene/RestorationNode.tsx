@@ -55,7 +55,7 @@ export function RestorationNode({
         <ringGeometry args={[0.58, 0.82, 32]} />
         <meshBasicMaterial color={color} transparent opacity={0.32} side={THREE.DoubleSide} />
       </mesh>
-      {state !== 'dormant' ? <pointLight color={color} intensity={2.8} distance={5} /> : null}
+      <pointLight color={color} intensity={state === 'dormant' ? 0 : 2.8} distance={5} />
     </group>
   );
 }

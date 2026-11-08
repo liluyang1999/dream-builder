@@ -9,6 +9,9 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Keep gameplay point lights mounted with zero intensity while inactive, so seed,
+  memory and restoration transitions reuse a fixed shader light budget. Add real
+  Three scene-graph regressions for light counts and visual parameters.
 - Save recovery prefers current snapshots over leftover legacy data and preserves
   readable progress when repair writes fail. Purification input follows the active
   game session, and gamepad confirmation must be released before world interaction.

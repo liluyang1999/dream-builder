@@ -37,6 +37,7 @@
 | 发布文档、依赖与磁盘复盘 | [`evidence/2026-09-28-maintenance-review.md`](evidence/2026-09-28-maintenance-review.md)：发布路径失败回归、全量门禁、真实 UI/原生验证与首次缓存清理 |
 | 原生持久化、并发状态与安装交付 | [`evidence/2026-10-21-engineering-delivery-review.md`](evidence/2026-10-21-engineering-delivery-review.md)：完整构建、安装版与便携版真实运行、同版重装、降级拒绝、卸载及原设置恢复 |
 | 存档、输入、计时与报告边界再复核 | [`evidence/2026-11-09-engineering-review.md`](evidence/2026-11-09-engineering-review.md)：失败回归、全量门禁、真实浏览器和教学页检查；最终候选运行附件按交付手册绑定产物身份 |
+| 冷运行图形程序长任务定位与固定灯预算 | [`evidence/2026-11-09-cold-render-followup.md`](evidence/2026-11-09-cold-render-followup.md)：原始报告保留 2.11 秒长帧；固定灯预算通过真实场景树失败回归，最终冷运行结论以绑定产物身份的本地附件为准 |
 
 历史性能与安装记录继续有效地描述当时的构建，不能当成当前候选的新测量。
 最终发行候选仍需重新绑定原生性能及受影响的安装/升级证据。
@@ -60,7 +61,7 @@
 | 门禁 | 结果 |
 |---|---|
 | `pnpm check` | 十一阶段全部通过，包含工程脚本回归 |
-| Vitest | 45 个测试文件、220 项测试通过；并发上限 4，原有断言与超时时限保留 |
+| Vitest | 46 个测试文件、223 项测试通过；并发上限 4，原有断言与超时时限保留 |
 | 工程脚本 | 50 项通过：清理 24、发布目录 12、安装状态 9、来源指纹 5 |
 | NSIS 原生版本比较 | 上轮 16 项真实编译/执行通过；每次 `release:build` 重新执行，不替代跨产品版本升级演练 |
 | 测试工具与协议校验依赖 | Vite 6.4.5、Vitest 4.1.12、Zod 4.6.7、undici 8.12.2；本轮 npm 联网审计修复前 12 项、修复后 0 项 |
@@ -68,7 +69,7 @@
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | 无告警 |
 | `cargo fmt --check` | 通过 |
 | `cargo doc --workspace --no-deps --locked` | `RUSTDOCFLAGS=-D warnings` 下通过，已加入 CI |
-| 教学档案 | 15 页、798 链接、100/100 源码模块覆盖；Chrome 桌面/窄屏 30 项布局检查通过 |
+| 教学档案 | 15 页、799 链接、100/100 源码模块覆盖；Chrome 桌面/窄屏 30 项布局检查通过，新增性能/质量讲解另复核 4 项 |
 | 发布手册路径 | 构建与验证脚本均指向 `loop/product/release-runbook.md`；两处旧路径均经失败回归确认 |
 | 发布 PowerShell 宿主 | [模块路径继承问题](evidence/2026-09-28-release-host-compatibility.md)已做最小失败/成功对照；两份脚本显式加载宿主自带的安全模块 |
 | 前端分块预算 | `three-engine` 687,920 / 700,000 字节，首屏不预加载 3D 块 |

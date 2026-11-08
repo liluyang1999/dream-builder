@@ -4,6 +4,7 @@
 本索引可增加入口。历史证据只证明所绑定的构建，不替代当前候选验证或真人观察。
 
 最新复盘见 [2026-11-09 · 工程与教学](2026-11-09-engineering-review.md)，
+冷运行长帧及图形程序诊断见[追加追踪](2026-11-09-cold-render-followup.md)，保留修复前的原始报告。
 依赖审计保留[修复前](2026-11-09-dependency-audit.json)与[修复后](2026-11-09-dependency-audit-after.json)的独立结果。
 此前复盘见 [2026-10-21 · 工程交付](2026-10-21-engineering-delivery-review.md)，
 包含 [正式标识原生运行](2026-10-21-native-runtime.json) 与 [依赖审计](2026-10-21-dependency-audit.json)。

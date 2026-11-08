@@ -35,7 +35,7 @@ export function MemoryFragment({
         <torusGeometry args={[0.39, 0.018, 7, 32]} />
         <meshBasicMaterial color="#7df0bd" transparent opacity={read ? 0.26 : 0.72} />
       </mesh>
-      {!read ? <pointLight color={color} intensity={1.7} distance={3} /> : null}
+      <pointLight color={color} intensity={read ? 0 : 1.7} distance={3} />
     </group>
   );
 }

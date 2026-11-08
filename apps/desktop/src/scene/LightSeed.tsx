@@ -25,28 +25,31 @@ export function LightSeed({
     }
   });
 
-  if (state === 'hidden') return null;
-
   return (
     <group
       ref={groupRef}
       position={[position.x, 0.65, position.z]}
       scale={state === 'collected' ? 1 : 0}
     >
-      <mesh>
-        <octahedronGeometry args={[0.18, 0]} />
-        <meshStandardMaterial
-          color="#fff0a6"
-          emissive="#f7c76b"
-          emissiveIntensity={2.8}
-          roughness={0.32}
-        />
-      </mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.31, 0.025, 8, 28]} />
-        <meshBasicMaterial color="#7df0bd" transparent opacity={0.75} />
-      </mesh>
-      <pointLight color="#f7c76b" intensity={2.2} distance={3.2} />
+      {state !== 'hidden' ? (
+        <>
+          <mesh>
+            <octahedronGeometry args={[0.18, 0]} />
+            <meshStandardMaterial
+              color="#fff0a6"
+              emissive="#f7c76b"
+              emissiveIntensity={2.8}
+              roughness={0.32}
+            />
+          </mesh>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <torusGeometry args={[0.31, 0.025, 8, 28]} />
+            <meshBasicMaterial color="#7df0bd" transparent opacity={0.75} />
+          </mesh>
+        </>
+      ) : null}
+      {/* Keep the shader light budget stable, including before the seed appears. */}
+      <pointLight color="#f7c76b" intensity={state === 'hidden' ? 0 : 2.2} distance={3.2} />
     </group>
   );
 }

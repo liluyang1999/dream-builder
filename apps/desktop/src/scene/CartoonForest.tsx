@@ -385,9 +385,12 @@ function MushroomGrove({ restored }: { restored: boolean }) {
           </mesh>
         </group>
       ))}
-      {restored ? (
-        <pointLight color="#e9a8ff" intensity={1.1} distance={4} position={[-6.1, 1.2, 1.8]} />
-      ) : null}
+      <pointLight
+        color="#e9a8ff"
+        intensity={restored ? 1.1 : 0}
+        distance={4}
+        position={[-6.1, 1.2, 1.8]}
+      />
     </group>
   );
 }
@@ -463,9 +466,12 @@ function RuinGate({ restored }: { restored: boolean }) {
           opacity={restored ? 0.9 : 0.24}
         />
       </mesh>
-      {restored ? (
-        <pointLight color="#7df0bd" intensity={2.2} distance={5} position={[0, 1.4, 0]} />
-      ) : null}
+      <pointLight
+        color="#7df0bd"
+        intensity={restored ? 2.2 : 0}
+        distance={5}
+        position={[0, 1.4, 0]}
+      />
     </group>
   );
 }

@@ -41,9 +41,12 @@ export function GameplayWorld({ reducedMotion }: { reducedMotion: boolean }) {
         state={progress.nodeState}
         reducedMotion={reducedMotion}
       />
-      {progress.nodeState === 'restored' ? (
-        <pointLight color="#7df0bd" intensity={4.2} distance={15} position={[0, 2.4, 0]} />
-      ) : null}
+      <pointLight
+        color="#7df0bd"
+        intensity={progress.nodeState === 'restored' ? 4.2 : 0}
+        distance={15}
+        position={[0, 2.4, 0]}
+      />
     </group>
   );
 }

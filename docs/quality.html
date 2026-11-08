@@ -120,6 +120,11 @@ try {
   </div>
   <h3>测试也要收拾自己的现场</h3>
   <p>
+    <a href="../apps/desktop/src/tests/sceneLightBudget.test.tsx">场景灯光回归</a>把组件挂到真实 Three 场景树，
+    检查进度变化时灯的数量、强度和位置。它可以证明场景结构与视觉规则一致，但没有实际 GPU，
+    所以着色器是否仍有长停顿必须由打包后的原生采样验证。
+  </p>
+  <p>
     项目使用 Vitest 的多项目配置，每个工作区选择 Node 或 jsdom 环境。
     升级测试工具时保留现有行为断言并重跑全部项目；单文件排查使用 <code>pnpm test treeApi</code>。
     测试工具不进入玩家生产包，但仍需要依赖公告检查。
