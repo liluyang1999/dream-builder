@@ -3,7 +3,9 @@
 本目录按日期归档性能、安装生命周期与质量复盘。原始数据和测量结论只追加、不改写；
 本索引可增加入口。历史证据只证明所绑定的构建，不替代当前候选验证或真人观察。
 
-最新复盘见 [2026-10-21 · 工程交付](2026-10-21-engineering-delivery-review.md)，
+最新复盘见 [2026-11-09 · 工程与教学](2026-11-09-engineering-review.md)，
+依赖审计保留[修复前](2026-11-09-dependency-audit.json)与[修复后](2026-11-09-dependency-audit-after.json)的独立结果。
+此前复盘见 [2026-10-21 · 工程交付](2026-10-21-engineering-delivery-review.md)，
 包含 [正式标识原生运行](2026-10-21-native-runtime.json) 与 [依赖审计](2026-10-21-dependency-audit.json)。
 此前复盘见 [2026-09-28 · 可交付性与磁盘清理](2026-09-28-maintenance-review.md)，
 依赖检查见 [2026-09-28 审计数据](2026-09-28-dependency-audit.json)。
