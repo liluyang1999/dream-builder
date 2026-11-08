@@ -407,6 +407,11 @@ body,
   overflow-wrap: anywhere;
 }
 
+/* Let the last settings control scroll above a persistent runtime notice. */
+.app-shell:has(> .app-warning) .settings-overlay > .settings-overlay__panel {
+  padding-bottom: calc(clamp(22px, 4vw, 34px) + min(30dvh, 180px) + 18px);
+}
+
 .hud__seed {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

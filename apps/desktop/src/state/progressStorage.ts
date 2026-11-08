@@ -28,29 +28,33 @@ export function readProgressStorage(storage: ProgressStorage | null): ProgressSt
     if (primaryRaw) {
       const primary = parseStoredGameProgress(primaryRaw);
       if (primary) return { progress: primary, status: 'none' };
-      return recoverCorruptPrimary(storage, primaryRaw);
+    }
+
+    // A v2 backup belongs to the current save lineage. A leftover v1 key may
+    // predate it, so only migrate v1 when neither v2 snapshot is usable.
+    const backupRaw = storage.getItem(PROGRESS_BACKUP_STORAGE_KEY);
+    const backup = backupRaw ? parseStoredGameProgress(backupRaw) : null;
+    if (backup && backupRaw) {
+      return recoverBackup(storage, backup, backupRaw, primaryRaw);
     }
 
     const legacyRaw = storage.getItem(LEGACY_PROGRESS_STORAGE_KEY);
     if (legacyRaw) {
       const migrated = parseStoredGameProgress(legacyRaw);
       if (migrated) {
-        storage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
-        storage.removeItem(LEGACY_PROGRESS_STORAGE_KEY);
+        try {
+          if (primaryRaw) quarantine(storage, primaryRaw);
+          storage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
+          storage.removeItem(LEGACY_PROGRESS_STORAGE_KEY);
+        } catch {
+          return { progress: migrated, status: 'storage-unavailable' };
+        }
         return { progress: migrated, status: 'migrated' };
       }
-      quarantine(storage, legacyRaw);
-      storage.removeItem(LEGACY_PROGRESS_STORAGE_KEY);
-      return { progress: null, status: 'reset-corrupt' };
     }
 
-    const backupRaw = storage.getItem(PROGRESS_BACKUP_STORAGE_KEY);
-    const backup = backupRaw ? parseStoredGameProgress(backupRaw) : null;
-    if (backup && backupRaw) {
-      storage.setItem(PROGRESS_STORAGE_KEY, backupRaw);
-      return { progress: backup, status: 'recovered-backup' };
-    }
-
+    if (primaryRaw) return isolateCorruptSave(storage, PROGRESS_STORAGE_KEY, primaryRaw);
+    if (legacyRaw) return isolateCorruptSave(storage, LEGACY_PROGRESS_STORAGE_KEY, legacyRaw);
     return { progress: null, status: 'none' };
   } catch {
     return { progress: null, status: 'storage-unavailable' };
@@ -94,16 +98,37 @@ export function replaceProgressStorage(
   }
 }
 
-function recoverCorruptPrimary(storage: ProgressStorage, corruptRaw: string): ProgressStorageRead {
-  quarantine(storage, corruptRaw);
-  const backupRaw = storage.getItem(PROGRESS_BACKUP_STORAGE_KEY);
-  const backup = backupRaw ? parseStoredGameProgress(backupRaw) : null;
-  if (backup && backupRaw) {
+function recoverBackup(
+  storage: ProgressStorage,
+  backup: GameProgress,
+  backupRaw: string,
+  primaryRaw: string | null,
+): ProgressStorageRead {
+  try {
+    const legacyRaw = storage.getItem(LEGACY_PROGRESS_STORAGE_KEY);
+    if (primaryRaw) quarantine(storage, primaryRaw);
+    else if (legacyRaw && !parseStoredGameProgress(legacyRaw)) quarantine(storage, legacyRaw);
     storage.setItem(PROGRESS_STORAGE_KEY, backupRaw);
+    // Retire the old source only after the chosen snapshot is durable.
+    if (legacyRaw) storage.removeItem(LEGACY_PROGRESS_STORAGE_KEY);
     return { progress: backup, status: 'recovered-backup' };
+  } catch {
+    return { progress: backup, status: 'storage-unavailable' };
   }
-  storage.removeItem(PROGRESS_STORAGE_KEY);
-  return { progress: null, status: 'reset-corrupt' };
+}
+
+function isolateCorruptSave(
+  storage: ProgressStorage,
+  corruptKey: string,
+  corruptRaw: string,
+): ProgressStorageRead {
+  try {
+    quarantine(storage, corruptRaw);
+    storage.removeItem(corruptKey);
+    return { progress: null, status: 'reset-corrupt' };
+  } catch {
+    return { progress: null, status: 'storage-unavailable' };
+  }
 }
 
 function quarantine(storage: ProgressStorage, raw: string): void {

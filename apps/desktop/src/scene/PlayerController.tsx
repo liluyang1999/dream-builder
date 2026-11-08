@@ -44,6 +44,7 @@ export function PlayerController({
   const resetPositionOverrideRef = useRef<Vec2 | null>(null);
   const gamepadInteractionRevisionRef = useRef(0);
   const gamepadInteractPressedRef = useRef(false);
+  const gamepadAwaitingReleaseRef = useRef(inputLocked);
   const camera = useThree((state) => state.camera);
   const controls = useThree((state) => state.controls) as OrbitLike | null;
   const cameraDirection = useMemo(() => new THREE.Vector3(), []);
@@ -70,6 +71,7 @@ export function PlayerController({
 
   useEffect(() => {
     if (!inputLocked) return;
+    gamepadAwaitingReleaseRef.current = true;
     motionRef.current = {
       ...motionRef.current,
       velocity: { x: 0, z: 0 },
@@ -79,6 +81,13 @@ export function PlayerController({
   useFrame((state, delta) => {
     const group = groupRef.current;
     if (!group) return;
+
+    const gamepad = sampleStandardGamepad(findPrimaryGamepad());
+    const locked = inputLocked || document.querySelector('[aria-modal="true"]') !== null;
+    if (locked) {
+      gamepadInteractPressedRef.current = gamepad.interactPressed;
+      gamepadAwaitingReleaseRef.current = true;
+    }
 
     if (resetRequestedRef.current) {
       const checkpoint = resetPositionOverrideRef.current ?? respawnPositionRef.current;
@@ -103,11 +112,17 @@ export function PlayerController({
       return;
     }
 
-    if (inputLocked || document.querySelector('[aria-modal="true"]')) return;
+    if (locked) return;
 
     camera.getWorldDirection(cameraDirection);
-    const gamepad = sampleStandardGamepad(findPrimaryGamepad());
-    if (gamepad.interactPressed && !gamepadInteractPressedRef.current) {
+    // A can close a modal before this frame runs. Require its release in the
+    // resumed world before treating another press as a world interaction.
+    if (!gamepad.interactPressed) gamepadAwaitingReleaseRef.current = false;
+    if (
+      gamepad.interactPressed &&
+      !gamepadInteractPressedRef.current &&
+      !gamepadAwaitingReleaseRef.current
+    ) {
       gamepadInteractionRevisionRef.current += 1;
     }
     gamepadInteractPressedRef.current = gamepad.interactPressed;

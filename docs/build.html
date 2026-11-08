@@ -186,6 +186,12 @@ pnpm store prune</code></pre>
     <code>output/release</code> 候选包和玩家数据；Rust 构建结果仍交给 <code>cargo clean</code> 删除。
     <code>pnpm store prune</code> 另行清除包管理器确认不再使用的依赖，不能用递归删除整个存储目录代替。
   </p>
+  <p>
+    Vite 配置加载也会产生临时缓存。固定清单覆盖桌面包，以及
+    <code>packages/ipc-contracts/node_modules/.vite-temp</code> 和
+    <code>packages/liquid-glass/node_modules/.vite-temp</code>；清理这些可重建目录会保留旁边的开发依赖。
+    完整范围以 <a href="../scripts/lib/generated-files.ps1">生成目录清单</a> 为准，不能把路径扩大成整个 <code>node_modules</code>。
+  </p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>目录</th><th>用途</th><th>处理原则</th></tr></thead>

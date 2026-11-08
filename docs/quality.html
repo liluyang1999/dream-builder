@@ -65,14 +65,24 @@
   <h2>“没有 LSP 告警”要落到可重复的编译与静态门禁</h2>
   <p class="section-lead">
     编辑器的 LSP 诊断依赖本机插件与当前打开文件，不能作为唯一交付证据。项目把同类检查固化为命令：
-    TypeScript 编译器、Biome、Vitest、Vite、Rustfmt、Clippy、Cargo tests 与原生打包共同构成新鲜证据。
+    TypeScript 编译器、Biome、Vitest、Vite、Rustfmt、Clippy、Cargo tests、Rustdoc 与原生打包共同构成新鲜证据。
   </p>
   <pre><code>pnpm check
   cargo fmt --check
   cargo test --workspace --locked
   cargo clippy --workspace --all-targets --locked -- -D warnings
   cargo check --workspace --all-targets --locked</code></pre>
+  <p>Rustdoc 还会检查文档注释中的链接和编译告警。在 PowerShell 中按 CI 相同要求运行，并在结束后恢复原有环境变量：</p>
+  <pre><code>$previousRustdocFlags = $env:RUSTDOCFLAGS
+try {
+  $env:RUSTDOCFLAGS = '-D warnings'
+  cargo doc --workspace --no-deps --locked
+} finally {
+  $env:RUSTDOCFLAGS = $previousRustdocFlags
+}</code></pre>
   <h3><code>pnpm check</code> 内部顺序</h3>
+  <p>测试并发最多使用四个 worker，避免同时启动过多 jsdom 环境争抢内存和 CPU。
+    并发上限控制资源使用，不改变测试断言或超时时限；真实渲染检查仍单独在浏览器和原生窗口执行。</p>
   <p>
     十一个阶段按“最便宜、最容易出错的先跑”排列：契约类检查在几秒内失败，编译与测试放在后面，
     最慢的生产构建放在最后。任何一步非零退出都会中断整条链。

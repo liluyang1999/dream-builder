@@ -312,7 +312,9 @@ class FrameStatisticsAccumulator {
       seen += this.buckets[index] ?? 0;
       if (seen < targetRank) continue;
       if (index === OVERFLOW_BUCKET_INDEX) return roundMetric(this.maxFrameTimeMs);
-      return roundMetric(index * FRAME_TIME_BUCKET_WIDTH_MS);
+      // A bucket's upper edge is an estimate, never a frame we observed.
+      // Keep short/uniform captures inside their actual measured range.
+      return roundMetric(Math.min(this.maxFrameTimeMs, index * FRAME_TIME_BUCKET_WIDTH_MS));
     }
     return roundMetric(this.maxFrameTimeMs);
   }

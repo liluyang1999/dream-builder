@@ -27,6 +27,8 @@ const PURIFICATION_BEATS = [
 
 export function PurificationOverlay() {
   const cleansing = useAppStore((state) => state.progress.nodeState === 'cleansing');
+  const playing = useAppStore((state) => state.sessionMode === 'playing');
+  const active = cleansing && playing;
   const dispatchProgress = useAppStore((state) => state.dispatchGameProgress);
   const [attempt, setAttempt] = useState<PurificationAttempt>(createPurificationAttempt);
   const [feedback, setFeedback] = useState('按图示顺序回应四拍根脉。');
@@ -35,7 +37,7 @@ export function PurificationOverlay() {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useModalFocus({
-    open: cleansing,
+    open: active,
     dialogRef,
     initialFocusRef: northButtonRef,
   });
@@ -65,7 +67,21 @@ export function PurificationOverlay() {
     attemptRef.current = initial;
     setAttempt(initial);
     setFeedback('按图示顺序回应四拍根脉。');
+  }, [cleansing]);
+
+  useEffect(() => {
+    if (!active) return;
     const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.repeat ||
+        event.isComposing ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey
+      ) {
+        return;
+      }
       if (event.key === 'Escape') {
         event.preventDefault();
         dispatchProgress({ type: 'cancel-cleansing' });
@@ -78,9 +94,9 @@ export function PurificationOverlay() {
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [cleansing, applyDirection, dispatchProgress]);
+  }, [active, applyDirection, dispatchProgress]);
 
-  if (!cleansing) return null;
+  if (!active) return null;
 
   return (
     <div className="purification-overlay">

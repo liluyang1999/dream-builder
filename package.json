@@ -39,7 +39,7 @@
     "@biomejs/biome": "^1.9.4",
     "@tauri-apps/cli": "2.11.4",
     "typescript": "^5.9.3",
-    "vite": "^6.4.4",
-    "vitest": "^4.1.11"
+    "vite": "^6.4.5",
+    "vitest": "^4.1.12"
   }
 }

@@ -7,6 +7,7 @@ import {
   PERFORMANCE_REPORT_VERSION,
   PerformanceMetricsRecorder,
 } from '../performance/performanceMetrics';
+import { inspectPerformanceReport } from '../performance/performanceReportValidation';
 
 const context = {
   runtime: 'browser' as const,
@@ -21,6 +22,32 @@ const context = {
 };
 
 describe('PerformanceMetricsRecorder', () => {
+  test.each([0, 0.1, 16.7, 33.34, 249.9, 250.1])(
+    'exports self-consistent session and phase statistics for %s ms frames',
+    (frameTimeMs) => {
+      const recorder = new PerformanceMetricsRecorder({
+        startedAtEpochMs: 1_000,
+        startedAtMonotonicMs: 0,
+        targetDurationMs: 100,
+      });
+      recorder.beginPhase('scene-load', 0);
+      recorder.recordFrame(sample(frameTimeMs, 1, 100, null), 10);
+      recorder.recordFrame(sample(frameTimeMs, 1, 100, null), 20);
+      recorder.endPhase('scene-load', 100);
+      const report = recorder.buildReport({
+        endedAtEpochMs: 1_100,
+        endedAtMonotonicMs: 100,
+        context,
+      });
+
+      expect(inspectPerformanceReport(report).issues).toEqual([]);
+      for (const statistics of [report.session, ...report.phases]) {
+        expect(statistics.p50FrameTimeMs).toBeGreaterThanOrEqual(statistics.minFrameTimeMs);
+        expect(statistics.p99FrameTimeMs).toBeLessThanOrEqual(statistics.maxFrameTimeMs);
+      }
+    },
+  );
+
   test('builds deterministic bounded frame and render statistics', () => {
     const recorder = new PerformanceMetricsRecorder({
       startedAtEpochMs: 1_000,

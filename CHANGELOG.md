@@ -9,6 +9,15 @@ must not appear in player-facing UI, Windows Installed Apps, release files, or d
 
 ### Changed
 
+- Save recovery prefers current snapshots over leftover legacy data and preserves
+  readable progress when repair writes fail. Purification input follows the active
+  game session, and gamepad confirmation must be released before world interaction.
+- Settings remain operable above persistent notices on narrow screens. Performance
+  histogram quantiles stay within observed bounds, including exported phase reports.
+- Native visual updates skip missed timer ticks after stalls, and committed atomic
+  files are no longer subject to temporary-file cleanup.
+- Patched Vite, Vitest, Zod, undici and Tokio advisories with wire compatibility
+  regressions; safe cleanup now includes both shared packages' Vite temporary caches.
 - Native settings and scene exports now replace complete files atomically;
   one native snapshot owns settings, and failed writes preserve prior state.
 - Frontend entry chunks recover through React error boundaries; selection,

@@ -75,6 +75,11 @@
     <li><code>scene-load</code> 与 <code>cleansing</code> 单独分段，不能用稳态平均值掩盖加载或净化尖峰。</li>
     <li>浏览器主循环只能观察 CPU/呈现间隔，不能直接得到 GPU frame time；需要 GPU 指标时另用目标设备分析器。</li>
   </ul>
+  <p>
+    直方图把相近帧间隔放入同一个桶，桶的上界可能略高于实际采样值。因此分位数估计还要以实际观测的最长帧为上限，
+    保持 <code>P50 ≤ P95 ≤ P99 ≤ 最长帧</code>。这些分位数仍是有限精度的估计，但导出的报告应当自洽，
+    不能出现“99% 的帧不超过的时间，比所有帧中最长的还长”。
+  </p>
   <div class="grid">
     <article class="card card--accent"><h3>已归档事实</h3><p>目标 Windows 设备已有十分钟原生性能报告，覆盖场景加载与净化，并通过当前 M2 帧率预算。</p></article>
     <article class="card card--warning"><h3>仍未替代的事实</h3><p>真实性能通过不代表五位新玩家能理解目标；自动化和证据工作台都不能代替真人无提示观察。</p></article>

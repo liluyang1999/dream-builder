@@ -129,6 +129,11 @@
     <li>浏览器 Worker 回退生成器与协议；</li>
     <li>Rust 序列化集成测试、Zod 契约测试和前端消费者测试。</li>
   </ol>
+  <p>
+    升级 Zod 校验库时也要守住这份合同：camelCase 字段、枚举值、错误格式和安全整数边界保持一致，
+    旧设置缺少较新的可选字段时仍由 schema 补上默认值。类型继续从 schema 推导；用有效旧载荷和非法边界值做回归，
+    同时确认旧数据仍能读取、非法数据仍被拒绝。依赖版本变化本身不应改变玩家存档或 IPC 格式。
+  </p>
   <div class="callout callout--gold">
     <strong>常见错误：</strong>只改 TS interface 不会改变运行时校验；只改 Rust 字段会让旧前端回退；
     用 <code>as TreeScene</code> 会把协议错误推迟到渲染深处，变成更难诊断的 WebGL 故障。

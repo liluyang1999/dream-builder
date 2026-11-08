@@ -6,6 +6,8 @@ function Get-DreamBuilderGeneratedPaths {
         ".pnpm-cache",
         "node_modules\.vite",
         "apps\desktop\node_modules\.vite-temp",
+        "packages\ipc-contracts\node_modules\.vite-temp",
+        "packages\liquid-glass\node_modules\.vite-temp",
         "apps\desktop\dist",
         "crates\dream-builder\gen"
     )

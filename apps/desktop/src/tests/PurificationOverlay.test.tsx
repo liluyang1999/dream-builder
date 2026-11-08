@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, test } from 'vitest';
 import {
   type GameProgress,
@@ -20,7 +20,11 @@ const DIRECTION_LABEL: Record<RuneDirection, string> = {
 describe('PurificationOverlay', () => {
   beforeEach(() => {
     localStorage.clear();
-    useAppStore.setState({ progress: createCleansingProgress(), interactionPrompt: null });
+    useAppStore.setState({
+      progress: createCleansingProgress(),
+      interactionPrompt: null,
+      sessionMode: 'playing',
+    });
   });
 
   test('resets a wrong local attempt, then restores the forest after the full rhythm', () => {
@@ -50,6 +54,50 @@ describe('PurificationOverlay', () => {
     expect(progress.nodeState).toBe('ready');
     expect(progress.collectedCount).toBe(3);
     expect(Object.values(progress.seeds).every((state) => state === 'collected')).toBe(true);
+  });
+
+  test('restores an interrupted ritual only after the player continues from the title', () => {
+    useAppStore.setState({ sessionMode: 'title' });
+    render(<PurificationOverlay />);
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(useAppStore.getState().progress.nodeState).toBe('cleansing');
+
+    act(() => useAppStore.getState().startGame());
+    expect(screen.getByRole('dialog', { name: '让微光沿正确方向流动' })).toBeTruthy();
+    expect(screen.getByText('按图示顺序回应四拍根脉。')).toBeTruthy();
+  });
+
+  test('suspends ritual input while paused and resumes the same attempt', () => {
+    render(<PurificationOverlay />);
+    fireEvent.keyDown(window, { key: 'ArrowUp' });
+    expect(screen.getByText('共鸣 1/4')).toBeTruthy();
+
+    act(() => useAppStore.getState().pauseGame());
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    act(() => useAppStore.getState().resumeGame());
+
+    expect(screen.getByText('共鸣 1/4')).toBeTruthy();
+    for (const direction of PURIFICATION_SEQUENCE.slice(1)) {
+      fireEvent.click(screen.getByRole('button', { name: DIRECTION_LABEL[direction] }));
+    }
+    expect(useAppStore.getState().progress.nodeState).toBe('restored');
+  });
+
+  test.each([
+    { repeat: true },
+    { ctrlKey: true },
+    { metaKey: true },
+    { altKey: true },
+    { isComposing: true },
+  ])('does not count held or modified direction keys as a new beat: %j', (modifiers) => {
+    render(<PurificationOverlay />);
+    fireEvent.keyDown(window, { key: 'ArrowUp' });
+    fireEvent.keyDown(window, { key: 'ArrowUp', ...modifiers });
+
+    expect(screen.getByText('共鸣 1/4')).toBeTruthy();
   });
 });
 

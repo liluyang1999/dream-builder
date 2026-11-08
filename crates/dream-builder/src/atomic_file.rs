@@ -7,11 +7,27 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_FILE: AtomicU64 = AtomicU64::new(0);
 
-struct PendingFile(PathBuf);
+struct PendingFile {
+    path: PathBuf,
+    committed: bool,
+}
+
+impl PendingFile {
+    fn commit(mut self, destination: &Path) -> io::Result<()> {
+        fs::rename(&self.path, destination)?;
+        // Ownership moved to the destination, including a same-path rename.
+        // Cleanup must never delete a successfully committed file.
+        self.committed = true;
+        Ok(())
+    }
+}
 
 impl Drop for PendingFile {
     fn drop(&mut self) {
-        if let Err(error) = fs::remove_file(&self.0)
+        if self.committed {
+            return;
+        }
+        if let Err(error) = fs::remove_file(&self.path)
             && error.kind() != io::ErrorKind::NotFound
         {
             log::warn!("无法清理未提交的临时文件：{error}");
@@ -35,7 +51,7 @@ fn write_with(path: &Path, write: impl FnOnce(&mut File) -> io::Result<()>) -> i
     file.sync_all()?;
     // Windows cannot rename a file while this write handle is still open.
     drop(file);
-    fs::rename(&pending.0, path)
+    pending.commit(path)
 }
 
 fn create_pending_file(parent: &Path) -> io::Result<(PendingFile, File)> {
@@ -46,7 +62,15 @@ fn create_pending_file(parent: &Path) -> io::Result<(PendingFile, File)> {
             NEXT_FILE.fetch_add(1, Ordering::Relaxed)
         ));
         match OpenOptions::new().write(true).create_new(true).open(&path) {
-            Ok(file) => return Ok((PendingFile(path), file)),
+            Ok(file) => {
+                return Ok((
+                    PendingFile {
+                        path,
+                        committed: false,
+                    },
+                    file,
+                ));
+            }
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
             Err(error) => return Err(error),
         }
@@ -121,6 +145,21 @@ pub(crate) mod tests {
         assert_eq!(fs::read(&path).unwrap(), b"first");
         write(&path, b"replacement").unwrap();
         assert_eq!(fs::read(&path).unwrap(), b"replacement");
+        assert_eq!(fs::read_dir(directory.path()).unwrap().count(), 1);
+    }
+
+    #[test]
+    fn committing_to_the_pending_filename_preserves_the_completed_file() {
+        let directory = TestDirectory::new();
+        let (pending, mut file) = create_pending_file(directory.path()).unwrap();
+        let destination = pending.path.clone();
+        file.write_all(b"complete export").unwrap();
+        file.sync_all().unwrap();
+        drop(file);
+
+        pending.commit(&destination).unwrap();
+
+        assert_eq!(fs::read(&destination).unwrap(), b"complete export");
         assert_eq!(fs::read_dir(directory.path()).unwrap().count(), 1);
     }
 

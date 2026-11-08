@@ -67,6 +67,15 @@ try {
     $null = New-Item -ItemType Directory -Path $cache, $desktop, (Split-Path $dependency)
     [IO.File]::WriteAllText((Join-Path $cache "cache.bin"), "reproducible")
     [IO.File]::WriteAllText($dependency, "required dependency")
+    $packageCaches = @(foreach ($package in @("ipc-contracts", "liquid-glass")) {
+        $packageModules = Join-Path $integrationRoot "packages\$package\node_modules"
+        $packageCache = Join-Path $packageModules ".vite-temp"
+        $packageDependency = Join-Path $packageModules "keep.txt"
+        $null = New-Item -ItemType Directory -Path $packageCache
+        [IO.File]::WriteAllText((Join-Path $packageCache "cache.bin"), "reproducible")
+        [IO.File]::WriteAllText($packageDependency, "required dependency")
+        [pscustomobject]@{ Cache = $packageCache; Dependency = $packageDependency }
+    })
     $badOutput = Join-Path $desktop "dist"
     $null = New-Item -ItemType Junction -Path $badOutput -Target $outside
     $junctions.Add($badOutput)
@@ -88,6 +97,13 @@ try {
     }
     $process.Dispose()
     $checks++
+    foreach ($packageCache in $packageCaches) {
+        if ([IO.File]::ReadAllText((Join-Path $packageCache.Cache "cache.bin")) -ne "reproducible" -or
+            [IO.File]::ReadAllText($packageCache.Dependency) -ne "required dependency") {
+            throw "Cleanup preview must preserve package caches and dependencies."
+        }
+        $checks++
+    }
     $process = Start-Process -FilePath (Join-Path $PSHOME "powershell.exe") -ArgumentList $baseArguments -WindowStyle Hidden -PassThru -Wait -RedirectStandardOutput $stdout -RedirectStandardError $stderr
     if ($process.ExitCode -ne 0 -or (Test-Path -LiteralPath $cache) -or
         [IO.File]::ReadAllText($dependency) -ne "required dependency") {
@@ -95,6 +111,13 @@ try {
     }
     $process.Dispose()
     $checks++
+    foreach ($packageCache in $packageCaches) {
+        if ((Test-Path -LiteralPath $packageCache.Cache) -or
+            [IO.File]::ReadAllText($packageCache.Dependency) -ne "required dependency") {
+            throw "Cleanup must remove package Vite caches and preserve dependencies."
+        }
+        $checks++
+    }
     if ([IO.File]::ReadAllText($sentinel) -ne "preserved") { throw "Unmanaged data changed." }
     Write-Host "Generated-file safety tests passed: $checks checks."
 } finally {

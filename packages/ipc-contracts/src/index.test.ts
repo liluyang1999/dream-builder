@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { type TreeScene, parseWith, treeSceneSchema } from './index';
+import {
+  DEFAULT_SETTINGS,
+  type TreeScene,
+  parseWith,
+  settingsSchema,
+  treeSceneSchema,
+} from './index';
 
 function makeValidScene(): TreeScene {
   const vec = { x: 0, y: 1, z: 0 };
@@ -70,4 +76,35 @@ describe('treeSceneSchema', () => {
     detail.energy = 1.5;
     expect(parseWith(treeSceneSchema, scene).ok).toBe(false);
   });
+});
+
+describe('settings wire compatibility', () => {
+  test('hydrates legacy settings and strips unknown keys without changing the wire shape', () => {
+    expect(
+      parseWith(settingsSchema, {
+        seed: 7,
+        theme: 'dark',
+        reducedMotion: true,
+        futurePreference: 'ignored',
+      }),
+    ).toEqual({
+      ok: true,
+      value: { ...DEFAULT_SETTINGS, seed: 7, theme: 'dark', reducedMotion: true },
+    });
+  });
+
+  test('accepts the largest seed representable on both sides of IPC', () => {
+    expect(
+      parseWith(settingsSchema, { ...DEFAULT_SETTINGS, seed: Number.MAX_SAFE_INTEGER }).ok,
+    ).toBe(true);
+  });
+
+  test.each([Number.MAX_SAFE_INTEGER + 1, -1, 0.5, Number.NaN, Number.POSITIVE_INFINITY])(
+    'rejects the invalid seed %s with a useful boundary error',
+    (seed) => {
+      const result = parseWith(settingsSchema, { ...DEFAULT_SETTINGS, seed });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.reason).toMatch(/^seed: /);
+    },
+  );
 });
